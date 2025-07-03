@@ -1,9 +1,11 @@
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MemeIt.Core.Models;
 using MemeIt.Library.Abstractions;
 using MemeIt.Library.Infrastructure.Configuration;
+using MemeIt.Library.Infrastructure.Constants;
 using MemeIt.Library.Infrastructure.Models;
 using System.Net;
 
@@ -33,10 +35,12 @@ public class CosmosMemeCategoryRepository : IMemeCategoryRepository
         {
             _logger.LogDebug("Getting all active categories");
 
-            var query = new QueryDefinition($"SELECT * FROM c WHERE c.type = '{nameof(MemeCategoryDocument)}' AND c.isActive = true ORDER BY c.displayOrder, c.name");
-            var iterator = _container.GetItemQueryIterator<MemeCategoryDocument>(query);
+            var queryable = _container.GetItemLinqQueryable<MemeCategoryDocument>()
+                .Where(c => c.Type == CosmosDbConstants.DocumentTypes.Category && c.IsActive);
 
+            var iterator = queryable.ToFeedIterator();
             var categories = new List<MemeCategoryDocument>();
+            
             while (iterator.HasMoreResults)
             {
                 var response = await iterator.ReadNextAsync(cancellationToken);
@@ -44,7 +48,7 @@ public class CosmosMemeCategoryRepository : IMemeCategoryRepository
             }
 
             _logger.LogDebug("Found {CategoryCount} active categories", categories.Count);
-            return categories.Select(c => c.ToDomain()).ToList();
+            return categories.OrderBy(x=> x.DisplayOrder).ThenBy(x=> x.Name).Select(c => c.ToDomain()).ToList();
         }
         catch (CosmosException ex)
         {
@@ -59,7 +63,7 @@ public class CosmosMemeCategoryRepository : IMemeCategoryRepository
         {
             _logger.LogDebug("Getting category by ID: {CategoryId}", id);
 
-            var response = await _container.ReadItemAsync<MemeCategoryDocument>(id, new PartitionKey("category"), cancellationToken: cancellationToken);
+            var response = await _container.ReadItemAsync<MemeCategoryDocument>(id, new PartitionKey(CosmosDbConstants.PartitionKeys.Category), cancellationToken: cancellationToken);
             return response.Resource.ToDomain();
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)

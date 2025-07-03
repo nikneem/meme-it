@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using MemeIt.Core.Models;
+using MemeIt.Library.Infrastructure.Constants;
 
 namespace MemeIt.Library.Infrastructure.Models;
 
@@ -36,7 +37,7 @@ public class MemeCategoryDocument
     public string Icon { get; set; } = string.Empty;
 
     [JsonPropertyName("type")]
-    public string Type { get; set; } = nameof(MemeCategoryDocument) ;
+    public string Type { get; set; } = CosmosDbConstants.DocumentTypes.Category;
 
     [JsonPropertyName("_etag")]
     public string? ETag { get; set; }
@@ -67,7 +68,7 @@ public class MemeCategoryDocument
         return new MemeCategoryDocument
         {
             Id = category.Id,
-            PartitionKey = "category",
+            PartitionKey = CosmosDbConstants.PartitionKeys.Category,
             Name = category.Name,
             Description = category.Description,
             IsActive = category.IsActive,

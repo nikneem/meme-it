@@ -1,9 +1,11 @@
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MemeIt.Core.Models;
 using MemeIt.Library.Abstractions;
 using MemeIt.Library.Infrastructure.Configuration;
+using MemeIt.Library.Infrastructure.Constants;
 using MemeIt.Library.Infrastructure.Models;
 using System.Net;
 
@@ -37,13 +39,40 @@ public class CosmosMemeRepository : IMemeRepository
         {
             _logger.LogDebug("Getting random meme for categories: {Categories}", string.Join(", ", categories));
 
-            var queryDefinition = BuildRandomMemeQuery(categories, excludedMemeIds ?? []);
-            var iterator = _container.GetItemQueryIterator<MemeDocument>(queryDefinition);
+            var categoryFilter = categories.Count == 0 ? 
+                string.Empty : 
+                $" AND ARRAY_CONTAINS(@{CosmosDbConstants.Parameters.Categories}, c.{CosmosDbConstants.FieldNames.Category})";
+
+            var excludeFilter = excludedMemeIds?.Count > 0 ? 
+                $" AND NOT ARRAY_CONTAINS(@{CosmosDbConstants.Parameters.ExcludedIds}, c.id)" : 
+                string.Empty;
+
+            var sql = $@"
+                SELECT * FROM c 
+                WHERE c.{CosmosDbConstants.FieldNames.Type} = @{CosmosDbConstants.Parameters.Type}
+                AND c.{CosmosDbConstants.FieldNames.IsActive} = true
+                {categoryFilter}
+                {excludeFilter}";
+
+            var queryDefinition = new QueryDefinition(sql)
+                .WithParameter($"@{CosmosDbConstants.Parameters.Type}", CosmosDbConstants.DocumentTypes.Meme);
+
+            if (categories.Count > 0)
+            {
+                queryDefinition = queryDefinition.WithParameter($"@{CosmosDbConstants.Parameters.Categories}", categories);
+            }
+
+            if (excludedMemeIds?.Count > 0)
+            {
+                queryDefinition = queryDefinition.WithParameter($"@{CosmosDbConstants.Parameters.ExcludedIds}", excludedMemeIds);
+            }
+
+            using var feedIterator = _container.GetItemQueryIterator<MemeDocument>(queryDefinition);
 
             var memes = new List<MemeDocument>();
-            while (iterator.HasMoreResults)
+            while (feedIterator.HasMoreResults)
             {
-                var response = await iterator.ReadNextAsync(cancellationToken);
+                var response = await feedIterator.ReadNextAsync(cancellationToken);
                 memes.AddRange(response);
             }
 
@@ -74,11 +103,17 @@ public class CosmosMemeRepository : IMemeRepository
         {
             _logger.LogDebug("Getting meme by ID: {MemeId}", id);
 
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @id AND c.type = 'meme'")
-                .WithParameter("@id", id);
+            var sql = $@"
+                SELECT * FROM c 
+                WHERE c.id = @{CosmosDbConstants.Parameters.Id} 
+                AND c.{CosmosDbConstants.FieldNames.Type} = @{CosmosDbConstants.Parameters.Type}";
 
-            var iterator = _container.GetItemQueryIterator<MemeDocument>(query);
-            var response = await iterator.ReadNextAsync(cancellationToken);
+            var queryDefinition = new QueryDefinition(sql)
+                .WithParameter($"@{CosmosDbConstants.Parameters.Id}", id)
+                .WithParameter($"@{CosmosDbConstants.Parameters.Type}", CosmosDbConstants.DocumentTypes.Meme);
+
+            using var feedIterator = _container.GetItemQueryIterator<MemeDocument>(queryDefinition);
+            var response = await feedIterator.ReadNextAsync(cancellationToken);
 
             var meme = response.FirstOrDefault();
             if (meme == null)
@@ -105,13 +140,39 @@ public class CosmosMemeRepository : IMemeRepository
         {
             _logger.LogDebug("Getting memes by categories: {Categories}", string.Join(", ", categories));
 
-            var queryDefinition = BuildCategoryMemeQuery(categories, isActive);
-            var iterator = _container.GetItemQueryIterator<MemeDocument>(queryDefinition);
+            var categoryFilter = categories.Count == 0 ? 
+                string.Empty : 
+                $" AND ARRAY_CONTAINS(@{CosmosDbConstants.Parameters.Categories}, c.{CosmosDbConstants.FieldNames.Category})";
 
-            var memes = new List<MemeDocument>();
-            while (iterator.HasMoreResults)
+            var activeFilter = isActive.HasValue ? 
+                $" AND c.{CosmosDbConstants.FieldNames.IsActive} = @{CosmosDbConstants.Parameters.IsActive}" : 
+                string.Empty;
+
+            var sql = $@"
+                SELECT * FROM c 
+                WHERE c.{CosmosDbConstants.FieldNames.Type} = @{CosmosDbConstants.Parameters.Type}
+                {categoryFilter}
+                {activeFilter}";
+
+            var queryDefinition = new QueryDefinition(sql)
+                .WithParameter($"@{CosmosDbConstants.Parameters.Type}", CosmosDbConstants.DocumentTypes.Meme);
+
+            if (categories.Count > 0)
             {
-                var response = await iterator.ReadNextAsync(cancellationToken);
+                queryDefinition = queryDefinition.WithParameter($"@{CosmosDbConstants.Parameters.Categories}", categories);
+            }
+
+            if (isActive.HasValue)
+            {
+                queryDefinition = queryDefinition.WithParameter($"@{CosmosDbConstants.Parameters.IsActive}", isActive.Value);
+            }
+
+            using var feedIterator = _container.GetItemQueryIterator<MemeDocument>(queryDefinition);
+            var memes = new List<MemeDocument>();
+            
+            while (feedIterator.HasMoreResults)
+            {
+                var response = await feedIterator.ReadNextAsync(cancellationToken);
                 memes.AddRange(response);
             }
 
@@ -179,7 +240,7 @@ public class CosmosMemeRepository : IMemeRepository
                 return false;
             }
 
-            var partitionKey = meme.Categories.Count > 0 ? meme.Categories[0] : "default";
+            var partitionKey = meme.Categories.Count > 0 ? meme.Categories[0] : CosmosDbConstants.PartitionKeys.Default;
             await _container.DeleteItemAsync<MemeDocument>(id, new PartitionKey(partitionKey), cancellationToken: cancellationToken);
 
             _logger.LogInformation("Deleted meme: {MemeId}", id);
@@ -221,72 +282,5 @@ public class CosmosMemeRepository : IMemeRepository
             _logger.LogError(ex, "Error updating popularity score for meme: {MemeId}", memeId);
             throw;
         }
-    }
-
-    private static QueryDefinition BuildRandomMemeQuery(IReadOnlyList<string> categories, IReadOnlyList<string> excludedMemeIds)
-    {
-        var query = "SELECT * FROM c WHERE c.type = 'meme' AND c.isActive = true";
-        var parameters = new List<(string name, object value)>();
-
-        if (categories.Count > 0)
-        {
-            var categoryConditions = categories.Select((_, index) => $"ARRAY_CONTAINS(c.categories, @category{index})").ToList();
-            query += $" AND ({string.Join(" OR ", categoryConditions)})";
-            
-            for (int i = 0; i < categories.Count; i++)
-            {
-                parameters.Add(($"@category{i}", categories[i]));
-            }
-        }
-
-        if (excludedMemeIds.Count > 0)
-        {
-            var excludeConditions = excludedMemeIds.Select((_, index) => $"@exclude{index}").ToList();
-            query += $" AND c.id NOT IN ({string.Join(", ", excludeConditions)})";
-            
-            for (int i = 0; i < excludedMemeIds.Count; i++)
-            {
-                parameters.Add(($"@exclude{i}", excludedMemeIds[i]));
-            }
-        }
-
-        var queryDefinition = new QueryDefinition(query);
-        foreach (var (name, value) in parameters)
-        {
-            queryDefinition = queryDefinition.WithParameter(name, value);
-        }
-
-        return queryDefinition;
-    }
-
-    private static QueryDefinition BuildCategoryMemeQuery(IReadOnlyList<string> categories, bool? isActive)
-    {
-        var query = "SELECT * FROM c WHERE c.type = 'meme'";
-        var parameters = new List<(string name, object value)>();
-
-        if (isActive.HasValue)
-        {
-            query += " AND c.isActive = @isActive";
-            parameters.Add(("@isActive", isActive.Value));
-        }
-
-        if (categories.Count > 0)
-        {
-            var categoryConditions = categories.Select((_, index) => $"ARRAY_CONTAINS(c.categories, @category{index})").ToList();
-            query += $" AND ({string.Join(" OR ", categoryConditions)})";
-            
-            for (int i = 0; i < categories.Count; i++)
-            {
-                parameters.Add(($"@category{i}", categories[i]));
-            }
-        }
-
-        var queryDefinition = new QueryDefinition(query);
-        foreach (var (name, value) in parameters)
-        {
-            queryDefinition = queryDefinition.WithParameter(name, value);
-        }
-
-        return queryDefinition;
     }
 }

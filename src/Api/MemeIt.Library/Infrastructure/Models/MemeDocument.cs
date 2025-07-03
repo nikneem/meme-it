@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using MemeIt.Core.Models;
+using MemeIt.Library.Infrastructure.Constants;
 
 namespace MemeIt.Library.Infrastructure.Models;
 
@@ -51,7 +52,7 @@ public class MemeDocument
     public int PopularityScore { get; set; } = 0;
 
     [JsonPropertyName("type")]
-    public string Type { get; set; } = "meme";
+    public string Type { get; set; } = CosmosDbConstants.DocumentTypes.Meme;
 
     [JsonPropertyName("_etag")]
     public string? ETag { get; set; }
@@ -108,7 +109,7 @@ public class MemeDocument
     /// </summary>
     private static string GeneratePartitionKey(IReadOnlyList<string> categories)
     {
-        return categories.Count > 0 ? categories[0] : "default";
+        return categories.Count > 0 ? categories[0] : CosmosDbConstants.PartitionKeys.Default;
     }
 }
 
