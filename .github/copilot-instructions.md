@@ -17,7 +17,7 @@ MemeIt is an online multiplayer party game where players create text content for
 - **Framework**: .NET 9
 - **Orchestration**: .NET Aspire
 - **State Management**: Microsoft Orleans
-- **Testing**: xUnit (inferred from project structure)
+- **Testing**: xUnit
 
 ### Project Structure
 ```
@@ -172,3 +172,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 - Microsoft.Extensions.DependencyInjection for DI
 - System.Text.Json for JSON serialization
 - xUnit for testing
+
+## Querying Microsoft Documentation
+
+You have access to an MCP server called `microsoft.docs.mcp` - this tool allows you to search through Microsoft's latest official documentation, and that information might be more detailed or newer than what's in your training data set.
+
+When handling questions around how to work with native Microsoft technologies, such as C#, F#, ASP.NET Core, Microsoft.Extensions, NuGet, Entity Framework, the `dotnet` runtime - please use this tool for research purposes when dealing with specific / narrowly defined questions that may occur.

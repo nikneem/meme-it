@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+    <PackageReference Include="Aspire.Microsoft.Azure.Cosmos" Version="9.3.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Aspire\MemeIt.Aspire\MemeIt.Aspire.ServiceDefaults\MemeIt.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\MemeIt.Library\MemeIt.Library.csproj" />
   </ItemGroup>
 
 </Project>

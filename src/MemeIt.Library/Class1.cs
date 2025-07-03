@@ -1,4 +1,4 @@
-﻿namespace MemeIt.Users
+﻿namespace MemeIt.Library
 {
     public class Class1
     {
