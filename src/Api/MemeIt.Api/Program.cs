@@ -3,9 +3,17 @@ using MemeIt.Library.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddOrleansDefaults();
 
 // Add Azure CosmosDB client with Aspire integration
 builder.AddAzureCosmosClient("cosmos");
+
+// Add Azure Storage services with Aspire integration
+builder.AddAzureBlobClient("blobs");
+builder.AddAzureQueueClient("queues");
+
+// Add Orleans with Aspire integration
+builder.UseOrleans();
 
 // Add MemeIt Library services
 builder.Services.AddMemeLibraryWithAspire();

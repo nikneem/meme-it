@@ -7,6 +7,7 @@ using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Orleans.Configuration;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -66,6 +67,23 @@ public static class Extensions
             });
 
         builder.AddOpenTelemetryExporters();
+
+        return builder;
+    }
+
+    public static TBuilder AddOrleansDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    {
+        // Add Orleans telemetry
+        builder.Services.AddOpenTelemetry()
+            .WithTracing(tracing =>
+            {
+                tracing.AddSource("Microsoft.Orleans.Runtime")
+                       .AddSource("Microsoft.Orleans.Application");
+            })
+            .WithMetrics(metrics =>
+            {
+                metrics.AddMeter("Microsoft.Orleans");
+            });
 
         return builder;
     }

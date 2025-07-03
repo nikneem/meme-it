@@ -9,6 +9,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
     <PackageReference Include="Aspire.Microsoft.Azure.Cosmos" Version="9.3.1" />
+    <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="9.3.1" />
+    <PackageReference Include="Aspire.Azure.Storage.Queues" Version="9.3.1" />
+    <PackageReference Include="Microsoft.Orleans.Server" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Client" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Persistence.AzureStorage" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup>
