@@ -1,6 +1,0 @@
-@MemeIt.Api_HostAddress = http://localhost:5265
-
-GET {{MemeIt.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
