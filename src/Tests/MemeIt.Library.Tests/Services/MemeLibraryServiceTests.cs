@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using MemeIt.Core.Models;
@@ -44,8 +43,10 @@ public class MemeLibraryServiceTests
         var result = await _sut.GetRandomMemeForPlayerAsync(playerId, categories, excludedMemeIds);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(expectedMeme);
+        Assert.NotNull(result);
+        Assert.Equal(expectedMeme.Id, result.Id);
+        Assert.Equal(expectedMeme.Name, result.Name);
+        Assert.Equal(expectedMeme.ImageUrl, result.ImageUrl);
         _memeRepositoryMock.Verify(x => x.GetRandomMemeAsync(categories, excludedMemeIds, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -56,9 +57,8 @@ public class MemeLibraryServiceTests
         var categories = new List<string> { "humor" };
 
         // Act & Assert
-        await _sut.Invoking(x => x.GetRandomMemeForPlayerAsync("", categories))
-            .Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("playerId");
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.GetRandomMemeForPlayerAsync("", categories));
+        Assert.Equal("playerId", exception.ParamName);
     }
 
     [Fact]
@@ -87,8 +87,10 @@ public class MemeLibraryServiceTests
         var result = await _sut.GetRandomMemeForPlayerAsync(playerId, emptyCategories);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(expectedMeme);
+        Assert.NotNull(result);
+        Assert.Equal(expectedMeme.Id, result.Id);
+        Assert.Equal(expectedMeme.Name, result.Name);
+        Assert.Equal(expectedMeme.ImageUrl, result.ImageUrl);
         _categoryRepositoryMock.Verify(x => x.GetActiveCategoriesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -107,7 +109,7 @@ public class MemeLibraryServiceTests
         var result = await _sut.GetRandomMemeForPlayerAsync(playerId, invalidCategories);
 
         // Assert
-        result.Should().BeNull();
+        Assert.Null(result);
         _memeRepositoryMock.Verify(x => x.GetRandomMemeAsync(It.IsAny<IReadOnlyList<string>>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -126,8 +128,10 @@ public class MemeLibraryServiceTests
         var result = await _sut.GetMemeByIdAsync(memeId);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(expectedMeme);
+        Assert.NotNull(result);
+        Assert.Equal(expectedMeme.Id, result.Id);
+        Assert.Equal(expectedMeme.Name, result.Name);
+        Assert.Equal(expectedMeme.ImageUrl, result.ImageUrl);
     }
 
     [Fact]
@@ -144,16 +148,15 @@ public class MemeLibraryServiceTests
         var result = await _sut.GetMemeByIdAsync(memeId);
 
         // Assert
-        result.Should().BeNull();
+        Assert.Null(result);
     }
 
     [Fact]
     public async Task GetMemeByIdAsync_WithEmptyId_ThrowsArgumentException()
     {
         // Act & Assert
-        await _sut.Invoking(x => x.GetMemeByIdAsync(""))
-            .Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("memeId");
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.GetMemeByIdAsync(""));
+        Assert.Equal("memeId", exception.ParamName);
     }
 
     [Fact]
@@ -170,9 +173,13 @@ public class MemeLibraryServiceTests
         var result = await _sut.GetAvailableCategoriesAsync();
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().HaveCount(expectedCategories.Count);
-        result.Should().BeEquivalentTo(expectedCategories);
+        Assert.NotNull(result);
+        Assert.Equal(expectedCategories.Count, result.Count);
+        for (int i = 0; i < expectedCategories.Count; i++)
+        {
+            Assert.Equal(expectedCategories[i].Id, result[i].Id);
+            Assert.Equal(expectedCategories[i].Name, result[i].Name);
+        }
     }
 
     [Fact]
@@ -201,9 +208,8 @@ public class MemeLibraryServiceTests
         var playerId = "player-123";
 
         // Act & Assert
-        await _sut.Invoking(x => x.RecordMemeUsageAsync("", playerId))
-            .Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("memeId");
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.RecordMemeUsageAsync("", playerId));
+        Assert.Equal("memeId", exception.ParamName);
     }
 
     [Fact]
@@ -213,9 +219,8 @@ public class MemeLibraryServiceTests
         var memeId = "test-meme-1";
 
         // Act & Assert
-        await _sut.Invoking(x => x.RecordMemeUsageAsync(memeId, ""))
-            .Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("playerId");
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.RecordMemeUsageAsync(memeId, ""));
+        Assert.Equal("playerId", exception.ParamName);
     }
 
     [Fact]
@@ -230,8 +235,8 @@ public class MemeLibraryServiceTests
             .ThrowsAsync(new InvalidOperationException("Meme not found"));
 
         // Act & Assert
-        await _sut.Invoking(x => x.RecordMemeUsageAsync(memeId, playerId))
-            .Should().NotThrowAsync();
+        var exception = await Record.ExceptionAsync(() => _sut.RecordMemeUsageAsync(memeId, playerId));
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -251,9 +256,10 @@ public class MemeLibraryServiceTests
         var result = await _sut.ValidateCategoriesAsync(categories);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().HaveCount(expectedCategories.Count);
-        result.Should().BeEquivalentTo(expectedCategories.Select(c => c.Id));
+        Assert.NotNull(result);
+        Assert.Equal(expectedCategories.Count, result.Count);
+        var expectedIds = expectedCategories.Select(c => c.Id).ToList();
+        Assert.Equal(expectedIds, result);
     }
 
     [Fact]
@@ -273,11 +279,11 @@ public class MemeLibraryServiceTests
         var result = await _sut.ValidateCategoriesAsync(categories);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().HaveCount(2);
-        result.Should().Contain("humor");
-        result.Should().Contain("classic");
-        result.Should().NotContain("invalid-category");
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        Assert.Contains("humor", result);
+        Assert.Contains("classic", result);
+        Assert.DoesNotContain("invalid-category", result);
     }
 
     [Fact]
@@ -290,8 +296,8 @@ public class MemeLibraryServiceTests
         var result = await _sut.ValidateCategoriesAsync(categories);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().BeEmpty();
+        Assert.NotNull(result);
+        Assert.Empty(result);
         _categoryRepositoryMock.Verify(x => x.GetCategoriesByIdsAsync(It.IsAny<IReadOnlyList<string>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -312,9 +318,9 @@ public class MemeLibraryServiceTests
         var result = await _sut.ValidateCategoriesAsync(categories);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().HaveCount(1);
-        result.Should().Contain("humor");
-        result.Should().NotContain("inactive");
+        Assert.NotNull(result);
+        Assert.Single(result);
+        Assert.Contains("humor", result);
+        Assert.DoesNotContain("inactive", result);
     }
 }

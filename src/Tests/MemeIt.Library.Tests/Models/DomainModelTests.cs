@@ -1,4 +1,3 @@
-using FluentAssertions;
 using MemeIt.Core.Models;
 using MemeIt.Library.Tests.TestData;
 
@@ -13,14 +12,14 @@ public class MemeTests
         var meme = MemeTestDataFactory.CreateSampleMeme();
 
         // Assert
-        meme.Should().NotBeNull();
-        meme.Id.Should().NotBeNullOrEmpty();
-        meme.Name.Should().NotBeNullOrEmpty();
-        meme.ImageUrl.Should().NotBeNullOrEmpty();
-        meme.TextAreas.Should().NotBeEmpty();
-        meme.Categories.Should().NotBeEmpty();
-        meme.Width.Should().BeGreaterThan(0);
-        meme.Height.Should().BeGreaterThan(0);
+        Assert.NotNull(meme);
+        Assert.False(string.IsNullOrEmpty(meme.Id));
+        Assert.False(string.IsNullOrEmpty(meme.Name));
+        Assert.False(string.IsNullOrEmpty(meme.ImageUrl));
+        Assert.NotEmpty(meme.TextAreas);
+        Assert.NotEmpty(meme.Categories);
+        Assert.True(meme.Width > 0);
+        Assert.True(meme.Height > 0);
     }
 
     [Fact]
@@ -30,10 +29,10 @@ public class MemeTests
         var meme = MemeTestDataFactory.CreateSampleMeme();
 
         // Assert
-        meme.IsActive.Should().BeTrue();
-        meme.DifficultyLevel.Should().Be(1);
-        meme.PopularityScore.Should().BeGreaterThanOrEqualTo(0);
-        meme.Tags.Should().NotBeNull();
+        Assert.True(meme.IsActive);
+        Assert.Equal(1, meme.DifficultyLevel);
+        Assert.True(meme.PopularityScore >= 0);
+        Assert.NotNull(meme.Tags);
     }
 
     [Fact]
@@ -46,7 +45,11 @@ public class MemeTests
         var meme = MemeTestDataFactory.CreateSampleMeme(categories: expectedCategories);
 
         // Assert
-        meme.Categories.Should().BeEquivalentTo(expectedCategories);
+        Assert.Equal(expectedCategories.Count, meme.Categories.Count);
+        foreach (var category in expectedCategories)
+        {
+            Assert.Contains(category, meme.Categories);
+        }
     }
 
     [Fact]
@@ -59,8 +62,13 @@ public class MemeTests
         var meme = MemeTestDataFactory.CreateSampleMeme(textAreas: expectedTextAreas);
 
         // Assert
-        meme.TextAreas.Should().HaveCount(expectedTextAreas.Count);
-        meme.TextAreas.Should().BeEquivalentTo(expectedTextAreas);
+        Assert.Equal(expectedTextAreas.Count, meme.TextAreas.Count);
+        for (int i = 0; i < expectedTextAreas.Count; i++)
+        {
+            Assert.Equal(expectedTextAreas[i].Id, meme.TextAreas[i].Id);
+            Assert.Equal(expectedTextAreas[i].X, meme.TextAreas[i].X);
+            Assert.Equal(expectedTextAreas[i].Y, meme.TextAreas[i].Y);
+        }
     }
 
     [Theory]
@@ -72,7 +80,7 @@ public class MemeTests
         var meme = MemeTestDataFactory.CreateSampleMeme(isActive: isActive);
 
         // Assert
-        meme.IsActive.Should().Be(isActive);
+        Assert.Equal(isActive, meme.IsActive);
     }
 
     [Theory]
@@ -85,7 +93,7 @@ public class MemeTests
         var meme = MemeTestDataFactory.CreateSampleMeme(popularityScore: popularityScore);
 
         // Assert
-        meme.PopularityScore.Should().Be(popularityScore);
+        Assert.Equal(popularityScore, meme.PopularityScore);
     }
 }
 
@@ -98,13 +106,13 @@ public class TextAreaTests
         var textArea = MemeTestDataFactory.CreateSampleTextArea();
 
         // Assert
-        textArea.Should().NotBeNull();
-        textArea.Id.Should().NotBeNullOrEmpty();
-        textArea.X.Should().BeGreaterThanOrEqualTo(0);
-        textArea.Y.Should().BeGreaterThanOrEqualTo(0);
-        textArea.Width.Should().BeGreaterThan(0);
-        textArea.Height.Should().BeGreaterThan(0);
-        textArea.FontSize.Should().BeGreaterThan(0);
+        Assert.NotNull(textArea);
+        Assert.False(string.IsNullOrEmpty(textArea.Id));
+        Assert.True(textArea.X >= 0);
+        Assert.True(textArea.Y >= 0);
+        Assert.True(textArea.Width > 0);
+        Assert.True(textArea.Height > 0);
+        Assert.True(textArea.FontSize > 0);
     }
 
     [Fact]
@@ -114,12 +122,12 @@ public class TextAreaTests
         var textArea = MemeTestDataFactory.CreateSampleTextArea();
 
         // Assert
-        textArea.MaxCharacters.Should().Be(100);
-        textArea.Alignment.Should().Be(TextAlignment.Center);
-        textArea.FontColor.Should().Be("#FFFFFF");
-        textArea.HasStroke.Should().BeTrue();
-        textArea.StrokeColor.Should().Be("#000000");
-        textArea.StrokeWidth.Should().Be(2);
+        Assert.Equal(100, textArea.MaxCharacters);
+        Assert.Equal(TextAlignment.Center, textArea.Alignment);
+        Assert.Equal("#FFFFFF", textArea.FontColor);
+        Assert.True(textArea.HasStroke);
+        Assert.Equal("#000000", textArea.StrokeColor);
+        Assert.Equal(2, textArea.StrokeWidth);
     }
 
     [Theory]
@@ -141,7 +149,7 @@ public class TextAreaTests
         };
 
         // Assert
-        textArea.Alignment.Should().Be(alignment);
+        Assert.Equal(alignment, textArea.Alignment);
     }
 
     [Theory]
@@ -154,11 +162,11 @@ public class TextAreaTests
         var textArea = MemeTestDataFactory.CreateSampleTextArea(x: x, y: y, width: width, height: height, fontSize: fontSize);
 
         // Assert
-        textArea.X.Should().Be(x);
-        textArea.Y.Should().Be(y);
-        textArea.Width.Should().Be(width);
-        textArea.Height.Should().Be(height);
-        textArea.FontSize.Should().Be(fontSize);
+        Assert.Equal(x, textArea.X);
+        Assert.Equal(y, textArea.Y);
+        Assert.Equal(width, textArea.Width);
+        Assert.Equal(height, textArea.Height);
+        Assert.Equal(fontSize, textArea.FontSize);
     }
 }
 
@@ -171,9 +179,9 @@ public class MemeCategoryTests
         var category = MemeTestDataFactory.CreateSampleCategory();
 
         // Assert
-        category.Should().NotBeNull();
-        category.Id.Should().NotBeNullOrEmpty();
-        category.Name.Should().NotBeNullOrEmpty();
+        Assert.NotNull(category);
+        Assert.False(string.IsNullOrEmpty(category.Id));
+        Assert.False(string.IsNullOrEmpty(category.Name));
     }
 
     [Fact]
@@ -183,12 +191,13 @@ public class MemeCategoryTests
         var category = MemeTestDataFactory.CreateSampleCategory();
 
         // Assert
-        category.IsActive.Should().BeTrue();
-        category.DisplayOrder.Should().BeGreaterThanOrEqualTo(0);
-        category.Description.Should().NotBeNull();
-        category.Color.Should().NotBeNullOrEmpty();
-        category.Icon.Should().NotBeNull();
-        category.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromDays(90));
+        Assert.True(category.IsActive);
+        Assert.True(category.DisplayOrder >= 0);
+        Assert.NotNull(category.Description);
+        Assert.False(string.IsNullOrEmpty(category.Color));
+        Assert.NotNull(category.Icon);
+        var timeDifference = Math.Abs((DateTimeOffset.UtcNow - category.CreatedAt).TotalDays);
+        Assert.True(timeDifference <= 90);
     }
 
     [Theory]
@@ -200,7 +209,7 @@ public class MemeCategoryTests
         var category = MemeTestDataFactory.CreateSampleCategory(isActive: isActive);
 
         // Assert
-        category.IsActive.Should().Be(isActive);
+        Assert.Equal(isActive, category.IsActive);
     }
 
     [Theory]
@@ -213,7 +222,7 @@ public class MemeCategoryTests
         var category = MemeTestDataFactory.CreateSampleCategory(displayOrder: displayOrder);
 
         // Assert
-        category.DisplayOrder.Should().Be(displayOrder);
+        Assert.Equal(displayOrder, category.DisplayOrder);
     }
 
     [Fact]
@@ -223,8 +232,14 @@ public class MemeCategoryTests
         var categories = MemeTestDataFactory.CreateMultipleCategories();
 
         // Assert
-        categories.Should().NotBeEmpty();
-        categories.Select(c => c.Id).Should().OnlyHaveUniqueItems();
-        categories.Select(c => c.Name).Should().OnlyHaveUniqueItems();
+        Assert.NotEmpty(categories);
+        
+        // Check unique IDs
+        var ids = categories.Select(c => c.Id).ToList();
+        Assert.Equal(ids.Count, ids.Distinct().Count());
+        
+        // Check unique names
+        var names = categories.Select(c => c.Name).ToList();
+        Assert.Equal(names.Count, names.Distinct().Count());
     }
 }

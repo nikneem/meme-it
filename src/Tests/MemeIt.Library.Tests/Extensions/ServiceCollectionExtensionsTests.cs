@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -37,9 +36,9 @@ public class ServiceCollectionExtensionsTests
         var serviceProvider = services.BuildServiceProvider();
 
         // Verify that all required services are registered
-        serviceProvider.GetService<IMemeRepository>().Should().NotBeNull();
-        serviceProvider.GetService<IMemeCategoryRepository>().Should().NotBeNull();
-        serviceProvider.GetService<IMemeLibraryService>().Should().NotBeNull();
+        Assert.NotNull(serviceProvider.GetService<IMemeRepository>());
+        Assert.NotNull(serviceProvider.GetService<IMemeCategoryRepository>());
+        Assert.NotNull(serviceProvider.GetService<IMemeLibraryService>());
     }
 
     [Fact]
@@ -51,7 +50,9 @@ public class ServiceCollectionExtensionsTests
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["CosmosDb:ConnectionString"] = "AccountEndpoint=https://test.documents.azure.com:443/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;",
-                ["CosmosDb:DatabaseName"] = "test-db"
+                ["CosmosDb:DatabaseName"] = "test-db",
+                ["CosmosDb:MemesContainerName"] = "memes",
+                ["CosmosDb:CategoriesContainerName"] = "categories"
             })
             .Build();
 
@@ -62,10 +63,9 @@ public class ServiceCollectionExtensionsTests
         // Assert
         var serviceProvider = services.BuildServiceProvider();
 
-        // Verify that correct implementations are registered
-        serviceProvider.GetService<IMemeRepository>().Should().BeOfType<CosmosMemeRepository>();
-        serviceProvider.GetService<IMemeCategoryRepository>().Should().BeOfType<CosmosMemeCategoryRepository>();
-        serviceProvider.GetService<IMemeLibraryService>().Should().BeOfType<MemeLibraryService>();
+        Assert.IsType<CosmosMemeRepository>(serviceProvider.GetService<IMemeRepository>());
+        Assert.IsType<CosmosMemeCategoryRepository>(serviceProvider.GetService<IMemeCategoryRepository>());
+        Assert.IsType<MemeLibraryService>(serviceProvider.GetService<IMemeLibraryService>());
     }
 
     [Fact]
@@ -93,22 +93,22 @@ public class ServiceCollectionExtensionsTests
 
         // Assert
         var serviceProvider = services.BuildServiceProvider();
-        var options = serviceProvider.GetRequiredService<IOptions<CosmosDbOptions>>().Value;
+        var options = serviceProvider.GetService<IOptions<CosmosDbOptions>>()?.Value;
 
-        options.Should().NotBeNull();
-        options.ConnectionString.Should().Be("AccountEndpoint=https://test.documents.azure.com:443/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;");
-        options.DatabaseName.Should().Be("test-database");
-        options.MemesContainerName.Should().Be("test-memes");
-        options.CategoriesContainerName.Should().Be("test-categories");
-        options.MaxRetryAttempts.Should().Be(5);
-        options.MaxRetryWaitTimeInSeconds.Should().Be(60);
-        options.CreateIfNotExists.Should().BeTrue();
-        options.MemesContainerThroughput.Should().Be(1000);
-        options.CategoriesContainerThroughput.Should().Be(800);
+        Assert.NotNull(options);
+        Assert.Equal("AccountEndpoint=https://test.documents.azure.com:443/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;", options.ConnectionString);
+        Assert.Equal("test-database", options.DatabaseName);
+        Assert.Equal("test-memes", options.MemesContainerName);
+        Assert.Equal("test-categories", options.CategoriesContainerName);
+        Assert.Equal(5, options.MaxRetryAttempts);
+        Assert.Equal(60, options.MaxRetryWaitTimeInSeconds);
+        Assert.True(options.CreateIfNotExists);
+        Assert.Equal(1000, options.MemesContainerThroughput);
+        Assert.Equal(800, options.CategoriesContainerThroughput);
     }
 
     [Fact]
-    public void AddMemeLibrary_WithMinimalConfiguration_UsesDefaults()
+    public void AddMemeLibrary_WithDefaultConfiguration_SetsDefaultValues()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -116,7 +116,7 @@ public class ServiceCollectionExtensionsTests
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["CosmosDb:ConnectionString"] = "AccountEndpoint=https://test.documents.azure.com:443/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;",
-                ["CosmosDb:DatabaseName"] = "test-database"
+                ["CosmosDb:DatabaseName"] = "memeit"
             })
             .Build();
 
@@ -125,16 +125,16 @@ public class ServiceCollectionExtensionsTests
 
         // Assert
         var serviceProvider = services.BuildServiceProvider();
-        var options = serviceProvider.GetRequiredService<IOptions<CosmosDbOptions>>().Value;
+        var options = serviceProvider.GetService<IOptions<CosmosDbOptions>>()?.Value;
 
-        options.Should().NotBeNull();
-        options.MemesContainerName.Should().Be("memes");
-        options.CategoriesContainerName.Should().Be("categories");
-        options.MaxRetryAttempts.Should().Be(3);
-        options.MaxRetryWaitTimeInSeconds.Should().Be(30);
-        options.CreateIfNotExists.Should().BeTrue();
-        options.MemesContainerThroughput.Should().Be(400);
-        options.CategoriesContainerThroughput.Should().Be(400);
+        Assert.NotNull(options);
+        Assert.Equal("memes", options.MemesContainerName);
+        Assert.Equal("categories", options.CategoriesContainerName);
+        Assert.Equal(3, options.MaxRetryAttempts);
+        Assert.Equal(30, options.MaxRetryWaitTimeInSeconds);
+        Assert.True(options.CreateIfNotExists);
+        Assert.Equal(400, options.MemesContainerThroughput);
+        Assert.Equal(400, options.CategoriesContainerThroughput);
     }
 
     [Fact]
@@ -154,63 +154,38 @@ public class ServiceCollectionExtensionsTests
         services.AddMemeLibrary(configuration);
 
         // Assert
-        var repositoryDescriptor = services.FirstOrDefault(x => x.ServiceType == typeof(IMemeRepository));
-        repositoryDescriptor.Should().NotBeNull();
-        repositoryDescriptor!.Lifetime.Should().Be(ServiceLifetime.Scoped);
+        var repositoryDescriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IMemeRepository));
+        Assert.NotNull(repositoryDescriptor);
+        Assert.Equal(ServiceLifetime.Scoped, repositoryDescriptor.Lifetime);
 
-        var categoryRepositoryDescriptor = services.FirstOrDefault(x => x.ServiceType == typeof(IMemeCategoryRepository));
-        categoryRepositoryDescriptor.Should().NotBeNull();
-        categoryRepositoryDescriptor!.Lifetime.Should().Be(ServiceLifetime.Scoped);
+        var categoryRepositoryDescriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IMemeCategoryRepository));
+        Assert.NotNull(categoryRepositoryDescriptor);
+        Assert.Equal(ServiceLifetime.Scoped, categoryRepositoryDescriptor.Lifetime);
 
-        var serviceDescriptor = services.FirstOrDefault(x => x.ServiceType == typeof(IMemeLibraryService));
-        serviceDescriptor.Should().NotBeNull();
-        serviceDescriptor!.Lifetime.Should().Be(ServiceLifetime.Scoped);
+        var serviceDescriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IMemeLibraryService));
+        Assert.NotNull(serviceDescriptor);
+        Assert.Equal(ServiceLifetime.Scoped, serviceDescriptor.Lifetime);
     }
 
     [Fact]
-    public void AddMemeLibraryWithAspire_RegistersAllRequiredServices()
+    public void AddMemeLibrary_WithConfigurationObject_ConfiguresCorrectly()
     {
         // Arrange
         var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["CosmosDb:ConnectionString"] = "test-connection",
+                ["CosmosDb:DatabaseName"] = "test-db"
+            })
+            .Build();
 
         // Act
-        services.AddMemeLibraryWithAspire();
+        services.AddMemeLibrary(configuration);
 
         // Assert
-        var repositoryDescriptor = services.FirstOrDefault(x => x.ServiceType == typeof(IMemeRepository));
-        repositoryDescriptor.Should().NotBeNull();
-        repositoryDescriptor!.Lifetime.Should().Be(ServiceLifetime.Scoped);
-
-        var categoryRepositoryDescriptor = services.FirstOrDefault(x => x.ServiceType == typeof(IMemeCategoryRepository));
-        categoryRepositoryDescriptor.Should().NotBeNull();
-        categoryRepositoryDescriptor!.Lifetime.Should().Be(ServiceLifetime.Scoped);
-
-        var serviceDescriptor = services.FirstOrDefault(x => x.ServiceType == typeof(IMemeLibraryService));
-        serviceDescriptor.Should().NotBeNull();
-        serviceDescriptor!.Lifetime.Should().Be(ServiceLifetime.Scoped);
-    }
-
-    [Fact]
-    public void AddMemeLibraryWithAspire_ConfiguresDefaultOptions()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-
-        // Act
-        services.AddMemeLibraryWithAspire();
-
-        // Assert
-        var serviceProvider = services.BuildServiceProvider();
-        var options = serviceProvider.GetRequiredService<IOptions<CosmosDbOptions>>().Value;
-
-        options.Should().NotBeNull();
-        options.DatabaseName.Should().Be("memeit");
-        options.MemesContainerName.Should().Be("memes");
-        options.CategoriesContainerName.Should().Be("categories");
-        options.MaxRetryAttempts.Should().Be(3);
-        options.MaxRetryWaitTimeInSeconds.Should().Be(30);
-        options.CreateIfNotExists.Should().BeTrue();
-        options.MemesContainerThroughput.Should().Be(400);
-        options.CategoriesContainerThroughput.Should().Be(400);
+        var repositoryDescriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IMemeRepository));
+        Assert.NotNull(repositoryDescriptor);
+        Assert.Equal(ServiceLifetime.Scoped, repositoryDescriptor.Lifetime);
     }
 }

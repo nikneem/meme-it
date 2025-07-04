@@ -16,10 +16,12 @@
     <PackageReference Include="Aspire.Hosting.Azure.CosmosDB" Version="9.3.1" />
     <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.3.1" />
     <PackageReference Include="Aspire.Hosting.Orleans" Version="9.3.1" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Api\MemeIt.Api\MemeIt.Api.csproj" />
+    <ProjectReference Include="..\..\..\MemeIt.OrleansServer\MemeIt.OrleansServer.csproj" />
   </ItemGroup>
 
 </Project>

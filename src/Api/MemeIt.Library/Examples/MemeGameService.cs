@@ -178,84 +178,84 @@ public class MemeGameService
         }
     }
 
-    /// <summary>
-    /// Creates sample memes and categories for testing/demo purposes
-    /// </summary>
-    /// <returns>List of created memes</returns>
-    public async Task<IReadOnlyList<Meme>> CreateSampleDataAsync()
-    {
-        _logger.LogInformation("Creating sample memes and categories");
+    ///// <summary>
+    ///// Creates sample memes and categories for testing/demo purposes
+    ///// </summary>
+    ///// <returns>List of created memes</returns>
+    //public async Task<IReadOnlyList<Meme>> CreateSampleDataAsync()
+    //{
+    //    _logger.LogInformation("Creating sample memes and categories");
 
-        // Note: This would require additional repository methods in a real implementation
-        // For now, this serves as an example of how you might structure data creation
+    //    // Note: This would require additional repository methods in a real implementation
+    //    // For now, this serves as an example of how you might structure data creation
 
-        var sampleMemes = new List<Meme>
-        {
-            new Meme
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Distracted Boyfriend",
-                ImageUrl = "https://example.com/distracted-boyfriend.jpg",
-                Categories = new[] { "humor", "reactions" },
-                TextAreas = new[]
-                {
-                    new TextArea
-                    {
-                        Id = "boyfriend-text",
-                        X = 50,
-                        Y = 20,
-                        Width = 300,
-                        Height = 60,
-                        FontSize = 32,
-                        Alignment = TextAlignment.Center
-                    }
-                },
-                Width = 800,
-                Height = 450,
-                Tags = new[] { "boyfriend", "distracted", "choice" },
-                DifficultyLevel = 2,
-                IsActive = true
-            },
-            new Meme
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Drake Pointing",
-                ImageUrl = "https://example.com/drake-pointing.jpg",
-                Categories = new[] { "humor", "preferences" },
-                TextAreas = new[]
-                {
-                    new TextArea
-                    {
-                        Id = "top-text",
-                        X = 400,
-                        Y = 100,
-                        Width = 350,
-                        Height = 80,
-                        FontSize = 28,
-                        Alignment = TextAlignment.Left
-                    },
-                    new TextArea
-                    {
-                        Id = "bottom-text",
-                        X = 400,
-                        Y = 300,
-                        Width = 350,
-                        Height = 80,
-                        FontSize = 28,
-                        Alignment = TextAlignment.Left
-                    }
-                },
-                Width = 750,
-                Height = 400,
-                Tags = new[] { "drake", "preference", "choice" },
-                DifficultyLevel = 1,
-                IsActive = true
-            }
-        };
+    //    var sampleMemes = new List<Meme>
+    //    {
+    //        new Meme
+    //        {
+    //            Id = Guid.NewGuid().ToString(),
+    //            Name = "Distracted Boyfriend",
+    //            ImageUrl = "https://example.com/distracted-boyfriend.jpg",
+    //            Categories = new[] { "humor", "reactions" },
+    //            TextAreas = new[]
+    //            {
+    //                new TextArea
+    //                {
+    //                    Id = "boyfriend-text",
+    //                    X = 50,
+    //                    Y = 20,
+    //                    Width = 300,
+    //                    Height = 60,
+    //                    FontSize = 32,
+    //                    Alignment = TextAlignment.Center
+    //                }
+    //            },
+    //            Width = 800,
+    //            Height = 450,
+    //            Tags = new[] { "boyfriend", "distracted", "choice" },
+    //            DifficultyLevel = 2,
+    //            IsActive = true
+    //        },
+    //        new Meme
+    //        {
+    //            Id = Guid.NewGuid().ToString(),
+    //            Name = "Drake Pointing",
+    //            ImageUrl = "https://example.com/drake-pointing.jpg",
+    //            Categories = new[] { "humor", "preferences" },
+    //            TextAreas = new[]
+    //            {
+    //                new TextArea
+    //                {
+    //                    Id = "top-text",
+    //                    X = 400,
+    //                    Y = 100,
+    //                    Width = 350,
+    //                    Height = 80,
+    //                    FontSize = 28,
+    //                    Alignment = TextAlignment.Left
+    //                },
+    //                new TextArea
+    //                {
+    //                    Id = "bottom-text",
+    //                    X = 400,
+    //                    Y = 300,
+    //                    Width = 350,
+    //                    Height = 80,
+    //                    FontSize = 28,
+    //                    Alignment = TextAlignment.Left
+    //                }
+    //            },
+    //            Width = 750,
+    //            Height = 400,
+    //            Tags = new[] { "drake", "preference", "choice" },
+    //            DifficultyLevel = 1,
+    //            IsActive = true
+    //        }
+    //    };
 
-        _logger.LogInformation("Created {Count} sample memes", sampleMemes.Count);
-        return sampleMemes;
-    }
+    //    _logger.LogInformation("Created {Count} sample memes", sampleMemes.Count);
+    //    return sampleMemes;
+    //}
 }
 
 /// <summary>

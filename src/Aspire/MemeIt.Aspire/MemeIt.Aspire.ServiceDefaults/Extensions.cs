@@ -85,6 +85,10 @@ public static class Extensions
                 metrics.AddMeter("Microsoft.Orleans");
             });
 
+        builder.AddAzureBlobClient("blobs");
+        builder.AddAzureTableClient("tables");
+
+
         return builder;
     }
 

@@ -1,0 +1,136 @@
+### Create a new game
+POST http://localhost:5000/api/games
+Content-Type: application/json
+
+{
+  "playerId": "player-alice",
+  "playerName": "Alice",
+  "gameName": "Alice's Awesome Game",
+  "options": {
+    "maxPlayers": 6,
+    "minPlayers": 2,
+    "allowSpectators": true,
+    "isPrivate": false,
+    "allowedCategories": ["Reaction", "Choice"]
+  }
+}
+
+###
+
+### Get game details by ID
+GET http://localhost:5000/api/games/{{gameId}}
+
+###
+
+### Get game details by game code
+GET http://localhost:5000/api/games/by-code/{{gameCode}}
+
+###
+
+### Join a game by ID
+POST http://localhost:5000/api/games/{{gameId}}/join
+Content-Type: application/json
+
+{
+  "playerId": "player-bob",
+  "playerName": "Bob"
+}
+
+###
+
+### Join a game by game code
+POST http://localhost:5000/api/games/join-by-code
+Content-Type: application/json
+
+{
+  "gameCode": "ABC123",
+  "playerId": "player-charlie",
+  "playerName": "Charlie"
+}
+
+###
+
+### Start the game (only game master can do this)
+POST http://localhost:5000/api/games/{{gameId}}/start
+Content-Type: application/json
+
+{
+  "playerId": "player-alice"
+}
+
+###
+
+### Get current round information
+GET http://localhost:5000/api/games/{{gameId}}/current-round
+
+###
+
+### Submit meme text for a player
+POST http://localhost:5000/api/games/{{gameId}}/submit-text
+Content-Type: application/json
+
+{
+  "playerId": "player-alice",
+  "textEntries": {
+    "top": "When you see a new meme template",
+    "bottom": "Time to make it funny!"
+  }
+}
+
+###
+
+### Submit another player's meme text
+POST http://localhost:5000/api/games/{{gameId}}/submit-text
+Content-Type: application/json
+
+{
+  "playerId": "player-bob",
+  "textEntries": {
+    "top": "Me trying to think of funny text",
+    "bottom": "My brain: *empty*"
+  }
+}
+
+###
+
+### Submit score for another player's meme
+POST http://localhost:5000/api/games/{{gameId}}/submit-score
+Content-Type: application/json
+
+{
+  "playerId": "player-alice",
+  "targetPlayerId": "player-bob", 
+  "score": 4
+}
+
+###
+
+### Submit score from Bob to Alice
+POST http://localhost:5000/api/games/{{gameId}}/submit-score
+Content-Type: application/json
+
+{
+  "playerId": "player-bob",
+  "targetPlayerId": "player-alice",
+  "score": 5
+}
+
+###
+
+### Get current scores
+GET http://localhost:5000/api/games/{{gameId}}/scores
+
+###
+
+### Leave the game
+POST http://localhost:5000/api/games/{{gameId}}/leave
+Content-Type: application/json
+
+{
+  "playerId": "player-charlie"
+}
+
+###
+
+### Get available games
+GET http://localhost:5000/api/games

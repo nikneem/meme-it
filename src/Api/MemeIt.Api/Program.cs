@@ -1,22 +1,21 @@
 using MemeIt.Library.Extensions;
+using MemeIt.Games.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-builder.AddOrleansDefaults();
 
 // Add Azure CosmosDB client with Aspire integration
 builder.AddAzureCosmosClient("cosmos");
+builder.AddKeyedAzureTableClient("clustering");
+builder.UseOrleansClient();
 
-// Add Azure Storage services with Aspire integration
-builder.AddAzureBlobClient("blobs");
-builder.AddAzureQueueClient("queues");
-
-// Add Orleans with Aspire integration
-builder.UseOrleans();
 
 // Add MemeIt Library services
 builder.Services.AddMemeLibraryWithAspire();
+
+// Add MemeIt Games services
+builder.Services.AddGameServices();
 
 // Add services to the container.
 builder.Services.AddControllers();

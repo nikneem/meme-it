@@ -8,9 +8,8 @@ var storage = builder.AddAzureStorage("storage")
         emulator.WithLifetime(ContainerLifetime.Persistent);
     });
 
-var blobs = storage.AddBlobs("blobs");
-var tables = storage.AddTables("tables");
-var queues = storage.AddQueues("queues");
+var grainStorage = storage.AddBlobs("grain-state");
+var clusteringTable = storage.AddTables("clustering");
 
 // Add Azure CosmosDB emulator
 var cosmos = builder.AddAzureCosmosDB("cosmos")
@@ -27,16 +26,29 @@ var categoriesContainer = database.AddContainer("categories", "/partitionKey");
 
 // Add Orleans cluster
 var orleans = builder.AddOrleans("orleans")
-    .WithClustering(tables)
-    .WithGrainStorage("Default", tables)
-    .WithGrainStorage("PubSubStore", tables);
+    .WithClustering(clusteringTable)
+    .WithGrainStorage("Default", grainStorage );
+
+builder.AddProject<Projects.MemeIt_OrleansServer>("silo")
+    .WithReference(orleans)
+    .WithReplicas(3);
+
+
 
 // Add API project with cosmos and orleans references
 builder.AddProject<Projects.MemeIt_Api>("memeit-api")
     .WithReference(cosmos)
-    .WithReference(orleans)
-    .WithReference(blobs)
-    .WithReference(tables)
-    .WithReference(queues);
+    .WithReference(orleans.AsClient())
+    .WithReference(grainStorage )
+    .WithReference(clusteringTable);
+
+var frontEndSourceFolder = Path.GetFullPath(builder.AppHostDirectory + "/../../../App");
+if (Directory.Exists(frontEndSourceFolder))
+{
+    builder.AddNpmApp("frontend", frontEndSourceFolder)
+        .WithHttpEndpoint(isProxied: false, port: 4200)
+        .WithHttpHealthCheck();
+    //        .WithNpmPackageInstallation();
+}
 
 builder.Build().Run();
