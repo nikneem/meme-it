@@ -10,15 +10,8 @@ public class CreateGameCommandHandler(IGrainFactory grainFactory) : ICommandHand
 {
     public async ValueTask<CreateGameResponse> HandleAsync(CreateGameCommand command, CancellationToken cancellationToken)
     {
-        var createGameState = new CreateGameState()
-        {
-            PlayerName = command.PlayerName,
-            GameCode = command.GameCode,
-            Password = command.Password
-        };
-        
         var gameGrain = grainFactory.GetGrain<IGameGrain>(command.GameCode);
-        var gameState = await gameGrain.CreateGame(createGameState);
+        var gameState = await gameGrain.CreateGame(command);
         return new CreateGameResponse(gameState.GameCode);
     }
 }

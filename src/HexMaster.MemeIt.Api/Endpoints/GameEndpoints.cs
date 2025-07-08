@@ -37,26 +37,24 @@ public static class GameEndpoints
 
     }
 
-    //private static async Task<IResult> ProjectList(
-    //    [AsParameters] ProjectListQuery query,
-    //    [FromServices] IQueryHandler<ProjectListQuery, LocalizrListResponse<ProjectListItem>> handler)
-    //{
-    //    var response = await handler.HandleAsync(query, CancellationToken.None);
-    //    return Results.Ok(response);
-    //}
-
-
-
-
-
     private static async Task<IResult> CreateGame(
         [FromBody] CreateGameRequest requestPayload, 
         [FromServices] ICommandHandler<CreateGameCommand, CreateGameResponse> handler)
     {
-        var command = new CreateGameCommand(
-            Randomizer.GenerateGameCode(),
-            requestPayload.PlayerName, 
-            requestPayload.Password);
+        if (string.IsNullOrWhiteSpace(requestPayload.PlayerName))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { nameof(requestPayload.PlayerName), ["Player name is required."] }
+            });
+        }
+
+        var command = new CreateGameCommand
+        {
+            GameCode = Randomizer.GenerateGameCode(),
+            PlayerName = requestPayload.PlayerName,
+            Password = requestPayload.Password
+        };
         var response = await handler.HandleAsync(command, CancellationToken.None);
         return TypedResults.Created($"/games/{response.GameCode}", response);
     }

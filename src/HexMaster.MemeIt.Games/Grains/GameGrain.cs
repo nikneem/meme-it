@@ -1,5 +1,6 @@
 ﻿using HexMaster.MemeIt.Core;
 using HexMaster.MemeIt.Games.Abstractions.Grains;
+using HexMaster.MemeIt.Games.Features.CreateGame;
 using HexMaster.MemeIt.Games.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Orleans;
@@ -15,7 +16,7 @@ public class GameGrain(IGrainFactory grainFactory,
     private readonly ObserverManager<IGameGainObserver> _gameWatchers = new(TimeSpan.FromMinutes(1), gameLogger);
     public Task<GameState> GetCurrent() => Task.FromResult(state.State);
 
-    public async Task<GameState> CreateGame(CreateGameState createGameState)
+    public async Task<GameState> CreateGame(CreateGameCommand createGameState)
     {
         var initialPlayerState = new GamePlayerState
         {

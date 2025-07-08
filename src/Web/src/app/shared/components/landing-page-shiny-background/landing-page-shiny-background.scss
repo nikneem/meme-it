@@ -1,25 +1,6 @@
-#container {
-  text-align: center;
-
-}
-
-.app-title {
-  font-family: "Luckiest Guy", cursive;
-  font-weight: 400;
-  font-size: 8rem;
-  font-style: normal;
-  rotate: -5deg;
-  line-height: 6rem;
-  background: linear-gradient(to bottom, white, #bffdda);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  -webkit-text-stroke: 5px #0de3a3;
-}
-
 .page-background {
   position: fixed;
+    z-index: -10;
   width: 100vw;
   height: 100vh;
 
@@ -30,6 +11,7 @@
 
   .background-spinner {
     position: absolute;
+    z-index: 0;
     top: 0;
     left: 0;
     width: 100vw;
