@@ -1,10 +1,11 @@
-﻿using HexMaster.MemeIt.Core.DataTransferObjects;
+﻿using HexMaster.MemeIt.Core;
+using HexMaster.MemeIt.Core.DataTransferObjects;
+using HexMaster.MemeIt.Games.DataTransferObjects;
 using HexMaster.MemeIt.Games.Features;
 using HexMaster.MemeIt.Games.Features.CreateGame;
 using HexMaster.MemeIt.Games.Features.GetGame;
 using HexMaster.MemeIt.Games.Features.JoinGame;
 using Localizr.Core.Abstractions.Cqrs;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HexMaster.MemeIt.Api.Endpoints;
@@ -48,11 +49,15 @@ public static class GameEndpoints
 
 
 
-    private static async Task<Results<Created<CreateGameResponse>, ValidationProblem>> CreateGame(
-        [FromBody] CreateGameCommand requestPayload, 
+    private static async Task<IResult> CreateGame(
+        [FromBody] CreateGameRequest requestPayload, 
         [FromServices] ICommandHandler<CreateGameCommand, CreateGameResponse> handler)
     {
-        var response = await handler.HandleAsync(requestPayload, CancellationToken.None);
+        var command = new CreateGameCommand(
+            Randomizer.GenerateGameCode(),
+            requestPayload.PlayerName, 
+            requestPayload.Password);
+        var response = await handler.HandleAsync(command, CancellationToken.None);
         return TypedResults.Created($"/games/{response.GameCode}", response);
     }
 
@@ -68,10 +73,14 @@ public static class GameEndpoints
         return Results.NotFound();
     }
     private static async Task<IResult> JoinGame(
-        [FromBody] JoinGameCommand requestPayload,
+        [FromBody] JoinGameRequest requestPayload,
         [FromServices] ICommandHandler<JoinGameCommand, GameDetailsResponse> handler)
     {
-        var response = await handler.HandleAsync(requestPayload, CancellationToken.None);
+        var command = new JoinGameCommand(
+            requestPayload.GameCode,
+            requestPayload.PlayerName,
+            requestPayload.Password);
+        var response = await handler.HandleAsync(command, CancellationToken.None);
         return Results.Ok(response);
     }
 

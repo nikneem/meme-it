@@ -15,12 +15,12 @@ public class GameGrain(IGrainFactory grainFactory,
     private readonly ObserverManager<IGameGainObserver> _gameWatchers = new(TimeSpan.FromMinutes(1), gameLogger);
     public Task<GameState> GetCurrent() => Task.FromResult(state.State);
 
-    public async Task<GameState> CreateGame(CreateGameState initialGameState)
+    public async Task<GameState> CreateGame(CreateGameState createGameState)
     {
         var initialPlayerState = new GamePlayerState
         {
             Id = Guid.NewGuid().ToString(),
-            Name = initialGameState.PlayerName
+            Name = createGameState.PlayerName
         };
 
         var playerGrain = grainFactory.GetGrain<IGamePlayerGrain>(initialPlayerState.Id);
@@ -28,10 +28,10 @@ public class GameGrain(IGrainFactory grainFactory,
 
         state.State = new GameState
         {
-            GameCode = Randomizer.GenerateGameCode(),
+            GameCode = createGameState.GameCode,
             Players = [(initialPlayerState.Id, initialPlayerState.Name)],
             Status = GameStatus.Waiting.Id,
-            Password = initialGameState.Password
+            Password = createGameState.Password
         };
         await state.WriteStateAsync();
         _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));

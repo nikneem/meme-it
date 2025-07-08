@@ -1,6 +1,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var redis = builder.AddRedis(AspireConstants.RedisCacheName);
+var redis = builder.AddRedis(AspireConstants.RedisCacheName, 64820)
+    .WithLifetime(ContainerLifetime.Persistent);
 
 var orleans = builder.AddOrleans(AspireConstants.MemeItOrleansCluster)
     .WithClustering(redis)
