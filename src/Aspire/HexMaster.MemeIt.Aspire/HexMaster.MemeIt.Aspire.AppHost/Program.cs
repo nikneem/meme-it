@@ -1,23 +1,16 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var redis = builder.AddRedis(AspireConstants.RedisCacheName);
 
-var storage = builder.AddAzureStorage("storage").RunAsEmulator();
-var clusteringTable = storage.AddTables("clustering");
-var grainStorage = storage.AddBlobs("grain-state");
+var orleans = builder.AddOrleans(AspireConstants.MemeItOrleansCluster)
+    .WithClustering(redis)
+    .WithGrainStorage("games", redis);
 
-
-var orleans = builder.AddOrleans("default")
-    .WithClustering(clusteringTable)
-    .WithGrainStorage("Default", grainStorage);
-
-
-builder.AddProject<Projects.HexMaster_MemeIt_OrleansServer>("silo")
+builder.AddProject<Projects.HexMaster_MemeIt_Api>(AspireConstants.MemeItApiProjectName)
     .WithReference(orleans)
-    .WithReplicas(3);
+    .WaitFor(redis)
+    .WithReplicas(2)
+    .WithExternalHttpEndpoints();
 
-builder.AddProject<Projects.HexMaster_MemeIt_Api>("hexmaster-memeit-api")
-    .WithReference(orleans.AsClient())
-    .WithExternalHttpEndpoints()
-    .WithReplicas(3);
 
 builder.Build().Run();

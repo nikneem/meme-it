@@ -12,14 +12,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.1" />
-    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.3.1" />
-    <PackageReference Include="Aspire.Hosting.Orleans" Version="9.3.1" />
+    <Compile Include="..\..\AspireConstants.cs" Link="AspireConstants.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Server\HexMaster.MemeIt.Api\HexMaster.MemeIt.Api.csproj" />
-    <ProjectReference Include="..\..\..\Server\HexMaster.MemeIt.OrleansServer\HexMaster.MemeIt.OrleansServer.csproj" />
+	  <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.1" />
+	  <PackageReference Include="Aspire.Hosting.Redis" Version="9.3.1" />
+	  <PackageReference Include="Aspire.Hosting.Orleans" Version="9.3.1" />
+    <PackageReference Include="System.Text.Json" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\HexMaster.MemeIt.Api\HexMaster.MemeIt.Api.csproj" />
   </ItemGroup>
 
 </Project>

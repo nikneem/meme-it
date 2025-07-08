@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Aspire\AspireConstants.cs" Link="AspireConstants.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.Redis" Version="9.1.2" />
+    <PackageReference Include="Microsoft.Orleans.Persistence.Redis" Version="9.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aspire\HexMaster.MemeIt.Aspire\HexMaster.MemeIt.Aspire.ServiceDefaults\HexMaster.MemeIt.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Games\HexMaster.MemeIt.Games.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+@HexMaster.MemeIt.Api_HostAddress = http://localhost:5298
+
+GET {{HexMaster.MemeIt.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
