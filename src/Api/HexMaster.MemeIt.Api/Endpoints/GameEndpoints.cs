@@ -8,6 +8,7 @@ using HexMaster.MemeIt.Games.Features.JoinGame;
 using HexMaster.MemeIt.Games.Features.LeaveGame;
 using HexMaster.MemeIt.Games.Features.StartGame;
 using HexMaster.MemeIt.Games.Features.UpdateSettings;
+using HexMaster.MemeIt.Games.ValueObjects;
 using Localizr.Core.Abstractions.Cqrs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -97,7 +98,7 @@ public static class GameEndpoints
     {
         var playerId = requestPayload?.PlayerId;
         var gameCode = requestPayload?.GameCode;
-        var settings = requestPayload?.Settings ?? new Dictionary<string, string>();
+        var settings = requestPayload?.Settings ?? new GameSettings();
         if (string.IsNullOrWhiteSpace(playerId) || string.IsNullOrWhiteSpace(gameCode))
         {
             return Results.ValidationProblem(new Dictionary<string, string[]>

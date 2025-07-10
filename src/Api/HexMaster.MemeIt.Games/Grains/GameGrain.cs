@@ -35,7 +35,7 @@ public class GameGrain(IGrainFactory grainFactory,
             Status = GameStatus.Waiting.Id,
             Password = createGameState.Password,
             LeaderId = initialPlayerState.Id,
-            Settings = new Dictionary<string, string>()
+            Settings = new GameSettings()
         };
         await state.WriteStateAsync();
         _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
@@ -94,20 +94,24 @@ public class GameGrain(IGrainFactory grainFactory,
         return state.State;
     }
 
-    public async Task<GameState> UpdateSettings(string playerId, Dictionary<string, string> settings)
+    public async Task<GameState> UpdateSettings(string playerId, GameSettings settings)
     {
         if (state.State.LeaderId != playerId)
         {
             throw new UnauthorizedAccessException("Only the game leader can update settings.");
         }
-        if (state.State.Settings == null)
+        if (state.State.Status != GameStatus.Waiting.Id)
         {
-            state.State.Settings = new Dictionary<string, string>();
+            throw new InvalidOperationException("Settings can only be changed before the game has started.");
         }
-        foreach (var kvp in settings)
-        {
-            state.State.Settings[kvp.Key] = kvp.Value;
-        }
+        // Enforce limits
+        if (settings.MaxPlayers < 2 || settings.MaxPlayers > 25)
+            settings.MaxPlayers = Math.Clamp(settings.MaxPlayers, 2, 25);
+        if (settings.NumberOfRounds < 1 || settings.NumberOfRounds > 10)
+            settings.NumberOfRounds = Math.Clamp(settings.NumberOfRounds, 1, 10);
+        if (string.IsNullOrWhiteSpace(settings.Category))
+            settings.Category = "All";
+        state.State.Settings = settings;
         await state.WriteStateAsync();
         _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
         return state.State;
