@@ -5,6 +5,9 @@ using HexMaster.MemeIt.Games.Features;
 using HexMaster.MemeIt.Games.Features.CreateGame;
 using HexMaster.MemeIt.Games.Features.GetGame;
 using HexMaster.MemeIt.Games.Features.JoinGame;
+using HexMaster.MemeIt.Games.Features.LeaveGame;
+using HexMaster.MemeIt.Games.Features.StartGame;
+using HexMaster.MemeIt.Games.Features.UpdateSettings;
 using Localizr.Core.Abstractions.Cqrs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,12 +32,83 @@ public static class GameEndpoints
             .WithName(nameof(GetGame))
             .Produces(StatusCodes.Status200OK);
 
+
         group.MapPost("/join", JoinGame)
             .WithName(nameof(JoinGame))
             .Produces(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
+        group.MapPost("/leave", LeaveGame)
+            .WithName(nameof(LeaveGame))
+            .Produces(StatusCodes.Status200OK)
+            .ProducesValidationProblem();
 
+        group.MapPost("/start", StartGame)
+            .WithName(nameof(StartGame))
+            .Produces(StatusCodes.Status200OK)
+            .ProducesValidationProblem();
+
+        group.MapPost("/settings", UpdateSettings)
+            .WithName(nameof(UpdateSettings))
+            .Produces(StatusCodes.Status200OK)
+            .ProducesValidationProblem();
+    }
+    private static async Task<IResult> LeaveGame(
+        [FromBody] LeaveGameRequest requestPayload,
+        [FromServices] ICommandHandler<LeaveGameCommand, object> handler)
+    {
+        var playerId = requestPayload?.PlayerId;
+        var gameCode = requestPayload?.GameCode;
+        if (string.IsNullOrWhiteSpace(playerId) || string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { "PlayerId", ["PlayerId is required."] },
+                { "GameCode", ["GameCode is required."] }
+            });
+        }
+        var command = new LeaveGameCommand(playerId, gameCode);
+       var responseObject= await handler.HandleAsync(command, CancellationToken.None);
+        return Results.Ok(responseObject);
+    }
+
+    private static async Task<IResult> StartGame(
+        [FromBody] StartGameRequest requestPayload,
+        [FromServices] ICommandHandler<StartGameCommand, object> handler)
+    {
+        var playerId = requestPayload?.PlayerId;
+        var gameCode = requestPayload?.GameCode;
+        if (string.IsNullOrWhiteSpace(playerId) || string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { "PlayerId", ["PlayerId is required."] },
+                { "GameCode", ["GameCode is required."] }
+            });
+        }
+        var command = new StartGameCommand(playerId, gameCode);
+        await handler.HandleAsync(command, CancellationToken.None);
+        return Results.Ok();
+    }
+
+    private static async Task<IResult> UpdateSettings(
+        [FromBody] UpdateSettingsRequest requestPayload,
+        [FromServices] ICommandHandler<UpdateSettingsCommand, object> handler)
+    {
+        var playerId = requestPayload?.PlayerId;
+        var gameCode = requestPayload?.GameCode;
+        var settings = requestPayload?.Settings ?? new Dictionary<string, string>();
+        if (string.IsNullOrWhiteSpace(playerId) || string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { "PlayerId", ["PlayerId is required."] },
+                { "GameCode", ["GameCode is required."] }
+            });
+        }
+        var command = new UpdateSettingsCommand(playerId, settings, gameCode);
+        await handler.HandleAsync(command, CancellationToken.None);
+        return Results.Ok();
     }
 
     private static async Task<IResult> CreateGame(

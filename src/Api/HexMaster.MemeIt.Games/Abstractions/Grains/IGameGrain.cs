@@ -10,4 +10,7 @@ public interface IGameGrain : IGrainWithStringKey
     Task<GameState> GetCurrent();
     Task<GameState> CreateGame(CreateGameCommand initialState);
     Task<GameState> JoinGame(JoinGameCommand playerState);
+    Task<GameState> LeaveGame(string playerId);
+    Task<GameState> UpdateSettings(string playerId, Dictionary<string, string> settings);
+    Task<GameState> StartGame(string playerId);
 }
