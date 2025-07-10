@@ -12,15 +12,8 @@ public sealed class JoinGameCommandHandler(IGrainFactory grainFactory) : IComman
     public async ValueTask<GameDetailsResponse> HandleAsync(JoinGameCommand command,
         CancellationToken cancellationToken)
     {
-        var joinGameState = new JoinGameState
-        {
-            PlayerName = command.PlayerName,
-            Password = command.Password
-        };
-
-
         var gameGrain = grainFactory.GetGrain<IGameGrain>(command.GameCode);
-        var newGameState = await gameGrain.JoinGame(joinGameState);
+        var newGameState = await gameGrain.JoinGame(command);
         return GameDetailsResponse.FromGameState(newGameState);
     }
 }

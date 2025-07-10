@@ -74,10 +74,21 @@ public static class GameEndpoints
         [FromBody] JoinGameRequest requestPayload,
         [FromServices] ICommandHandler<JoinGameCommand, GameDetailsResponse> handler)
     {
-        var command = new JoinGameCommand(
-            requestPayload.GameCode,
-            requestPayload.PlayerName,
-            requestPayload.Password);
+
+        if (string.IsNullOrWhiteSpace(requestPayload.PlayerName))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { nameof(requestPayload.PlayerName), ["Player name is required."] }
+            });
+        }
+
+        var command = new JoinGameCommand
+        {
+            PlayerName = requestPayload.PlayerName,
+            GameCode = requestPayload.GameCode,
+            Password = requestPayload.Password
+        };
         var response = await handler.HandleAsync(command, CancellationToken.None);
         return Results.Ok(response);
     }
