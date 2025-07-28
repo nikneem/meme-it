@@ -1,0 +1,39 @@
+### Test Meme Upload SAS Token Generation
+POST {{baseUrl}}/management/memes/upload
+Content-Type: application/json
+
+{
+  "fileName": "test-meme.jpg",
+  "contentType": "image/jpeg"
+}
+
+### Expected Response
+# {
+#   "sasUri": "https://...",
+#   "fileName": "unique-guid_test-meme.jpg",
+#   "expiresAt": "2025-07-29T12:00:00Z"
+# }
+
+### Test Create Meme (using the filename from SAS response)
+POST {{baseUrl}}/management/memes
+Content-Type: application/json
+
+{
+  "name": "Test Meme",
+  "description": "A test meme created via API",
+  "sourceImage": "unique-guid_test-meme.jpg",
+  "sourceWidth": 800,
+  "sourceHeight": 600,
+  "textareas": [
+    {
+      "x": 10,
+      "y": 10,
+      "width": 200,
+      "height": 50,
+      "fontFamily": "Arial",
+      "fontSize": 24,
+      "fontColor": "#FFFFFF",
+      "maxLength": 50
+    }
+  ]
+}

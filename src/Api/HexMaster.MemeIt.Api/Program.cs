@@ -1,11 +1,13 @@
 using HexMaster.MemeIt.Api.Endpoints;
 using HexMaster.MemeIt.Games.ExtensionMethods;
+using HexMaster.MemeIt.Memes.ExtensionMethods;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddGamesServices();
+builder.AddMemesServices();
 
 builder.AddKeyedRedisClient(AspireConstants.RedisCacheName);
 builder.UseOrleans(); 
@@ -15,6 +17,7 @@ var app = builder.Build();
 
 app.MapDefaultEndpoints();
 app.MapGamesEndpoints();
+app.MapMemeEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
