@@ -4,7 +4,7 @@
 		{
 			"label": "Run Aspire AppHost",
 			"type": "shell",
-			"command": "dotnet run --project \"src/Aspire/MemeIt.Aspire/MemeIt.Aspire.AppHost\"",
+			"command": "dotnet run --project \"src/Api/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost\"",
 			"group": "build",
 			"isBackground": true,
 			"problemMatcher": []

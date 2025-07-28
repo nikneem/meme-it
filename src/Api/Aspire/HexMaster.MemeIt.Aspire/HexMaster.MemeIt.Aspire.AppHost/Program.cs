@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Hosting;
+using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -35,12 +36,22 @@ if (builder.Environment.IsDevelopment())
 var memesDatabase = cosmos.AddCosmosDatabase("MemeItDatabase");
 var memeTemplatesContainer = memesDatabase.AddContainer("MemeTemplates", "/partitionKey");
 
-builder.AddProject<Projects.HexMaster_MemeIt_Api>(AspireConstants.MemeItApiProjectName)
+var api = builder.AddProject<Projects.HexMaster_MemeIt_Api>(AspireConstants.MemeItApiProjectName)
     .WithReference(orleans)
     .WithReference(blobs)
     .WithReference(memeTemplatesContainer)
     .WaitFor(redis)
     .WithReplicas(2)
     .WithExternalHttpEndpoints();
+
+// Add Angular frontend application
+var frontEndSourceFolder = Path.GetFullPath(builder.AppHostDirectory + "../../../../../Web");
+if (Directory.Exists(frontEndSourceFolder))
+{
+    var frontend = builder.AddNpmApp("Frontend", frontEndSourceFolder)
+        .WaitFor(api)
+            .WithHttpEndpoint(isProxied: false, port: 4200)
+            .WithHttpHealthCheck();
+}
 
 builder.Build().Run();

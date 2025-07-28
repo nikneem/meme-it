@@ -21,11 +21,16 @@
 	  <PackageReference Include="Aspire.Hosting.Orleans" Version="9.3.1" />
 	  <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.3.1" />
 	  <PackageReference Include="Aspire.Hosting.Azure.CosmosDB" Version="9.3.1" />
+	  <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.3.1" />
     <PackageReference Include="System.Text.Json" Version="9.0.7" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\HexMaster.MemeIt.Api\HexMaster.MemeIt.Api.csproj" />
   </ItemGroup>
+
+  <Target Name="InstallFrontendPackages" BeforeTargets="Build">
+    <Exec Command="npm install" WorkingDirectory="../../../../Web" Condition="!Exists('../../../../Web/node_modules')" />
+  </Target>
 
 </Project>
