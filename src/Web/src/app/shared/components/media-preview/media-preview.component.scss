@@ -1,0 +1,40 @@
+.media-preview-container {
+  @apply relative border-2 border-dashed border-gray-300 rounded-lg overflow-hidden;
+  background: repeating-conic-gradient(#f8f9fa 0% 25%, #e9ecef 25% 50%) 0 0 / 20px 20px;
+  min-width: 300px;
+  min-height: 200px;
+  max-width: 800px;
+  max-height: 600px;
+}
+
+.media-element {
+  @apply object-contain bg-white;
+}
+
+.placeholder-area {
+  @apply flex items-center justify-center bg-gray-50;
+}
+
+.placeholder-content {
+  @apply text-center;
+}
+
+.text-areas-overlay {
+  @apply absolute inset-0 pointer-events-none;
+}
+
+.text-areas-overlay app-draggable-text-area {
+  @apply pointer-events-auto;
+}
+
+.add-text-prompt {
+  @apply absolute inset-0 flex items-center justify-center pointer-events-none;
+}
+
+.add-text-button {
+  @apply px-4 py-2 bg-primary text-white rounded-lg shadow-lg hover:bg-primary-600 transition-colors pointer-events-auto;
+}
+
+.media-info {
+  @apply border border-gray-200;
+}

@@ -1,0 +1,60 @@
+<div class="media-preview-container" #container [style.width.px]="containerSize().width"
+  [style.height.px]="containerSize().height" (click)="onContainerClick($event)">
+
+  <!-- Media display -->
+  @if (uploadedFile() && uploadedFile()!.type.startsWith('image/')) {
+  <img #mediaElement [src]="uploadedFile()!.url" [alt]="uploadedFile()!.file.name" class="media-element"
+    [style.width.px]="containerSize().width" [style.height.px]="containerSize().height" (load)="onMediaLoad()" />
+  } @else if (uploadedFile() && uploadedFile()!.type.startsWith('video/')) {
+  <video #mediaElement [src]="uploadedFile()!.url" class="media-element" [style.width.px]="containerSize().width"
+    [style.height.px]="containerSize().height" controls muted (loadedmetadata)="onMediaLoad()">
+    Your browser does not support the video tag.
+  </video>
+  } @else {
+  <div class="placeholder-area" [style.width.px]="containerSize().width" [style.height.px]="containerSize().height">
+    <div class="placeholder-content">
+      <i class="pi pi-image text-6xl text-gray-400 mb-4"></i>
+      <p class="text-gray-500 text-lg">Drop media here to get started</p>
+    </div>
+  </div>
+  }
+
+  <!-- Text areas overlay -->
+  @if (uploadedFile()) {
+  <div class="text-areas-overlay" [style.width.px]="containerSize().width" [style.height.px]="containerSize().height">
+    @for (textArea of textAreas(); track textArea.id) {
+    <app-draggable-text-area [textArea]="textArea" [isSelected]="selectedTextAreaId() === textArea.id"
+      [containerBounds]="containerBounds()" (onTextAreaChange)="onTextAreaChange($event)"
+      (onDelete)="onDeleteTextArea(textArea.id)" (onSelect)="onSelectTextArea(textArea.id)" />
+    }
+  </div>
+  }
+
+  <!-- Add text area button -->
+  @if (uploadedFile() && textAreas().length === 0) {
+  <div class="add-text-prompt">
+    <button class="add-text-button" (click)="addTextArea($event)">
+      <i class="pi pi-plus mr-2"></i>
+      Click anywhere to add text
+    </button>
+  </div>
+  }
+</div>
+
+<!-- Media info -->
+@if (uploadedFile()) {
+<div class="media-info mt-4 p-3 bg-gray-50 rounded-lg">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="font-medium">{{ uploadedFile()!.file.name }}</p>
+      <p class="text-sm text-gray-600">
+        {{ formatFileSize(uploadedFile()!.file.size) }} •
+        {{ uploadedFile()!.dimensions?.width }}×{{ uploadedFile()!.dimensions?.height }}
+      </p>
+    </div>
+    <div class="text-sm text-gray-600">
+      {{ textAreas().length }} text area{{ textAreas().length !== 1 ? 's' : '' }}
+    </div>
+  </div>
+</div>
+}

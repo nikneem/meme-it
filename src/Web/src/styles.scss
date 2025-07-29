@@ -1,5 +1,5 @@
-@import "tailwindcss";
-
+@use "tailwindcss";
+@plugin "tailwindcss-primeui";
 
 html, body {
   height: 100%;

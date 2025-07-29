@@ -41,6 +41,8 @@ var api = builder.AddProject<Projects.HexMaster_MemeIt_Api>(AspireConstants.Meme
     .WithReference(blobs)
     .WithReference(memeTemplatesContainer)
     .WaitFor(redis)
+    .WaitFor(storage)
+    .WaitFor(cosmos)
     .WithReplicas(2)
     .WithExternalHttpEndpoints();
 

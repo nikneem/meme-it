@@ -1,0 +1,41 @@
+<div class="navbar bg-white shadow-sm border-b">
+  <div class="container mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a routerLink="/home" class="text-2xl font-bold text-primary">
+          MemeIt
+        </a>
+      </div>
+      
+      <!-- Navigation Links -->
+      <div class="hidden md:flex items-center space-x-6">
+        <a routerLink="/home" 
+           class="text-gray-700 hover:text-primary transition-colors"
+           routerLinkActive="text-primary font-medium">
+          Home
+        </a>
+        <a routerLink="/management/memes/create" 
+           class="text-gray-700 hover:text-primary transition-colors"
+           routerLinkActive="text-primary font-medium">
+          Create Meme
+        </a>
+      </div>
+      
+      <!-- Action Button -->
+      <div class="flex items-center space-x-4">
+        <button pButton 
+                label="Create Meme" 
+                icon="pi pi-plus"
+                routerLink="/management/memes/create"
+                class="hidden sm:inline-flex"></button>
+                
+        <!-- Mobile menu button -->
+        <button pButton 
+                icon="pi pi-bars"
+                [text]="true"
+                class="md:hidden"></button>
+      </div>
+    </div>
+  </div>
+</div>

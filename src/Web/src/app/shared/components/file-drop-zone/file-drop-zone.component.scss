@@ -1,0 +1,27 @@
+.file-drop-zone {
+  @apply border-2 border-dashed border-surface-300 rounded-lg p-8 text-center transition-all duration-200 cursor-pointer min-h-64 flex items-center justify-center;
+}
+
+.file-drop-zone:hover:not(.disabled) {
+  @apply border-primary bg-primary-50 dark:bg-primary-950;
+}
+
+.file-drop-zone.dragging {
+  @apply border-primary bg-primary-50 dark:bg-primary-950 scale-105;
+}
+
+.file-drop-zone.disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.drop-content {
+  @apply w-full;
+}
+
+.drop-instructions {
+  @apply flex flex-col items-center;
+}
+
+.upload-progress {
+  @apply flex flex-col items-center space-y-4 w-full max-w-sm mx-auto;
+}
