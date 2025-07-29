@@ -1,27 +1,49 @@
 .file-drop-zone {
-  @apply border-2 border-dashed border-surface-300 rounded-lg p-8 text-center transition-all duration-200 cursor-pointer min-h-64 flex items-center justify-center;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  min-height: 16rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .file-drop-zone:hover:not(.disabled) {
-  @apply border-primary bg-primary-50 dark:bg-primary-950;
+  border-color: var(--primary-color, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.05);
 }
 
 .file-drop-zone.dragging {
-  @apply border-primary bg-primary-50 dark:bg-primary-950 scale-105;
+  border-color: var(--primary-color, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.05);
+  transform: scale(1.05);
 }
 
 .file-drop-zone.disabled {
-  @apply opacity-50 cursor-not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .drop-content {
-  @apply w-full;
+  width: 100%;
 }
 
 .drop-instructions {
-  @apply flex flex-col items-center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .upload-progress {
-  @apply flex flex-col items-center space-y-4 w-full max-w-sm mx-auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 24rem;
+  margin-left: auto;
+  margin-right: auto;
 }

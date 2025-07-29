@@ -2,7 +2,6 @@ import {
   Component, 
   input, 
   output, 
-  signal, 
   ElementRef, 
   viewChild,
   computed
@@ -21,6 +20,8 @@ export interface DragData {
   startY: number;
   elementX: number;
   elementY: number;
+  elementWidth: number;
+  elementHeight: number;
 }
 
 @Component({
@@ -108,7 +109,9 @@ export class DraggableTextAreaComponent {
       startX: event.clientX,
       startY: event.clientY,
       elementX: this.textArea().x,
-      elementY: this.textArea().y
+      elementY: this.textArea().y,
+      elementWidth: this.textArea().width,
+      elementHeight: this.textArea().height
     };
     
     this.addGlobalListeners();
@@ -120,7 +123,9 @@ export class DraggableTextAreaComponent {
       startX: event.clientX,
       startY: event.clientY,
       elementX: this.textArea().x,
-      elementY: this.textArea().y
+      elementY: this.textArea().y,
+      elementWidth: this.textArea().width,
+      elementHeight: this.textArea().height
     };
     
     this.addGlobalListeners();
@@ -169,8 +174,7 @@ export class DraggableTextAreaComponent {
       this.dragData.elementY + deltaY
     ));
     
-    this.updateProperty('x', newX);
-    this.updateProperty('y', newY);
+    this.updateProperties({ x: newX, y: newY });
   }
 
   private handleResize(event: MouseEvent): void {
@@ -179,32 +183,37 @@ export class DraggableTextAreaComponent {
     const deltaX = event.clientX - this.dragData.startX;
     const deltaY = event.clientY - this.dragData.startY;
     
-    const textArea = this.textArea();
-    let newX = textArea.x;
-    let newY = textArea.y;
-    let newWidth = textArea.width;
-    let newHeight = textArea.height;
+    // Apply scaling factor to make resize less sensitive
+    const resizeScale = 0.5;
+    const scaledDeltaX = deltaX * resizeScale;
+    const scaledDeltaY = deltaY * resizeScale;
+    
+    // Use original dimensions from dragData to avoid exponential growth
+    let newX = this.dragData.elementX;
+    let newY = this.dragData.elementY;
+    let newWidth = this.dragData.elementWidth;
+    let newHeight = this.dragData.elementHeight;
     
     switch (this.resizeDirection) {
       case 'nw':
-        newX = Math.max(0, this.dragData.elementX + deltaX);
-        newY = Math.max(0, this.dragData.elementY + deltaY);
-        newWidth = Math.max(50, textArea.width - deltaX);
-        newHeight = Math.max(20, textArea.height - deltaY);
+        newX = Math.max(0, this.dragData.elementX + scaledDeltaX);
+        newY = Math.max(0, this.dragData.elementY + scaledDeltaY);
+        newWidth = Math.max(50, this.dragData.elementWidth - scaledDeltaX);
+        newHeight = Math.max(20, this.dragData.elementHeight - scaledDeltaY);
         break;
       case 'ne':
-        newY = Math.max(0, this.dragData.elementY + deltaY);
-        newWidth = Math.max(50, textArea.width + deltaX);
-        newHeight = Math.max(20, textArea.height - deltaY);
+        newY = Math.max(0, this.dragData.elementY + scaledDeltaY);
+        newWidth = Math.max(50, this.dragData.elementWidth + scaledDeltaX);
+        newHeight = Math.max(20, this.dragData.elementHeight - scaledDeltaY);
         break;
       case 'sw':
-        newX = Math.max(0, this.dragData.elementX + deltaX);
-        newWidth = Math.max(50, textArea.width - deltaX);
-        newHeight = Math.max(20, textArea.height + deltaY);
+        newX = Math.max(0, this.dragData.elementX + scaledDeltaX);
+        newWidth = Math.max(50, this.dragData.elementWidth - scaledDeltaX);
+        newHeight = Math.max(20, this.dragData.elementHeight + scaledDeltaY);
         break;
       case 'se':
-        newWidth = Math.max(50, textArea.width + deltaX);
-        newHeight = Math.max(20, textArea.height + deltaY);
+        newWidth = Math.max(50, this.dragData.elementWidth + scaledDeltaX);
+        newHeight = Math.max(20, this.dragData.elementHeight + scaledDeltaY);
         break;
     }
     
@@ -216,15 +225,17 @@ export class DraggableTextAreaComponent {
       newHeight = this.containerBounds().height - newY;
     }
     
-    this.updateProperty('x', newX);
-    this.updateProperty('y', newY);
-    this.updateProperty('width', newWidth);
-    this.updateProperty('height', newHeight);
+    this.updateProperties({ x: newX, y: newY, width: newWidth, height: newHeight });
   }
 
   updateProperty(property: keyof MemeTextArea, value: any): void {
     const updatedTextArea = { ...this.textArea() };
     (updatedTextArea as any)[property] = value;
+    this.onTextAreaChange.emit(updatedTextArea);
+  }
+
+  updateProperties(properties: Partial<MemeTextArea>): void {
+    const updatedTextArea = { ...this.textArea(), ...properties };
     this.onTextAreaChange.emit(updatedTextArea);
   }
 }

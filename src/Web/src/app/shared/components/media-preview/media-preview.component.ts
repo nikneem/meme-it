@@ -67,7 +67,7 @@ export class MediaPreviewComponent {
   });
 
   constructor() {
-    // Update container bounds when size changes
+    // Update container bounds when computed size changes
     effect(() => {
       const size = this.containerSize();
       this.containerBounds.set(new DOMRect(0, 0, size.width, size.height));
@@ -75,11 +75,7 @@ export class MediaPreviewComponent {
   }
 
   onMediaLoad(): void {
-    // Update container bounds after media loads
-    setTimeout(() => {
-      const element = this.container().nativeElement;
-      this.containerBounds.set(element.getBoundingClientRect());
-    }, 0);
+    // Media loaded - bounds are already updated by the effect
   }
 
   onContainerClick(event: MouseEvent): void {
