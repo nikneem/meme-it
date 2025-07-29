@@ -1,7 +1,7 @@
 <div class="container mx-auto px-4 py-8 max-w-6xl">
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Meme</h1>
-    <p class="text-gray-600">Upload media and add text areas to create your meme</p>
+    <p class="text-gray-600">Upload media, add text areas by clicking on the image, and provide a name to create your meme</p>
   </div>
   
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -52,7 +52,8 @@
             <label for="name" class="block text-sm font-medium mb-1">Name *</label>
             <input pInputText
                    id="name"
-                   [(ngModel)]="memeName"
+                   [ngModel]="memeName()"
+                   (ngModelChange)="memeName.set($event)"
                    placeholder="Enter meme name"
                    class="w-full"
                    [maxlength]="100" />
@@ -62,7 +63,8 @@
           <div>
             <label for="description" class="block text-sm font-medium mb-1">Description</label>
             <textarea id="description"
-                      [(ngModel)]="memeDescription"
+                      [ngModel]="memeDescription()"
+                      (ngModelChange)="memeDescription.set($event)"
                       placeholder="Optional description"
                       class="w-full p-2 border border-gray-300 rounded"
                       rows="3"
@@ -87,6 +89,35 @@
               <div class="flex justify-between">
                 <span>Text Areas:</span>
                 <span>{{ textAreas().length }}</span>
+              </div>
+            </div>
+          }
+          
+          <!-- Requirements Status -->
+          @if (uploadedFile() && !canCreateMeme()) {
+            <div class="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded p-3">
+              <div class="font-medium mb-2">To create your meme, you need:</div>
+              <ul class="space-y-1">
+                <li class="flex items-center">
+                  <i class="pi mr-2" [class]="memeName().trim().length > 0 ? 'pi-check text-green-600' : 'pi-circle text-gray-400'"></i>
+                  A meme name
+                </li>
+                <li class="flex items-center">
+                  <i class="pi mr-2" [class]="uploadedFile() && uploadedFileName() ? 'pi-check text-green-600' : 'pi-circle text-gray-400'"></i>
+                  Upload media file
+                </li>
+                <li class="flex items-center">
+                  <i class="pi mr-2" [class]="textAreas().length > 0 ? 'pi-check text-green-600' : 'pi-circle text-gray-400'"></i>
+                  Add at least one text area
+                </li>
+              </ul>
+              <div class="mt-3 text-xs text-gray-500">
+                Debug: Name="{{memeName()}}" ({{memeName().trim().length}}) | 
+                File={{!!uploadedFile()}} | 
+                FileName="{{uploadedFileName()}}" | 
+                TextAreas={{textAreas().length}} | 
+                Creating={{isCreating()}} | 
+                CanCreate={{canCreateMeme()}}
               </div>
             </div>
           }

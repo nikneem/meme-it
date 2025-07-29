@@ -44,17 +44,17 @@ export class CreateMemePageComponent {
   readonly selectedTextAreaId = signal<string | null>(null);
   readonly isCreating = signal<boolean>(false);
   readonly uploadedFileName = signal<string | null>(null);
-  
-  memeName = '';
-  memeDescription = '';
+  readonly memeName = signal<string>('');
+  readonly memeDescription = signal<string>('');
   
   readonly maxFileSize = 50 * 1024 * 1024; // 50MB
   readonly acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'];
   
   readonly canCreateMeme = computed(() => {
-    return this.memeName.trim().length > 0 && 
+    return this.memeName().trim().length > 0 && 
            this.uploadedFile() !== null && 
            this.uploadedFileName() !== null &&
+           this.textAreas().length > 0 &&
            !this.isCreating();
   });
 
@@ -159,8 +159,8 @@ export class CreateMemePageComponent {
     try {
       // Create meme with uploaded file reference (file is already uploaded)
       const createRequest: CreateMemeRequest = {
-        name: this.memeName.trim(),
-        description: this.memeDescription.trim() || undefined,
+        name: this.memeName().trim(),
+        description: this.memeDescription().trim() || undefined,
         sourceImage: fileName,
         sourceWidth: file.dimensions?.width || 0,
         sourceHeight: file.dimensions?.height || 0,
@@ -184,7 +184,7 @@ export class CreateMemePageComponent {
       this.messageService.add({
         severity: 'success',
         summary: 'Meme Created',
-        detail: `Meme "${this.memeName}" created successfully!`
+        detail: `Meme "${this.memeName()}" created successfully!`
       });
 
       // Navigate to meme details or list
