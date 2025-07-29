@@ -1,5 +1,7 @@
-using Microsoft.Extensions.Hosting;
 using Aspire.Hosting;
+using Azure.Provisioning;
+using Azure.Provisioning.Storage;
+using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -11,7 +13,20 @@ var orleans = builder.AddOrleans(AspireConstants.MemeItOrleansCluster)
     .WithGrainStorage("games", redis);
 
 // Add Azure Storage (with Azurite emulator for development)
-var storage = builder.AddAzureStorage("Storage");
+var storage = builder.AddAzureStorage("Storage").ConfigureInfrastructure(infra =>
+{
+    var blobStorage = infra.GetProvisionableResources().OfType<BlobService>().Single();
+
+    blobStorage.CorsRules.Add(new BicepValue<StorageCorsRule>(new StorageCorsRule
+    {
+        AllowedOrigins = [new BicepValue<string>("http://localhost:4200")],
+        AllowedMethods = [CorsRuleAllowedMethod.Get, CorsRuleAllowedMethod.Put, CorsRuleAllowedMethod.Options],
+        AllowedHeaders = [new BicepValue<string>("*")],
+        ExposedHeaders = [new BicepValue<string>("*")],
+        MaxAgeInSeconds = new BicepValue<int>(3600)
+    }));
+
+});
 if (builder.Environment.IsDevelopment())
 {
     storage.RunAsEmulator(em =>
@@ -20,6 +35,7 @@ if (builder.Environment.IsDevelopment())
     });
 }
 var blobs = storage.AddBlobs("BlobConnection");
+
 blobs.AddBlobContainer("upload");
 blobs.AddBlobContainer("memes");
 

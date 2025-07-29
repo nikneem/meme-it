@@ -14,7 +14,6 @@ import {
   MemeTextArea, 
   UploadedFile, 
   CreateMemeRequest, 
-  GenerateUploadSasResponse,
   MemeTextAreaDto
 } from '../../../shared/models/meme.models';
 import { MemeApiService } from '../../../shared/services/meme-api.service';
@@ -44,6 +43,7 @@ export class CreateMemePageComponent {
   readonly textAreas = signal<MemeTextArea[]>([]);
   readonly selectedTextAreaId = signal<string | null>(null);
   readonly isCreating = signal<boolean>(false);
+  readonly uploadedFileName = signal<string | null>(null);
   
   memeName = '';
   memeDescription = '';
@@ -54,6 +54,7 @@ export class CreateMemePageComponent {
   readonly canCreateMeme = computed(() => {
     return this.memeName.trim().length > 0 && 
            this.uploadedFile() !== null && 
+           this.uploadedFileName() !== null &&
            !this.isCreating();
   });
 
@@ -92,6 +93,10 @@ export class CreateMemePageComponent {
         summary: 'File Ready',
         detail: 'Media file loaded successfully'
       });
+
+      // Automatically upload file to blob storage when media is selected
+      await this.uploadFileToStorage(file);
+      
     } catch (error) {
       this.messageService.add({
         severity: 'error',
@@ -119,6 +124,7 @@ export class CreateMemePageComponent {
 
   clearMedia(): void {
     this.uploadedFile.set(null);
+    this.uploadedFileName.set(null);
     this.textAreas.set([]);
     this.selectedTextAreaId.set(null);
     
@@ -142,31 +148,20 @@ export class CreateMemePageComponent {
 
   async createMeme(): Promise<void> {
     const file = this.uploadedFile();
-    if (!file || !this.canCreateMeme()) {
+    const fileName = this.uploadedFileName();
+    
+    if (!file || !fileName || !this.canCreateMeme()) {
       return;
     }
 
     this.isCreating.set(true);
 
     try {
-      // Step 1: Get SAS token for upload
-      const sasResponse = await this.memeApiService.generateUploadSas({
-        fileName: file.file.name,
-        contentType: file.file.type
-      }).toPromise();
-
-      if (!sasResponse) {
-        throw new Error('Failed to get upload token');
-      }
-
-      // Step 2: Upload file to blob storage
-      await this.uploadFileToBlob(file.file, sasResponse);
-
-      // Step 3: Create meme with uploaded file reference
+      // Create meme with uploaded file reference (file is already uploaded)
       const createRequest: CreateMemeRequest = {
         name: this.memeName.trim(),
         description: this.memeDescription.trim() || undefined,
-        sourceImage: sasResponse.fileName,
+        sourceImage: fileName,
         sourceWidth: file.dimensions?.width || 0,
         sourceHeight: file.dimensions?.height || 0,
         textareas: this.textAreas().map(ta => ({
@@ -208,18 +203,37 @@ export class CreateMemePageComponent {
     }
   }
 
-  private async uploadFileToBlob(file: File, sasResponse: GenerateUploadSasResponse): Promise<void> {
-    const response = await fetch(sasResponse.sasUri, {
-      method: 'PUT',
-      headers: {
-        'x-ms-blob-type': 'BlockBlob',
-        'Content-Type': file.type
-      },
-      body: file
-    });
+  private async uploadFileToStorage(file: File): Promise<void> {
+    try {
+      // Step 1: Get SAS token for upload
+      const sasResponse = await this.memeApiService.generateUploadSas({
+        fileName: file.name,
+        contentType: file.type
+      }).toPromise();
 
-    if (!response.ok) {
-      throw new Error('Failed to upload file to storage');
+      if (!sasResponse) {
+        throw new Error('Failed to get upload token');
+      }
+
+      // Step 2: Upload file to blob storage
+      await this.memeApiService.uploadFile(sasResponse.sasUri, file).toPromise();
+      
+      // Store the uploaded file name for later use
+      this.uploadedFileName.set(sasResponse.fileName);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'File Uploaded',
+        detail: 'File uploaded to storage successfully'
+      });
+
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Upload Failed',
+        detail: error instanceof Error ? error.message : 'Failed to upload file'
+      });
+      throw error; // Re-throw to handle in calling method
     }
   }
 

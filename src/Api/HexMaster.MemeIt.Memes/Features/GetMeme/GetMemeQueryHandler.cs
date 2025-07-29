@@ -32,7 +32,7 @@ public class GetMemeQueryHandler : IQueryHandler<GetMemeQuery, OperationResult<M
             memeTemplate.SourceHeight,
             memeTemplate.TextAreas.Select(ta => new MemeTextArea(
                 ta.X, ta.Y, ta.Width, ta.Height,
-                ta.FontFamily, ta.FontSize, ta.FontColor, ta.MaxLength)).ToArray(),
+                ta.FontFamily, ta.FontSize, ta.FontColor, ta.FontBold, ta.MaxLength, ta.BorderThickness, ta.BorderColor)).ToArray(),
             memeTemplate.CreatedAt,
             memeTemplate.UpdatedAt);
 

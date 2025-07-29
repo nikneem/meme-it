@@ -13,9 +13,25 @@ builder.AddKeyedRedisClient(AspireConstants.RedisCacheName);
 builder.UseOrleans(); 
 builder.Services.AddOpenApi();
 
+// Add CORS services
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+// Use CORS middleware
+app.UseCors();
+
 app.MapGamesEndpoints();
 app.MapMemeEndpoints();
 

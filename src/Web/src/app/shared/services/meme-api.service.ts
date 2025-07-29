@@ -14,7 +14,7 @@ import {
 })
 export class MemeApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/management/memes'; // This will be proxied in development
+  private readonly baseUrl = 'https://localhost:7294/management/memes'; // This will be proxied in development
 
   generateUploadSas(request: GenerateUploadSasRequest): Observable<GenerateUploadSasResponse> {
     return this.http.post<GenerateUploadSasResponse>(`${this.baseUrl}/upload`, request);

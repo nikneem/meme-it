@@ -49,7 +49,7 @@ public class UpdateMemeCommandHandler : ICommandHandler<UpdateMemeCommand, Opera
             updatedTemplate.SourceHeight,
             updatedTemplate.TextAreas.Select(ta => new MemeTextArea(
                 ta.X, ta.Y, ta.Width, ta.Height,
-                ta.FontFamily, ta.FontSize, ta.FontColor, ta.MaxLength)).ToArray(),
+                ta.FontFamily, ta.FontSize, ta.FontColor, ta.FontBold, ta.MaxLength, ta.BorderThickness, ta.BorderColor)).ToArray(),
             updatedTemplate.CreatedAt,
             updatedTemplate.UpdatedAt);
 
