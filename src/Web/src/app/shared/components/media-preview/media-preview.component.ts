@@ -9,6 +9,10 @@ import {
   effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ColorPickerModule } from 'primeng/colorpicker';
+import { CardModule } from 'primeng/card';
 import { DraggableTextAreaComponent } from '../draggable-text-area/draggable-text-area.component';
 import { MemeTextArea, UploadedFile } from '../../models/meme.models';
 
@@ -17,6 +21,10 @@ import { MemeTextArea, UploadedFile } from '../../models/meme.models';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
+    InputNumberModule,
+    ColorPickerModule,
+    CardModule,
     DraggableTextAreaComponent
   ],
   templateUrl: './media-preview.component.html',
@@ -34,6 +42,71 @@ export class MediaPreviewComponent {
   readonly mediaElement = viewChild<ElementRef<HTMLImageElement | HTMLVideoElement>>('mediaElement');
   
   readonly containerBounds = signal<DOMRect>(new DOMRect(0, 0, 600, 400));
+  
+  readonly fontOptions = [
+    { label: 'Arial', value: 'Arial, sans-serif' },
+    { label: 'Helvetica', value: 'Helvetica, sans-serif' },
+    { label: 'Times New Roman', value: 'Times New Roman, serif' },
+    { label: 'Georgia', value: 'Georgia, serif' },
+    { label: 'Verdana', value: 'Verdana, sans-serif' },
+    { label: 'Courier New', value: 'Courier New, monospace' },
+    { label: 'Impact', value: 'Impact, sans-serif' },
+    { label: 'Comic Sans MS', value: 'Comic Sans MS, cursive' }
+  ];
+  
+  readonly selectedTextArea = computed(() => {
+    const selectedId = this.selectedTextAreaId();
+    return selectedId ? this.textAreas().find(ta => ta.id === selectedId) : null;
+  });
+  
+  readonly propertiesPanelPosition = computed(() => {
+    const textArea = this.selectedTextArea();
+    const bounds = this.containerBounds();
+    
+    if (!textArea) return { x: 0, y: 0 };
+    
+    // Panel dimensions
+    const panelWidth = 320;
+    const panelHeight = 400;
+    
+    // Get container element to calculate its position
+    const containerElement = this.container()?.nativeElement;
+    const containerRect = containerElement?.getBoundingClientRect();
+    
+    // Calculate absolute position relative to the viewport
+    const containerOffsetX = containerRect?.left || 0;
+    const containerOffsetY = containerRect?.top || 0;
+    
+    // Position panel to the right of the text area by default
+    let x = containerOffsetX + textArea.x + textArea.width + 10;
+    
+    // If panel would extend beyond the right edge of the viewport,
+    // position it to the left of the text area instead
+    if (x + panelWidth > window.innerWidth) {
+      x = containerOffsetX + textArea.x - panelWidth - 10;
+    }
+    
+    // If positioning to the left would place it outside the left edge,
+    // position it at the right edge of the container
+    if (x < 0) {
+      x = containerOffsetX + bounds.width + 10;
+    }
+    
+    // Position panel vertically aligned with text area top
+    let y = containerOffsetY + textArea.y;
+    
+    // Adjust if panel would extend beyond viewport bottom
+    if (y + panelHeight > window.innerHeight) {
+      y = Math.max(0, window.innerHeight - panelHeight - 10);
+    }
+    
+    // Ensure panel doesn't go above viewport top
+    if (y < 0) {
+      y = 10;
+    }
+    
+    return { x, y };
+  });
   
   readonly containerSize = computed(() => {
     const file = this.uploadedFile();
@@ -81,14 +154,25 @@ export class MediaPreviewComponent {
   onContainerClick(event: MouseEvent): void {
     if (!this.uploadedFile()) return;
     
-    // Only add text area if clicking on empty space
     const target = event.target as HTMLElement;
-    if (target === this.container().nativeElement || 
-        target.classList.contains('media-element') ||
-        target.classList.contains('add-text-button')) {
+    
+    // Check if the click is on a draggable text area or its children
+    const isTextAreaClick = target.closest('app-draggable-text-area') !== null;
+    
+    // Check if the click is on the properties panel
+    const isPropertiesPanelClick = target.closest('.properties-panel') !== null;
+    
+    // Check if the click is on the container background or media element
+    const isBackgroundClick = target === this.container().nativeElement || 
+                             target.classList.contains('media-element') ||
+                             target.classList.contains('placeholder-area') ||
+                             target.classList.contains('placeholder-content');
+    
+    if (isBackgroundClick && !isTextAreaClick && !isPropertiesPanelClick) {
+      // Only add text area if clicking on empty background space
       this.addTextArea(event);
-    } else {
-      // Deselect current text area
+    } else if (!isTextAreaClick && !isPropertiesPanelClick && !target.classList.contains('add-text-button')) {
+      // Only deselect if clicking outside text areas, properties panel, and not on the add button
       this.onTextAreaSelect.emit(null);
     }
   }
@@ -135,6 +219,14 @@ export class MediaPreviewComponent {
 
   onSelectTextArea(textAreaId: string): void {
     this.onTextAreaSelect.emit(textAreaId);
+  }
+
+  updateTextAreaProperty(property: keyof MemeTextArea, value: any): void {
+    const selectedTextArea = this.selectedTextArea();
+    if (!selectedTextArea) return;
+    
+    const updatedTextArea = { ...selectedTextArea, [property]: value };
+    this.onTextAreaChange(updatedTextArea);
   }
 
   formatFileSize(bytes?: number): string {

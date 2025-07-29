@@ -7,12 +7,7 @@ import {
   computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { ColorPickerModule } from 'primeng/colorpicker';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { MemeTextArea } from '../../models/meme.models';
 
 export interface DragData {
@@ -29,12 +24,7 @@ export interface DragData {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    InputTextModule,
-    InputNumberModule,
-    ColorPickerModule,
-    ButtonModule,
-    CardModule
+    ButtonModule
   ],
   templateUrl: './draggable-text-area.component.html',
   styleUrl: './draggable-text-area.component.scss'
@@ -54,35 +44,6 @@ export class DraggableTextAreaComponent {
   private isResizing = false;
   private resizeDirection = '';
   private dragData: DragData | null = null;
-  
-  readonly fontOptions = [
-    { label: 'Arial', value: 'Arial, sans-serif' },
-    { label: 'Helvetica', value: 'Helvetica, sans-serif' },
-    { label: 'Times New Roman', value: 'Times New Roman, serif' },
-    { label: 'Georgia', value: 'Georgia, serif' },
-    { label: 'Verdana', value: 'Verdana, sans-serif' },
-    { label: 'Courier New', value: 'Courier New, monospace' },
-    { label: 'Impact', value: 'Impact, sans-serif' },
-    { label: 'Comic Sans MS', value: 'Comic Sans MS, cursive' }
-  ];
-  
-  readonly propertiesPanelPosition = computed(() => {
-    const textArea = this.textArea();
-    const bounds = this.containerBounds();
-    
-    // Position panel to the right of the text area, or left if not enough space
-    let x = textArea.x + textArea.width + 10;
-    if (x + 320 > bounds.width) {
-      x = Math.max(10, textArea.x - 330);
-    }
-    
-    let y = textArea.y;
-    if (y + 400 > bounds.height) {
-      y = Math.max(10, bounds.height - 410);
-    }
-    
-    return { x, y };
-  });
 
   constructor() {
     // No initialization needed
@@ -151,7 +112,10 @@ export class DraggableTextAreaComponent {
     }
   };
 
-  private onMouseUp = (): void => {
+  private onMouseUp = (event: MouseEvent): void => {
+    // Prevent the mouse up event from bubbling to parent elements
+    event.stopPropagation();
+    
     this.isDragging = false;
     this.isResizing = false;
     this.dragData = null;

@@ -41,6 +41,97 @@
   }
 </div>
 
+<!-- Properties panel - positioned relative to container but can extend beyond -->
+@if (selectedTextArea()) {
+  <div class="properties-panel" 
+       [style.left.px]="propertiesPanelPosition().x"
+       [style.top.px]="propertiesPanelPosition().y">
+    <p-card header="Text Area Properties" 
+            styleClass="w-80 shadow-lg">
+      
+      <div class="space-y-4">
+        <!-- Font Family -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Font Family</label>
+          <select [ngModel]="selectedTextArea()!.fontFamily"
+                  (ngModelChange)="updateTextAreaProperty('fontFamily', $event)"
+                  class="w-full p-2 border border-gray-300 rounded">
+            @for (font of fontOptions; track font.value) {
+              <option [value]="font.value">{{ font.label }}</option>
+            }
+          </select>
+        </div>
+        
+        <!-- Font Size -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Font Size</label>
+          <p-inputNumber [ngModel]="selectedTextArea()!.fontSize"
+                       (ngModelChange)="updateTextAreaProperty('fontSize', $event)"
+                       [min]="8"
+                       [max]="72"
+                       suffix="px"
+                       styleClass="w-full" />
+        </div>
+        
+        <!-- Font Color -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Font Color</label>
+          <p-colorPicker [ngModel]="selectedTextArea()!.fontColor"
+                       (ngModelChange)="updateTextAreaProperty('fontColor', $event)"
+                       format="hex"
+                       styleClass="w-full" />
+        </div>
+        
+        <!-- Max Length -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Max Characters</label>
+          <p-inputNumber [ngModel]="selectedTextArea()!.maxLength"
+                       (ngModelChange)="updateTextAreaProperty('maxLength', $event)"
+                       [min]="1"
+                       [max]="500"
+                       styleClass="w-full" />
+        </div>
+        
+        <!-- Position & Size -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-sm font-medium mb-1">X</label>
+            <p-inputNumber [ngModel]="selectedTextArea()!.x"
+                         (ngModelChange)="updateTextAreaProperty('x', $event)"
+                         [min]="0"
+                         suffix="px"
+                         styleClass="w-full" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Y</label>
+            <p-inputNumber [ngModel]="selectedTextArea()!.y"
+                         (ngModelChange)="updateTextAreaProperty('y', $event)"
+                         [min]="0"
+                         suffix="px"
+                         styleClass="w-full" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Width</label>
+            <p-inputNumber [ngModel]="selectedTextArea()!.width"
+                         (ngModelChange)="updateTextAreaProperty('width', $event)"
+                         [min]="50"
+                         suffix="px"
+                         styleClass="w-full" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Height</label>
+            <p-inputNumber [ngModel]="selectedTextArea()!.height"
+                         (ngModelChange)="updateTextAreaProperty('height', $event)"
+                         [min]="20"
+                         suffix="px"
+                         styleClass="w-full" />
+          </div>
+        </div>
+      </div>
+    </p-card>
+  </div>
+}
+
 <!-- Media info -->
 @if (uploadedFile()) {
 <div class="media-info mt-4 p-3 bg-gray-50 rounded-lg">
