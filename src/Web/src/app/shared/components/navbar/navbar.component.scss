@@ -7,3 +7,19 @@
 .container {
   max-width: 1200px;
 }
+
+/* Ensure navigation links are properly hidden on smaller screens */
+.navbar nav.hidden {
+  display: none !important;
+}
+
+/* Ensure hamburger menu is properly hidden on larger screens */
+@media (min-width: 768px) {
+  .navbar nav.hidden {
+    display: flex !important;
+  }
+  
+  .navbar .md\:hidden {
+    display: none !important;
+  }
+}
