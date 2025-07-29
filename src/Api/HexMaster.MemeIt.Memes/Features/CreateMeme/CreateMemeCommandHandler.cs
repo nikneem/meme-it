@@ -1,5 +1,6 @@
 using HexMaster.MemeIt.Memes.Abstractions;
 using HexMaster.MemeIt.Memes.Models;
+using HexMaster.MemeIt.Memes.Models.Factories;
 using Localizr.Core.Abstractions.Cqrs;
 
 namespace HexMaster.MemeIt.Memes.Features.CreateMeme;
@@ -20,26 +21,19 @@ public class CreateMemeCommandHandler : ICommandHandler<CreateMemeCommand, Creat
         // Move blob from upload to memes container
         var sourceImageUrl = await _blobStorageService.MoveFromUploadToMemesAsync(command.SourceImage, cancellationToken);
 
-        // Create meme template
-        var memeTemplate = new MemeTemplate
-        {
-            Name = command.Name,
-            Description = command.Description,
-            SourceImageUrl = sourceImageUrl,
-            SourceWidth = command.SourceWidth,
-            SourceHeight = command.SourceHeight,
-            TextAreas = command.TextAreas.Select(ta => new TextArea
-            {
-                X = ta.X,
-                Y = ta.Y,
-                Width = ta.Width,
-                Height = ta.Height,
-                FontFamily = ta.FontFamily,
-                FontSize = ta.FontSize,
-                FontColor = ta.FontColor,
-                MaxLength = ta.MaxLength
-            }).ToArray()
-        };
+        // Create text areas using the domain model constructor
+        var textAreas = command.TextAreas.Select(ta => new TextArea(
+            ta.X, ta.Y, ta.Width, ta.Height, ta.FontFamily, ta.FontSize, 
+            ta.FontColor, ta.FontBold, ta.MaxLength, ta.BorderThickness, ta.BorderColor)).ToArray();
+
+        // Create meme template using the domain model constructor
+        var memeTemplate = new MemeTemplate(
+            command.Name,
+            command.Description,
+            sourceImageUrl,
+            command.SourceWidth,
+            command.SourceHeight,
+            textAreas);
 
         var createdTemplate = await _repository.CreateAsync(memeTemplate, cancellationToken);
         

@@ -3,6 +3,6 @@ namespace HexMaster.MemeIt.Memes.DataTransferObjects;
 public record MemeTemplateListResponse(
     string Id,
     string Name,
-    string Description,
+    string? Description,
     string SourceImageUrl,
-    DateTime CreatedAt);
+    DateTimeOffset CreatedAt);

@@ -206,6 +206,7 @@ export class CreateMemePageComponent {
   private async uploadFileToStorage(file: File): Promise<void> {
     try {
       // Step 1: Get SAS token for upload
+      debugger;
       const sasResponse = await this.memeApiService.generateUploadSas({
         fileName: file.name,
         contentType: file.type

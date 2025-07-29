@@ -88,7 +88,7 @@ public static class MemeEndpoints
         var command = new CreateMemeCommand
         {
             Name = request.Name,
-            Description = request.Description ?? string.Empty,
+            Description = request.Description,
             SourceImage = request.SourceImage,
             SourceWidth = request.SourceWidth,
             SourceHeight = request.SourceHeight,
@@ -140,7 +140,7 @@ public static class MemeEndpoints
         {
             Id = id,
             Name = request.Name,
-            Description = request.Description ?? string.Empty,
+            Description = request.Description,
             TextAreas = request.TextAreas ?? Array.Empty<MemeTextArea>()
         };
 

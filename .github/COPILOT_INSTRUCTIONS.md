@@ -10,6 +10,12 @@ MemeIt is an online multiplayer party game written in C# using the latest langua
 - **State Management:** Microsoft Orleans (for game state)
 - **Testing:** xUnit (with plain .NET Assert statements)
 
+## Code Standards and Best Practices
+- **DateTime Usage:** Always use `DateTimeOffset` instead of `DateTime` for all date/time operations. This ensures proper timezone handling and consistency across the application.
+- Use async/await throughout the codebase.
+- Follow modern C# conventions and use the latest language features.
+- Implement proper error handling and validation.
+
 ## Running the Project Locally
 To run the full application locally, use the Aspire App Host. This will start all required services and configure inter-service communication automatically:
 

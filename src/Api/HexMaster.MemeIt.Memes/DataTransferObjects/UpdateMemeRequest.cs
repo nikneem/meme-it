@@ -2,5 +2,5 @@ namespace HexMaster.MemeIt.Memes.DataTransferObjects;
 
 public record UpdateMemeRequest(
     string Name,
-    string Description,
+    string? Description,
     MemeTextArea[] TextAreas);

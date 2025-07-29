@@ -24,19 +24,19 @@ public class UpdateMemeCommandHandler : ICommandHandler<UpdateMemeCommand, Opera
             return new OperationResult<MemeTemplateResponse>(false, null);
         }
 
-        existingTemplate.Name = command.Name;
-        existingTemplate.Description = command.Description;
-        existingTemplate.TextAreas = command.TextAreas.Select(ta => new TextArea
-        {
-            X = ta.X,
-            Y = ta.Y,
-            Width = ta.Width,
-            Height = ta.Height,
-            FontFamily = ta.FontFamily,
-            FontSize = ta.FontSize,
-            FontColor = ta.FontColor,
-            MaxLength = ta.MaxLength
-        }).ToArray();
+        // Create text areas using the domain model constructor
+        var textAreas = command.TextAreas.Select(ta => new TextArea(
+            ta.X, ta.Y, ta.Width, ta.Height, ta.FontFamily, ta.FontSize, 
+            ta.FontColor, ta.FontBold, ta.MaxLength, ta.BorderThickness, ta.BorderColor)).ToArray();
+
+        // Update the template using the domain model update method
+        existingTemplate.Update(
+            command.Name,
+            command.Description,
+            existingTemplate.SourceImageUrl, // Keep the same source image URL
+            existingTemplate.SourceWidth,    // Keep the same dimensions
+            existingTemplate.SourceHeight,
+            textAreas);
 
         var updatedTemplate = await _repository.UpdateAsync(existingTemplate, cancellationToken);
         

@@ -9,7 +9,7 @@ namespace HexMaster.MemeIt.Memes.DataTransferObjects;
 // boxes are used to overlay text on the source medium when the meme is created.
 public record CreateMemeRequest(
     string Name,
-    string Description,
+    string? Description,
     string SourceImage, 
     int SourceWidth, 
     int SourceHeight, 

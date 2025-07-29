@@ -10,6 +10,7 @@ using HexMaster.MemeIt.Memes.Features.UpdateMeme;
 using HexMaster.MemeIt.Memes.Repositories;
 using HexMaster.MemeIt.Memes.Services;
 using Localizr.Core.Abstractions.Cqrs;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,8 +22,16 @@ public static class AppHostBuilderExtensions
     public static IHostApplicationBuilder AddMemesServices(this IHostApplicationBuilder builder)
     {
         // Register Aspire integrations for Azure services
-        builder.AddAzureBlobClient("BlobConnection");
-        builder.AddAzureCosmosContainer("MemeTemplates");
+        builder.AddAzureBlobServiceClient("BlobConnection");
+        
+        // Configure CosmosDB with camelCase serialization
+        builder.AddAzureCosmosContainer("MemeTemplates", configureClientOptions: options =>
+        {
+            options.SerializerOptions = new CosmosSerializationOptions
+            {
+                PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+            };
+        });
 
         // Register repositories and services
         builder.Services.AddScoped<IMemeTemplateRepository, MemeTemplateRepository>();

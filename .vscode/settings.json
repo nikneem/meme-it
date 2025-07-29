@@ -1,7 +1,8 @@
 {
     "github.copilot.chat.agent.terminal.allowList": {
         "dotnet build": true,
-        "dotnet test": true
+        "dotnet test": true,
+        "cd": true
     },
     "chat.agent.maxRequests": 50
 }
