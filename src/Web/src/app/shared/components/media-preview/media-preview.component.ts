@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { CardModule } from 'primeng/card';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { DraggableTextAreaComponent } from '../draggable-text-area/draggable-text-area.component';
 import { MemeTextArea, UploadedFile } from '../../models/meme.models';
 
@@ -25,6 +26,7 @@ import { MemeTextArea, UploadedFile } from '../../models/meme.models';
     InputNumberModule,
     ColorPickerModule,
     CardModule,
+    ToggleSwitchModule,
     DraggableTextAreaComponent
   ],
   templateUrl: './media-preview.component.html',
@@ -168,11 +170,17 @@ export class MediaPreviewComponent {
                              target.classList.contains('placeholder-area') ||
                              target.classList.contains('placeholder-content');
     
-    if (isBackgroundClick && !isTextAreaClick && !isPropertiesPanelClick) {
-      // Only add text area if clicking on empty background space
-      this.addTextArea(event);
+    // Only handle background clicks (not on text areas, properties panel, or add button)
+    if (isBackgroundClick && !isTextAreaClick && !isPropertiesPanelClick && !target.classList.contains('add-text-button')) {
+      if (this.selectedTextAreaId()) {
+        // If a text area is selected, deselect it
+        this.onTextAreaSelect.emit(null);
+      } else {
+        // If no text area is selected, add a new one
+        this.addTextArea(event);
+      }
     } else if (!isTextAreaClick && !isPropertiesPanelClick && !target.classList.contains('add-text-button')) {
-      // Only deselect if clicking outside text areas, properties panel, and not on the add button
+      // Deselect if clicking on other non-interactive elements
       this.onTextAreaSelect.emit(null);
     }
   }
@@ -193,7 +201,10 @@ export class MediaPreviewComponent {
       fontSize: 24,
       fontFamily: 'Arial, sans-serif',
       fontColor: '#FFFFFF',
-      maxLength: 100
+      fontBold: false,
+      maxLength: 100,
+      borderThickness: 2,
+      borderColor: '#000000'
     };
     
     const updatedTextAreas = [...this.textAreas(), newTextArea];

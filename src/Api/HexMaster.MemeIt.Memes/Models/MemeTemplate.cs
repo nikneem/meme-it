@@ -61,6 +61,15 @@ public class TextArea
     [JsonPropertyName("fontColor")]
     public string FontColor { get; set; } = string.Empty;
     
+    [JsonPropertyName("fontBold")]
+    public bool FontBold { get; set; }
+    
     [JsonPropertyName("maxLength")]
     public int MaxLength { get; set; }
+    
+    [JsonPropertyName("borderThickness")]
+    public int BorderThickness { get; set; }
+    
+    [JsonPropertyName("borderColor")]
+    public string BorderColor { get; set; } = string.Empty;
 }

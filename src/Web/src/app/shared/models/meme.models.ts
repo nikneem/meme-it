@@ -7,7 +7,10 @@ export interface MemeTextArea {
   fontFamily: string;
   fontSize: number;
   fontColor: string;
+  fontBold: boolean;
   maxLength: number;
+  borderThickness: number;
+  borderColor: string;
 }
 
 export interface MemeTextAreaDto {
@@ -18,7 +21,10 @@ export interface MemeTextAreaDto {
   fontFamily: string;
   fontSize: number;
   fontColor: string;
+  fontBold: boolean;
   maxLength: number;
+  borderThickness: number;
+  borderColor: string;
 }
 
 export interface MediaDimensions {

@@ -177,7 +177,10 @@ export class CreateMemePageComponent {
           fontFamily: ta.fontFamily,
           fontSize: ta.fontSize,
           fontColor: ta.fontColor,
-          maxLength: ta.maxLength
+          fontBold: ta.fontBold,
+          maxLength: ta.maxLength,
+          borderThickness: ta.borderThickness,
+          borderColor: ta.borderColor
         } as MemeTextAreaDto))
       };
 

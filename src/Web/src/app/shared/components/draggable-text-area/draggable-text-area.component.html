@@ -11,8 +11,11 @@
   <div class="text-area-preview"
        [style.font-family]="textArea().fontFamily"
        [style.font-size.px]="textArea().fontSize"
-       [style.color]="textArea().fontColor">
-    {{textArea().x}}Sample Text
+       [style.color]="textArea().fontColor"
+       [style.font-weight]="textArea().fontBold ? 'bold' : 'normal'"
+       [style.-webkit-text-stroke-width.px]="textArea().borderThickness"
+       [style.-webkit-text-stroke-color]="textArea().borderColor">
+    Sample Text
   </div>
   
   <!-- Resize handles -->

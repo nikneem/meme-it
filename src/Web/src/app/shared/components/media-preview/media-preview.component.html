@@ -81,6 +81,33 @@
                        format="hex"
                        styleClass="w-full" />
         </div>
+
+        <!-- Font Bold -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Bold Font</label>
+          <p-toggleswitch [ngModel]="selectedTextArea()!.fontBold"
+                        (ngModelChange)="updateTextAreaProperty('fontBold', $event)" />
+        </div>
+
+        <!-- Text Border -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-sm font-medium mb-1">Border Thickness</label>
+            <p-inputNumber [ngModel]="selectedTextArea()!.borderThickness"
+                         (ngModelChange)="updateTextAreaProperty('borderThickness', $event)"
+                         [min]="0"
+                         [max]="10"
+                         suffix="px"
+                         styleClass="w-full" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Border Color</label>
+            <p-colorPicker [ngModel]="selectedTextArea()!.borderColor"
+                         (ngModelChange)="updateTextAreaProperty('borderColor', $event)"
+                         format="hex"
+                         styleClass="w-full" />
+          </div>
+        </div>
         
         <!-- Max Length -->
         <div>
