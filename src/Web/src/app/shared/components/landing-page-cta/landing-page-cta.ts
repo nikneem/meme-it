@@ -1,14 +1,22 @@
 import { Component } from '@angular/core';
-import { Card } from "primeng/card";
+import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'meme-landing-page-cta',
-  imports: [Card, ButtonModule, RouterModule],
+  imports: [ButtonModule],
   templateUrl: './landing-page-cta.html',
   styleUrl: './landing-page-cta.scss'
 })
 export class LandingPageCta {
+  
+  constructor(private router: Router) {}
 
+  onCreateGame() {
+    this.router.navigate(['/game']);
+  }
+
+  onJoinGame() {
+    this.router.navigate(['/game']);
+  }
 }

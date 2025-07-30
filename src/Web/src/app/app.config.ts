@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { routes } from './app.routes';
+import { appStoreConfig } from './store/app.store';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
@@ -41,6 +42,7 @@ export const appConfig: ApplicationConfig = {
         }
       }
     }),
+    ...appStoreConfig,
     importProvidersFrom(
       TranslateModule.forRoot({
         loader: {

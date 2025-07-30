@@ -47,14 +47,16 @@
                     label="Create Game" 
                     icon="pi pi-plus"
                     size="large"
-                    class="primary-btn"></button>
+                    class="primary-btn"
+                    (click)="onCreateGame()"></button>
             <button pButton 
                     label="Join Game" 
                     icon="pi pi-sign-in"
                     size="large"
                     severity="secondary"
                     [outlined]="true"
-                    class="secondary-btn"></button>
+                    class="secondary-btn"
+                    (click)="onJoinGame()"></button>
         </div>
 
         <p class="tagline">

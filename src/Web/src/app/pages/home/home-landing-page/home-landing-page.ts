@@ -1,18 +1,18 @@
 import { Component } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
 import { AppTitleComponent } from "../../../shared/components/app-title-component/app-title-component";
-import { CardModule } from 'primeng/card';
 import { LandingPageCta } from "../../../shared/components/landing-page-cta/landing-page-cta";
 import { LandingPageShinyBackground } from "../../../shared/components/landing-page-shiny-background/landing-page-shiny-background";
+import { GameFlowComponent, FunFeaturesComponent, PartyOccasionsComponent } from '../components';
 
 @Component({
   selector: 'meme-home-landing-page',
   imports: [
-    TranslateModule,
     AppTitleComponent, 
-    CardModule, 
     LandingPageCta, 
-    LandingPageShinyBackground
+    LandingPageShinyBackground,
+    GameFlowComponent,
+    FunFeaturesComponent,
+    PartyOccasionsComponent
   ],
   templateUrl: './home-landing-page.html',
   styleUrl: './home-landing-page.scss'

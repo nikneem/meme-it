@@ -1,107 +1,26 @@
-.welcome-section {
-  text-align: center;
-  margin: 3rem 0;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 1rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.welcome-title {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #4f46e5;
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.welcome-description {
-  font-size: 1.25rem;
-  color: #6b7280;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-.features-section {
-  margin: 4rem 0;
-  padding: 2rem;
-}
-
-.features-title {
-  text-align: center;
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 3rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.feature-card {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 2rem;
-  border-radius: 1rem;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.feature-icon {
-  width: 4rem;
-  height: 4rem;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  border-radius: 50%;
+.page-container {
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  font-size: 1.5rem;
+  padding: 2rem;
+  gap: 4rem;
+  position: relative;
+  z-index: 1;
 }
 
-.feature-card h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 1rem;
-}
-
-.feature-card p {
-  color: #6b7280;
-  line-height: 1.6;
-}
-
+/* Responsive design */
 @media (max-width: 768px) {
-  .welcome-title {
-    font-size: 2rem;
-  }
-  
-  .features-title {
-    font-size: 2rem;
-  }
-  
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .welcome-section,
-  .features-section {
+  .page-container {
     padding: 1rem;
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    gap: 2rem;
+    padding: 0.5rem;
   }
 }

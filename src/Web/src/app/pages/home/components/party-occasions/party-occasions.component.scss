@@ -1,0 +1,77 @@
+/* Party ready section */
+.party-ready {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 3rem 2rem;
+  border-radius: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.party-content h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2rem;
+}
+
+.party-scenarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.scenario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 1rem;
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.3s ease;
+}
+
+.scenario:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.scenario strong {
+  color: #4f46e5;
+  font-weight: 700;
+}
+
+.scenario span {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .party-ready {
+    padding: 2rem 1.5rem;
+    margin: 0 1rem;
+  }
+  
+  .party-scenarios {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .party-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .party-ready {
+    padding: 1.5rem 1rem;
+  }
+}
