@@ -118,3 +118,16 @@ export const setPlayerReadyStatusFailure = createAction(
   '[Game] Set Player Ready Status Failure',
   props<{ error: string }>()
 );
+
+// Start Game Actions
+export const startGame = createAction('[Game] Start Game');
+
+export const startGameSuccess = createAction(
+  '[Game] Start Game Success',
+  props<{ game: Game }>()
+);
+
+export const startGameFailure = createAction(
+  '[Game] Start Game Failure',
+  props<{ error: string }>()
+);

@@ -19,7 +19,7 @@ import {
   selectPlayerCount,
   selectGameCode 
 } from '../../store/game/game.selectors';
-import { leaveGame, setPlayerReadyStatus } from '../../store/game/game.actions';
+import { leaveGame, setPlayerReadyStatus, startGame } from '../../store/game/game.actions';
 import { BreakoutGameComponent } from '../../shared/components/breakout-game/breakout-game.component';
 
 @Component({
@@ -87,8 +87,8 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   }
 
   startGame() {
-    // Dispatch action to start game
-    console.log('Starting game...');
+    // Dispatch action to start game - effect will get game code and player ID from state
+    this.store.dispatch(startGame());
   }
 
   toggleReady() {

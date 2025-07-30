@@ -277,4 +277,40 @@ export class GameEffects {
     ),
     { dispatch: false }
   );
+
+  // Start Game Effects
+  startGame$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.startGame),
+      withLatestFrom(
+        this.store.select(selectCurrentGame),
+        this.store.select(selectCurrentPlayer)
+      ),
+      switchMap(([action, game, player]) => {
+        if (!game || !player) {
+          return of(GameActions.startGameFailure({ error: 'Game or player not found' }));
+        }
+        
+        return this.gameService.startGame(game.code, player.id).pipe(
+          map((updatedGame) => 
+            GameActions.startGameSuccess({ game: updatedGame })
+          ),
+          catchError((error) =>
+            of(GameActions.startGameFailure({ error: error.message || 'Failed to start game' }))
+          )
+        );
+      })
+    )
+  );
+
+  startGameSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.startGameSuccess),
+      tap(({ game }) => {
+        // Navigate to game or update state as needed
+        console.log('Game started successfully:', game);
+      })
+    ),
+    { dispatch: false }
+  );
 }

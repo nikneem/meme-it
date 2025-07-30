@@ -198,5 +198,25 @@ export const gameReducer = createReducer(
     ...state,
     isLoading: false,
     error
+  })),
+
+  // Start Game
+  on(GameActions.startGame, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(GameActions.startGameSuccess, (state, { game }) => ({
+    ...state,
+    currentGame: game,
+    isLoading: false,
+    error: null
+  })),
+
+  on(GameActions.startGameFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
   }))
 );

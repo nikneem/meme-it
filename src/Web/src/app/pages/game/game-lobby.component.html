@@ -54,17 +54,32 @@
       <!-- Host Actions -->
       <p-card header="Game Actions" styleClass="bg-white/10 backdrop-blur-sm border-0" *ngIf="isHost$ | async">
         <div class="space-y-4">
-          <p class="text-white">As the host, you can start the game when all players are ready.</p>
-          <p-button 
-            label="Start Game" 
-            icon="pi pi-play"
-            styleClass="w-full"
-            [disabled]="!(canStartGame$ | async)"
-            (onClick)="startGame()">
-          </p-button>
-          <p class="text-sm text-white/70" *ngIf="!(canStartGame$ | async)">
-            All players must be ready and at least 2 players are required to start.
-          </p>
+          <!-- Host Ready Status -->
+          <div class="space-y-2">
+            <p class="text-white">Mark yourself as ready when you're prepared to play.</p>
+            <p-button 
+              [label]="(currentPlayer$ | async)?.isReady ? 'Ready!' : 'Mark as Ready'"
+              [icon]="(currentPlayer$ | async)?.isReady ? 'pi pi-check' : 'pi pi-clock'"
+              styleClass="w-full"
+              [severity]="(currentPlayer$ | async)?.isReady ? 'success' : 'secondary'"
+              (onClick)="toggleReady()">
+            </p-button>
+          </div>
+          
+          <!-- Start Game Action -->
+          <div class="space-y-2">
+            <p class="text-white">Start the game when all players are ready.</p>
+            <p-button 
+              label="Start Game" 
+              icon="pi pi-play"
+              styleClass="w-full"
+              [disabled]="!(canStartGame$ | async)"
+              (onClick)="startGame()">
+            </p-button>
+            <p class="text-sm text-white/70" *ngIf="!(canStartGame$ | async)">
+              All players must be ready and at least 2 players are required to start.
+            </p>
+          </div>
         </div>
       </p-card>
 

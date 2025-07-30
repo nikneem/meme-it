@@ -85,6 +85,13 @@ export class GameService {
     );
   }
 
+  startGame(gameCode: string, playerId: string): Observable<Game> {
+    const request = { playerId, gameCode };
+    return this.http.post<BackendGameDetailsResponse>(`${this.baseUrl}/start`, request).pipe(
+      map(response => this.mapBackendGameResponseToGame(response))
+    );
+  }
+
   getGame(gameId: string, playerId?: string): Observable<Game> {
     const url = playerId ? `${this.baseUrl}/${gameId}?playerId=${playerId}` : `${this.baseUrl}/${gameId}`;
     return this.http.get<BackendGameDetailsResponse>(url).pipe(
