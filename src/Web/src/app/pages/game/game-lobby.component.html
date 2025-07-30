@@ -11,6 +11,20 @@
         <p class="text-white text-lg mb-2">Game Code</p>
         <p class="text-3xl font-mono font-bold text-yellow-300">{{ gameCode }}</p>
       </div>
+      
+      <!-- WebPubSub Connection Status -->
+      <div class="mt-4" *ngIf="webPubSubConnectionStatus$ | async as connectionStatus">
+        <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1">
+          <div class="w-2 h-2 rounded-full" 
+               [class]="connectionStatus.isConnected ? 'bg-green-500' : 
+                       connectionStatus.isConnecting ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'">
+          </div>
+          <span class="text-white text-sm">
+            {{ connectionStatus.isConnected ? 'Real-time Connected' : 
+               connectionStatus.isConnecting ? 'Connecting...' : 'Disconnected' }}
+          </span>
+        </div>
+      </div>
     </div>
 
     <!-- Game Info -->

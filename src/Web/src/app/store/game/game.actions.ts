@@ -61,6 +61,61 @@ export const playerLeft = createAction(
   props<{ playerId: string }>()
 );
 
+// WebPubSub Connection Actions
+export const connectToWebPubSub = createAction(
+  '[Game] Connect to WebPubSub',
+  props<{ gameCode: string; playerId: string }>()
+);
+
+export const connectToWebPubSubSuccess = createAction(
+  '[Game] Connect to WebPubSub Success',
+  props<{ connectionUrl: string; gameCode: string }>()
+);
+
+export const connectToWebPubSubFailure = createAction(
+  '[Game] Connect to WebPubSub Failure',
+  props<{ error: string }>()
+);
+
+export const disconnectFromWebPubSub = createAction(
+  '[Game] Disconnect from WebPubSub'
+);
+
+export const ensureWebPubSubConnection = createAction(
+  '[Game] Ensure WebPubSub Connection'
+);
+
+// Real-time message received actions
+export const realTimeGameUpdated = createAction(
+  '[Game] Real-time Game Updated',
+  props<{ game: any }>()
+);
+
+export const realTimePlayerJoined = createAction(
+  '[Game] Real-time Player Joined',
+  props<{ player: Player }>()
+);
+
+export const realTimePlayerLeft = createAction(
+  '[Game] Real-time Player Left',
+  props<{ playerId: string }>()
+);
+
+export const realTimePlayerReadyStatusChanged = createAction(
+  '[Game] Real-time Player Ready Status Changed',
+  props<{ playerId: string; isReady: boolean }>()
+);
+
+export const realTimePlayerKicked = createAction(
+  '[Game] Real-time Player Kicked',
+  props<{ playerId: string }>()
+);
+
+export const realTimeGameStarted = createAction(
+  '[Game] Real-time Game Started',
+  props<{ game: Game }>()
+);
+
 // Game State Persistence Actions
 export const restoreGameState = createAction('[Game] Restore Game State');
 

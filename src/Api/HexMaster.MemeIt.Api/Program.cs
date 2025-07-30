@@ -20,6 +20,9 @@ builder.AddServiceDefaults();
 builder.AddGamesServices();
 builder.AddMemesServices();
 
+// Add WebPubSub service
+builder.Services.AddSingleton<HexMaster.MemeIt.Core.Services.IWebPubSubService, HexMaster.MemeIt.Core.Services.WebPubSubService>();
+
 // Configure JSON serialization globally for the application
 builder.Services.Configure<JsonOptions>(options =>
 {

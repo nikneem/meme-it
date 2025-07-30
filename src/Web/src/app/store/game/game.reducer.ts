@@ -109,6 +109,107 @@ export const gameReducer = createReducer(
     };
   }),
 
+  // WebPubSub Connection States
+  on(GameActions.connectToWebPubSub, (state) => ({
+    ...state,
+    isLoading: true
+  })),
+
+  on(GameActions.connectToWebPubSubSuccess, (state) => ({
+    ...state,
+    isLoading: false,
+    error: null
+  })),
+
+  on(GameActions.connectToWebPubSubFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
+  })),
+
+  // Real-time Updates
+  on(GameActions.realTimeGameUpdated, (state, { game }) => ({
+    ...state,
+    currentGame: game
+  })),
+
+  on(GameActions.realTimePlayerJoined, (state, { player }) => {
+    if (!state.currentGame) return state;
+    
+    // Check if player already exists to avoid duplicates
+    const playerExists = state.currentGame.players.some(p => p.id === player.id);
+    if (playerExists) return state;
+    
+    return {
+      ...state,
+      currentGame: {
+        ...state.currentGame,
+        players: [...state.currentGame.players, player],
+        currentPlayers: state.currentGame.currentPlayers + 1
+      }
+    };
+  }),
+
+  on(GameActions.realTimePlayerLeft, (state, { playerId }) => {
+    if (!state.currentGame) return state;
+    
+    return {
+      ...state,
+      currentGame: {
+        ...state.currentGame,
+        players: state.currentGame.players.filter(p => p.id !== playerId),
+        currentPlayers: state.currentGame.currentPlayers - 1
+      }
+    };
+  }),
+
+  on(GameActions.realTimePlayerReadyStatusChanged, (state, { playerId, isReady }) => {
+    if (!state.currentGame) return state;
+    
+    return {
+      ...state,
+      currentGame: {
+        ...state.currentGame,
+        players: state.currentGame.players.map(player =>
+          player.id === playerId ? { ...player, isReady } : player
+        )
+      },
+      // Update current player if it's them
+      currentPlayer: state.currentPlayer?.id === playerId 
+        ? { ...state.currentPlayer, isReady }
+        : state.currentPlayer
+    };
+  }),
+
+  on(GameActions.realTimePlayerKicked, (state, { playerId }) => {
+    if (!state.currentGame) return state;
+    
+    // If the current player was kicked, redirect them
+    if (state.currentPlayer?.id === playerId) {
+      return {
+        ...state,
+        currentGame: null,
+        currentPlayer: null,
+        isInLobby: false,
+        error: 'You have been kicked from the game'
+      };
+    }
+    
+    return {
+      ...state,
+      currentGame: {
+        ...state.currentGame,
+        players: state.currentGame.players.filter(p => p.id !== playerId),
+        currentPlayers: state.currentGame.currentPlayers - 1
+      }
+    };
+  }),
+
+  on(GameActions.realTimeGameStarted, (state, { game }) => ({
+    ...state,
+    currentGame: game
+  })),
+
   // Game State Persistence
   on(GameActions.restoreGameState, (state) => ({
     ...state,

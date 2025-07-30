@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis" Version="9.4.0" />
+    <PackageReference Include="Azure.Messaging.WebPubSub" Version="1.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
     <PackageReference Include="Microsoft.Orleans.Clustering.Redis" Version="9.2.1" />
     <PackageReference Include="Microsoft.Orleans.Persistence.Redis" Version="9.2.1" />
@@ -20,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Aspire\HexMaster.MemeIt.Aspire\HexMaster.MemeIt.Aspire.ServiceDefaults\HexMaster.MemeIt.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Core\HexMaster.MemeIt.Core.csproj" />
     <ProjectReference Include="..\HexMaster.MemeIt.Games\HexMaster.MemeIt.Games.csproj" />
     <ProjectReference Include="..\HexMaster.MemeIt.Memes\HexMaster.MemeIt.Memes.csproj" />
   </ItemGroup>

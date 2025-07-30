@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Router } from '@angular/router';
-import { catchError, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, map, switchMap, tap, withLatestFrom, takeUntil, filter } from 'rxjs/operators';
+import { of, Subject, EMPTY } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { GameService } from '../../services/game.service';
 import { GamePersistenceService } from '../../shared/services/game-persistence.service';
+import { WebPubSubService, GameUpdateMessageTypes, GameUpdateMessage } from '../../services/web-pubsub.service';
+import { WebPubSubConnectionService } from '../../services/web-pubsub-connection.service';
 import { selectCurrentGame, selectCurrentPlayer, selectIsInLobby } from './game.selectors';
 import * as GameActions from './game.actions';
 
@@ -17,6 +19,10 @@ export class GameEffects {
   private router = inject(Router);
   private store = inject(Store);
   private gamePersistenceService = inject(GamePersistenceService);
+  private webPubSubService = inject(WebPubSubService);
+  private webPubSubConnectionService = inject(WebPubSubConnectionService);
+
+  private destroy$ = new Subject<void>();
 
   createGame$ = createEffect(() =>
     this.actions$.pipe(
@@ -172,6 +178,23 @@ export class GameEffects {
       })
     ),
     { dispatch: false }
+  );
+
+  // Auto-connect to WebPubSub when game state is restored
+  refreshGameStateFromServerSuccessWebPubSub$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.refreshGameStateFromServerSuccess),
+      map(({ game, player }) => {
+        if (game && player) {
+          return GameActions.connectToWebPubSub({ 
+            gameCode: game.code, 
+            playerId: player.id 
+          });
+        }
+        return { type: 'NO_ACTION' };
+      }),
+      filter(action => action.type !== 'NO_ACTION')
+    )
   );
 
   // Game State Verification (kept for backward compatibility or manual verification)
@@ -348,4 +371,187 @@ export class GameEffects {
     ),
     { dispatch: false }
   );
+
+  // WebPubSub Connection Effects
+  connectToWebPubSub$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.connectToWebPubSub),
+      switchMap(({ gameCode, playerId }) =>
+        this.webPubSubConnectionService.getConnectionUrl(gameCode, playerId).pipe(
+          switchMap((connectionResponse) => {
+            if (connectionResponse.isSuccess) {
+              return this.webPubSubService.connect(connectionResponse.connectionUrl, gameCode).then(() => {
+                // Start listening to messages after successful connection
+                this.startListeningToMessages();
+                return GameActions.connectToWebPubSubSuccess({ 
+                  connectionUrl: connectionResponse.connectionUrl, 
+                  gameCode 
+                });
+              }).catch((error) => {
+                return GameActions.connectToWebPubSubFailure({ 
+                  error: error.message || 'Failed to connect to WebPubSub' 
+                });
+              });
+            } else {
+              return of(GameActions.connectToWebPubSubFailure({ 
+                error: connectionResponse.errorMessage || 'Failed to get connection URL' 
+              }));
+            }
+          }),
+          catchError((error) =>
+            of(GameActions.connectToWebPubSubFailure({ 
+              error: error.message || 'Failed to connect to WebPubSub' 
+            }))
+          )
+        )
+      )
+    )
+  );
+
+  connectToWebPubSubSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.connectToWebPubSubSuccess),
+      tap(({ gameCode }) => {
+        console.log('Successfully connected to WebPubSub for game:', gameCode);
+      })
+    ),
+    { dispatch: false }
+  );
+
+  // Ensure WebPubSub connection when manually triggered
+  ensureWebPubSubConnection$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.ensureWebPubSubConnection),
+      withLatestFrom(
+        this.store.select(selectCurrentGame),
+        this.store.select(selectCurrentPlayer)
+      ),
+      switchMap(([action, game, player]) => {
+        if (game && player && !this.webPubSubService.isConnected()) {
+          console.log('Ensuring WebPubSub connection for game:', game.code, 'player:', player.id);
+          return of(GameActions.connectToWebPubSub({ 
+            gameCode: game.code, 
+            playerId: player.id 
+          }));
+        }
+        return EMPTY;
+      })
+    )
+  );
+
+  // Auto-connect to WebPubSub when joining a game successfully
+  joinGameSuccessWebPubSub$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.joinGameSuccess),
+      withLatestFrom(
+        this.store.select(selectCurrentPlayer)
+      ),
+      map(([{ game }, player]) => {
+        if (game && player) {
+          return GameActions.connectToWebPubSub({ 
+            gameCode: game.code, 
+            playerId: player.id 
+          });
+        }
+        return { type: 'NO_ACTION' };
+      }),
+      filter(action => action.type !== 'NO_ACTION')
+    )
+  );
+
+  // Auto-connect to WebPubSub when creating a game successfully
+  createGameSuccessWebPubSub$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.createGameSuccess),
+      withLatestFrom(
+        this.store.select(selectCurrentPlayer)
+      ),
+      map(([{ game }, player]) => {
+        if (game && player) {
+          return GameActions.connectToWebPubSub({ 
+            gameCode: game.code, 
+            playerId: player.id 
+          });
+        }
+        return { type: 'NO_ACTION' };
+      }),
+      filter(action => action.type !== 'NO_ACTION')
+    )
+  );
+
+  // Disconnect from WebPubSub when leaving game
+  leaveGameWebPubSub$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.leaveGame),
+      tap(() => {
+        this.webPubSubService.disconnect();
+        this.destroy$.next();
+      })
+    ),
+    { dispatch: false }
+  );
+
+  // Real-time message effects
+  realTimeGameUpdated$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.realTimeGameUpdated),
+      map(({ game }) => GameActions.gameUpdated({ game }))
+    )
+  );
+
+  realTimePlayerJoined$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.realTimePlayerJoined),
+      map(({ player }) => GameActions.playerJoined({ player }))
+    )
+  );
+
+  realTimePlayerLeft$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.realTimePlayerLeft),
+      map(({ playerId }) => GameActions.playerLeft({ playerId }))
+    )
+  );
+
+  private startListeningToMessages(): void {
+    this.webPubSubService.messages$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((message: GameUpdateMessage) => {
+        console.log('Received real-time message:', message);
+        
+        switch (message.type) {
+          case GameUpdateMessageTypes.GAME_UPDATED:
+            this.store.dispatch(GameActions.realTimeGameUpdated({ game: message.data }));
+            break;
+            
+          case GameUpdateMessageTypes.PLAYER_JOINED:
+            this.store.dispatch(GameActions.realTimePlayerJoined({ player: message.data }));
+            break;
+            
+          case GameUpdateMessageTypes.PLAYER_LEFT:
+            this.store.dispatch(GameActions.realTimePlayerLeft({ playerId: message.data.playerId || message.data.id }));
+            break;
+            
+          case GameUpdateMessageTypes.PLAYER_READY_STATUS_CHANGED:
+            this.store.dispatch(GameActions.realTimePlayerReadyStatusChanged({ 
+              playerId: message.data.playerId || message.data.id, 
+              isReady: message.data.isReady 
+            }));
+            break;
+            
+          case GameUpdateMessageTypes.PLAYER_KICKED:
+            this.store.dispatch(GameActions.realTimePlayerKicked({ 
+              playerId: message.data.playerId || message.data.id 
+            }));
+            break;
+            
+          case GameUpdateMessageTypes.GAME_STARTED:
+            this.store.dispatch(GameActions.realTimeGameStarted({ game: message.data }));
+            break;
+            
+          default:
+            console.log('Unknown message type:', message.type);
+        }
+      });
+  }
 }

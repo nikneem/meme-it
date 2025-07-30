@@ -1,5 +1,6 @@
 ﻿using HexMaster.MemeIt.Core;
 using HexMaster.MemeIt.Core.DataTransferObjects;
+using HexMaster.MemeIt.Core.Services;
 using HexMaster.MemeIt.Games.DataTransferObjects;
 using HexMaster.MemeIt.Games.Features;
 using HexMaster.MemeIt.Games.Features.CreateGame;
@@ -65,10 +66,16 @@ public static class GameEndpoints
             .WithName(nameof(SetPlayerReadyStatus))
             .Produces(StatusCodes.Status200OK)
             .ProducesValidationProblem();
+
+        group.MapPost("/connection", GetWebPubSubConnection)
+            .WithName(nameof(GetWebPubSubConnection))
+            .Produces(StatusCodes.Status200OK)
+            .ProducesValidationProblem();
     }
     private static async Task<IResult> LeaveGame(
         [FromBody] LeaveGameRequest requestPayload,
-        [FromServices] ICommandHandler<LeaveGameCommand, object> handler)
+        [FromServices] ICommandHandler<LeaveGameCommand, object> handler,
+        [FromServices] IWebPubSubService webPubSubService)
     {
         var playerId = requestPayload?.PlayerId;
         var gameCode = requestPayload?.GameCode;
@@ -81,7 +88,18 @@ public static class GameEndpoints
             });
         }
         var command = new LeaveGameCommand(playerId, gameCode);
-       var responseObject= await handler.HandleAsync(command, CancellationToken.None);
+        var responseObject = await handler.HandleAsync(command, CancellationToken.None);
+
+        // Broadcast player left event
+        var playerLeftMessage = new GameUpdateMessage
+        {
+            Type = GameUpdateMessageTypes.PlayerLeft,
+            Data = new { playerId },
+            GameCode = gameCode
+        };
+        
+        _ = Task.Run(async () => await webPubSubService.BroadcastToGameAsync(gameCode, playerLeftMessage));
+        
         return Results.Ok(responseObject);
     }
 
@@ -182,7 +200,8 @@ public static class GameEndpoints
     }
     private static async Task<IResult> JoinGame(
         [FromBody] JoinGameRequest requestPayload,
-        [FromServices] ICommandHandler<JoinGameCommand, GameDetailsResponse> handler)
+        [FromServices] ICommandHandler<JoinGameCommand, GameDetailsResponse> handler,
+        [FromServices] IWebPubSubService webPubSubService)
     {
 
         if (string.IsNullOrWhiteSpace(requestPayload.PlayerName))
@@ -200,6 +219,34 @@ public static class GameEndpoints
             Password = requestPayload.Password
         };
         var response = await handler.HandleAsync(command, CancellationToken.None);
+
+        // Broadcast player joined event
+        if (response != null)
+        {
+            var joinedPlayer = response.Players?.FirstOrDefault(p => p.Name == requestPayload.PlayerName);
+            if (joinedPlayer != null)
+            {
+                var playerJoinedMessage = new GameUpdateMessage
+                {
+                    Type = GameUpdateMessageTypes.PlayerJoined,
+                    Data = joinedPlayer,
+                    GameCode = requestPayload.GameCode
+                };
+                
+                _ = Task.Run(async () => await webPubSubService.BroadcastToGameAsync(requestPayload.GameCode, playerJoinedMessage));
+            }
+
+            // Also broadcast full game update
+            var gameUpdatedMessage = new GameUpdateMessage
+            {
+                Type = GameUpdateMessageTypes.GameUpdated,
+                Data = response,
+                GameCode = requestPayload.GameCode
+            };
+            
+            _ = Task.Run(async () => await webPubSubService.BroadcastToGameAsync(requestPayload.GameCode, gameUpdatedMessage));
+        }
+
         return Results.Ok(response);
     }
 
@@ -220,5 +267,52 @@ public static class GameEndpoints
         var command = new SetPlayerReadyStatusCommand(playerId, gameCode, requestPayload?.IsReady ?? false);
         var response = await handler.HandleAsync(command, CancellationToken.None);
         return Results.Ok(response);
+    }
+
+    private static async Task<IResult> GetWebPubSubConnection(
+        [FromBody] WebPubSubConnectionRequest requestPayload,
+        [FromServices] IQueryHandler<GetGameQuery, OperationResult<GameDetailsResponse>> gameHandler,
+        [FromServices] HexMaster.MemeIt.Core.Services.IWebPubSubService webPubSubService)
+    {
+        var gameCode = requestPayload?.GameCode;
+        var playerId = requestPayload?.PlayerId;
+
+        if (string.IsNullOrWhiteSpace(gameCode) || string.IsNullOrWhiteSpace(playerId))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { "GameCode", ["GameCode is required."] },
+                { "PlayerId", ["PlayerId is required."] }
+            });
+        }
+
+        try
+        {
+            // First validate that the player exists in the game
+            var query = new GetGameQuery(gameCode, playerId);
+            var gameResult = await gameHandler.HandleAsync(query, CancellationToken.None);
+
+            if (!gameResult.Success || gameResult.ResponseObject?.Players?.Any(p => p.Id == playerId) != true)
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    { "Player", ["Player is not part of this game."] }
+                });
+            }
+
+            // Generate Web PubSub connection URL
+            var connectionResponse = await webPubSubService.GenerateConnectionUrlAsync(gameCode, playerId);
+
+            if (!connectionResponse.IsSuccess)
+            {
+                return Results.Problem(connectionResponse.ErrorMessage ?? "Failed to generate Web PubSub connection", statusCode: 500);
+            }
+
+            return Results.Ok(connectionResponse);
+        }
+        catch (Exception)
+        {
+            return Results.Problem("Failed to generate Web PubSub connection", statusCode: 500);
+        }
     }
 }

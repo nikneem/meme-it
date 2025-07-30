@@ -13,6 +13,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 
 import { Game, Player } from '../../store/game/game.models';
+import { WebPubSubService, WebSocketConnectionStatus } from '../../services/web-pubsub.service';
 import { 
   selectCurrentGame, 
   selectCurrentPlayer, 
@@ -21,7 +22,7 @@ import {
   selectPlayerCount,
   selectGameCode 
 } from '../../store/game/game.selectors';
-import { leaveGame, setPlayerReadyStatus, startGame, kickPlayer } from '../../store/game/game.actions';
+import { leaveGame, setPlayerReadyStatus, startGame, kickPlayer, ensureWebPubSubConnection } from '../../store/game/game.actions';
 import { BreakoutGameComponent } from '../../shared/components/breakout-game/breakout-game.component';
 
 @Component({
@@ -50,18 +51,27 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   canStartGame$: Observable<boolean>;
   playerCount$: Observable<{ current: number; max: number }>;
   gameCode$: Observable<string | undefined>;
+  
+  // WebPubSub connection status
+  webPubSubConnectionStatus$: Observable<WebSocketConnectionStatus>;
 
-  constructor(private store: Store, private confirmationService: ConfirmationService) {
+  constructor(
+    private store: Store, 
+    private confirmationService: ConfirmationService,
+    private webPubSubService: WebPubSubService
+  ) {
     this.currentGame$ = this.store.select(selectCurrentGame);
     this.currentPlayer$ = this.store.select(selectCurrentPlayer);
     this.isHost$ = this.store.select(selectIsHost);
     this.canStartGame$ = this.store.select(selectCanStartGame);
     this.playerCount$ = this.store.select(selectPlayerCount);
     this.gameCode$ = this.store.select(selectGameCode);
+    this.webPubSubConnectionStatus$ = this.webPubSubService.connectionStatus$;
   }
 
   ngOnInit() {
-    // Set up any real-time connections here (SignalR, WebSocket, etc.)
+    // Ensure WebPubSub connection when entering the lobby
+    this.store.dispatch(ensureWebPubSubConnection());
   }
 
   ngOnDestroy() {
