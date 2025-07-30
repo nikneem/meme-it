@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, take } from 'rxjs/operators';
 
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -92,7 +92,9 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   }
 
   toggleReady() {
-    this.currentPlayer$.pipe(takeUntil(this.destroy$)).subscribe(player => {
+    this.currentPlayer$.pipe(
+      take(1) // Only take the current value once
+    ).subscribe((player: Player | null) => {
       if (player) {
         this.store.dispatch(setPlayerReadyStatus({ isReady: !player.isReady }));
       }
