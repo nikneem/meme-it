@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http.Json;
 using Scalar.AspNetCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using HexMaster.MemeIt.Core.ExtensionMethods;
+using HexMaster.MemeIt.Aspire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +23,7 @@ builder.AddGamesServices();
 builder.AddMemesServices();
 
 // Add WebPubSub service
-builder.Services.AddSingleton<HexMaster.MemeIt.Core.Services.IWebPubSubService, HexMaster.MemeIt.Core.Services.WebPubSubService>();
+builder.Services.AddWebPubSubServices();
 
 // Configure JSON serialization globally for the application
 builder.Services.Configure<JsonOptions>(options =>

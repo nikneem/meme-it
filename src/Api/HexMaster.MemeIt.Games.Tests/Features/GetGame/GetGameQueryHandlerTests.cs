@@ -172,8 +172,8 @@ public class GetGameQueryHandlerTests
         Assert.NotNull(result.ResponseObject);
         Assert.Equal("ABC123", result.ResponseObject.GameCode);
         Assert.Equal(2, result.ResponseObject.Players.Count);
-        Assert.Contains("Alice", result.ResponseObject.Players);
-        Assert.Contains("Bob", result.ResponseObject.Players);
+        Assert.Contains(result.ResponseObject.Players, p => p.Name == "Alice");
+        Assert.Contains(result.ResponseObject.Players, p => p.Name == "Bob");
         Assert.True(result.ResponseObject.IsPasswordProtected);
         Assert.Equal(8, result.ResponseObject.Settings.MaxPlayers);
         Assert.Equal(3, result.ResponseObject.Settings.NumberOfRounds);

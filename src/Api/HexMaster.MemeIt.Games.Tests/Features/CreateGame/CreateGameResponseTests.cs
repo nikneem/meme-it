@@ -1,4 +1,5 @@
 using HexMaster.MemeIt.Games.Features.CreateGame;
+using HexMaster.MemeIt.Games.Features;
 
 namespace HexMaster.MemeIt.Games.Tests.Features.CreateGame;
 
@@ -9,9 +10,14 @@ public class CreateGameResponseTests
     {
         // Arrange
         var gameCode = "ABC123";
+        var status = "Waiting";
+        var players = new List<PlayerResponse>();
+        var playerId = "player1";
+        var isPasswordProtected = false;
+        var settings = new GameSettingsResponse(4, 3, "Movies");
 
         // Act
-        var response = new CreateGameResponse(gameCode);
+        var response = new CreateGameResponse(gameCode, status, players, playerId, isPasswordProtected, settings);
 
         // Assert
         Assert.Equal(gameCode, response.GameCode);
@@ -24,8 +30,15 @@ public class CreateGameResponseTests
     [InlineData("A1B2C3")]
     public void CreateGameResponse_AcceptsVariousGameCodes(string gameCode)
     {
+        // Arrange
+        var status = "Waiting";
+        var players = new List<PlayerResponse>();
+        var playerId = "player1";
+        var isPasswordProtected = false;
+        var settings = new GameSettingsResponse(4, 3, "Movies");
+
         // Act
-        var response = new CreateGameResponse(gameCode);
+        var response = new CreateGameResponse(gameCode, status, players, playerId, isPasswordProtected, settings);
 
         // Assert
         Assert.Equal(gameCode, response.GameCode);
@@ -36,9 +49,14 @@ public class CreateGameResponseTests
     {
         // Arrange
         var gameCode = "";
+        var status = "Waiting";
+        var players = new List<PlayerResponse>();
+        var playerId = "player1";
+        var isPasswordProtected = false;
+        var settings = new GameSettingsResponse(4, 3, "Movies");
 
         // Act
-        var response = new CreateGameResponse(gameCode);
+        var response = new CreateGameResponse(gameCode, status, players, playerId, isPasswordProtected, settings);
 
         // Assert
         Assert.Equal(gameCode, response.GameCode);
@@ -48,9 +66,15 @@ public class CreateGameResponseTests
     public void CreateGameResponse_IsRecord_SupportsEquality()
     {
         // Arrange
-        var response1 = new CreateGameResponse("ABC123");
-        var response2 = new CreateGameResponse("ABC123");
-        var response3 = new CreateGameResponse("XYZ789");
+        var status = "Waiting";
+        var players = new List<PlayerResponse>();
+        var playerId = "player1";
+        var isPasswordProtected = false;
+        var settings = new GameSettingsResponse(4, 3, "Movies");
+        
+        var response1 = new CreateGameResponse("ABC123", status, players, playerId, isPasswordProtected, settings);
+        var response2 = new CreateGameResponse("ABC123", status, players, playerId, isPasswordProtected, settings);
+        var response3 = new CreateGameResponse("XYZ789", status, players, playerId, isPasswordProtected, settings);
 
         // Act & Assert
         Assert.Equal(response1, response2);
@@ -62,7 +86,12 @@ public class CreateGameResponseTests
     {
         // Arrange
         var gameCode = "ABC123";
-        var response = new CreateGameResponse(gameCode);
+        var status = "Waiting";
+        var players = new List<PlayerResponse>();
+        var playerId = "player1";
+        var isPasswordProtected = false;
+        var settings = new GameSettingsResponse(4, 3, "Movies");
+        var response = new CreateGameResponse(gameCode, status, players, playerId, isPasswordProtected, settings);
 
         // Act
         var extractedGameCode = response.GameCode;
@@ -76,7 +105,12 @@ public class CreateGameResponseTests
     {
         // Arrange
         var gameCode = "ABC123";
-        var response = new CreateGameResponse(gameCode);
+        var status = "Waiting";
+        var players = new List<PlayerResponse>();
+        var playerId = "player1";
+        var isPasswordProtected = false;
+        var settings = new GameSettingsResponse(4, 3, "Movies");
+        var response = new CreateGameResponse(gameCode, status, players, playerId, isPasswordProtected, settings);
 
         // Act
         var toString = response.ToString();

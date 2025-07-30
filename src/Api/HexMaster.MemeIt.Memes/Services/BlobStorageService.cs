@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using HexMaster.MemeIt.Memes.Abstractions;
+using HexMaster.MemeIt.Aspire;
 
 namespace HexMaster.MemeIt.Memes.Services;
 

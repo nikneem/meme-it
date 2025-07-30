@@ -10,16 +10,24 @@ public class GameDetailsResponseTests
     {
         // Arrange
         var gameCode = "ABC123";
-        var players = new List<string> { "Alice", "Bob" };
+        var status = "Waiting";
+        var players = new List<PlayerResponse> 
+        { 
+            new PlayerResponse("player1", "Alice", false), 
+            new PlayerResponse("player2", "Bob", false) 
+        };
+        var playerId = "player1";
         var isPasswordProtected = true;
         var settings = new GameSettingsResponse(8, 3, "Movies");
 
         // Act
-        var response = new GameDetailsResponse(gameCode, players, isPasswordProtected, settings);
+        var response = new GameDetailsResponse(gameCode, status, players, playerId, isPasswordProtected, settings);
 
         // Assert
         Assert.Equal(gameCode, response.GameCode);
+        Assert.Equal(status, response.Status);
         Assert.Equal(players, response.Players);
+        Assert.Equal(playerId, response.PlayerId);
         Assert.Equal(isPasswordProtected, response.IsPasswordProtected);
         Assert.Equal(settings, response.Settings);
     }
@@ -48,14 +56,14 @@ public class GameDetailsResponseTests
         };
 
         // Act
-        var response = GameDetailsResponse.FromGameState(gameState);
+        var response = GameDetailsResponse.FromGameState(gameState, "player1");
 
         // Assert
         Assert.Equal("TEST123", response.GameCode);
         Assert.Equal(3, response.Players.Count);
-        Assert.Contains("Alice", response.Players);
-        Assert.Contains("Bob", response.Players);
-        Assert.Contains("Charlie", response.Players);
+        Assert.Contains(response.Players, p => p.Name == "Alice");
+        Assert.Contains(response.Players, p => p.Name == "Bob");
+        Assert.Contains(response.Players, p => p.Name == "Charlie");
         Assert.True(response.IsPasswordProtected);
         Assert.Equal(6, response.Settings.MaxPlayers);
         Assert.Equal(4, response.Settings.NumberOfRounds);
@@ -75,7 +83,7 @@ public class GameDetailsResponseTests
         };
 
         // Act
-        var response = GameDetailsResponse.FromGameState(gameState);
+        var response = GameDetailsResponse.FromGameState(gameState, "player1");
 
         // Assert
         Assert.False(response.IsPasswordProtected);
@@ -94,7 +102,7 @@ public class GameDetailsResponseTests
         };
 
         // Act
-        var response = GameDetailsResponse.FromGameState(gameState);
+        var response = GameDetailsResponse.FromGameState(gameState, "player1");
 
         // Assert
         Assert.False(response.IsPasswordProtected);
@@ -113,7 +121,7 @@ public class GameDetailsResponseTests
         };
 
         // Act
-        var response = GameDetailsResponse.FromGameState(gameState);
+        var response = GameDetailsResponse.FromGameState(gameState, "player1");
 
         // Assert
         Assert.False(response.IsPasswordProtected);
@@ -131,7 +139,7 @@ public class GameDetailsResponseTests
         };
 
         // Act
-        var response = GameDetailsResponse.FromGameState(gameState);
+        var response = GameDetailsResponse.FromGameState(gameState, "player1");
 
         // Assert
         Assert.Empty(response.Players);
@@ -154,16 +162,16 @@ public class GameDetailsResponseTests
         };
 
         // Act
-        var response = GameDetailsResponse.FromGameState(gameState);
+        var response = GameDetailsResponse.FromGameState(gameState, "player1");
 
         // Assert
         Assert.Equal(3, response.Players.Count);
-        Assert.Contains("Name1", response.Players);
-        Assert.Contains("Name2", response.Players);
-        Assert.Contains("Name3", response.Players);
-        Assert.DoesNotContain("id1", response.Players);
-        Assert.DoesNotContain("id2", response.Players);
-        Assert.DoesNotContain("id3", response.Players);
+        Assert.Contains(response.Players, p => p.Name == "Name1");
+        Assert.Contains(response.Players, p => p.Name == "Name2");
+        Assert.Contains(response.Players, p => p.Name == "Name3");
+        Assert.DoesNotContain(response.Players, p => p.Name == "id1");
+        Assert.DoesNotContain(response.Players, p => p.Name == "id2");
+        Assert.DoesNotContain(response.Players, p => p.Name == "id3");
     }
 }
 

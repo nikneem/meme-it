@@ -58,8 +58,8 @@ public class JoinGameCommandHandlerTests
         Assert.NotNull(result);
         Assert.Equal("ABC123", result.GameCode);
         Assert.Equal(2, result.Players.Count);
-        Assert.Contains("ExistingPlayer", result.Players);
-        Assert.Contains("TestPlayer", result.Players);
+        Assert.Contains(result.Players, p => p.Name == "ExistingPlayer");
+        Assert.Contains(result.Players, p => p.Name == "TestPlayer");
     }
 
     [Fact]
@@ -171,8 +171,8 @@ public class JoinGameCommandHandlerTests
         // Assert
         Assert.Equal("ABC123", result.GameCode);
         Assert.Equal(2, result.Players.Count);
-        Assert.Contains("Player1", result.Players);
-        Assert.Contains("NewPlayer", result.Players);
+        Assert.Contains(result.Players, p => p.Name == "Player1");
+        Assert.Contains(result.Players, p => p.Name == "NewPlayer");
         Assert.True(result.IsPasswordProtected);
         Assert.Equal(8, result.Settings.MaxPlayers);
         Assert.Equal(3, result.Settings.NumberOfRounds);
@@ -250,7 +250,7 @@ public class JoinGameCommandHandlerTests
 
         // Assert
         Assert.Equal(gameCode, result.GameCode);
-        Assert.Contains(playerName, result.Players);
+        Assert.Contains(result.Players, p => p.Name == playerName);
     }
 
     [Fact]

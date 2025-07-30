@@ -8,6 +8,7 @@ using HexMaster.MemeIt.Memes.Features.ListMemes;
 using HexMaster.MemeIt.Memes.Features.GenerateUploadSas;
 using HexMaster.MemeIt.Memes.Features.UpdateMeme;
 using HexMaster.MemeIt.Memes.Repositories;
+using HexMaster.MemeIt.Aspire;
 using HexMaster.MemeIt.Memes.Services;
 using Localizr.Core.Abstractions.Cqrs;
 using Microsoft.Azure.Cosmos;

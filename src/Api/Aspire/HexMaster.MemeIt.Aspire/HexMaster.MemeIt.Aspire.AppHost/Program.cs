@@ -2,6 +2,7 @@ using Aspire.Hosting;
 using Azure.Provisioning;
 using Azure.Provisioning.Storage;
 using Microsoft.Extensions.Hosting;
+using HexMaster.MemeIt.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 

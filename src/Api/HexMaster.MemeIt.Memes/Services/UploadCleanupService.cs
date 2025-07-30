@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using HexMaster.MemeIt.Aspire;
 
 namespace HexMaster.MemeIt.Memes.Services;
 
