@@ -1,0 +1,156 @@
+.game-join-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.game-join-card {
+  width: 100%;
+  max-width: 500px;
+}
+
+.card-header {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+
+  h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+}
+
+.tabs-container {
+  background: white;
+}
+
+.tab-buttons {
+  display: flex;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background: #f9fafb;
+    color: #374151;
+  }
+
+  &.active {
+    color: #667eea;
+    border-bottom: 2px solid #667eea;
+    background: #f8faff;
+  }
+}
+
+.tab-content {
+  padding: 2rem 1.5rem;
+}
+
+.game-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+  }
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.create-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.join-button {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+}
+
+.error-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 6px;
+  color: #e53e3e;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+:host ::ng-deep {
+  .p-card .p-card-content {
+    padding: 0;
+  }
+
+  .p-password input {
+    width: 100%;
+  }
+
+  .p-button.p-button-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .game-join-container {
+    padding: 0.5rem;
+  }
+
+  .tab-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .card-header {
+    padding: 1.5rem;
+
+    h1 {
+      font-size: 2rem;
+    }
+  }
+
+  .tab-button {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+}

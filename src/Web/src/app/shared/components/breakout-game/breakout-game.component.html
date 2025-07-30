@@ -1,0 +1,57 @@
+<div class="breakout-container" [class.game-active]="gameRunning">
+  <div class="game-header">
+    <div class="score-display">
+      <span class="score-label">Score:</span>
+      <span class="score-value" [class.animate]="scoreAnimation">{{ score }}</span>
+    </div>
+    <div class="lives-display">
+      <span class="lives-label">Lives:</span>
+      <div class="lives-hearts">
+        <i class="pi pi-heart-fill" *ngFor="let life of getLivesArray()"></i>
+        <i class="pi pi-heart" *ngFor="let life of getEmptyLivesArray()"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="canvas-container" #canvasContainer>
+    <canvas 
+      #gameCanvas
+      [width]="canvasWidth" 
+      [height]="canvasHeight"
+      (mousemove)="onMouseMove($event)"
+      (touchmove)="onTouchMove($event)"
+      (touchstart)="onTouchStart($event)"
+      (click)="onCanvasClick()"
+      [class.cursor-pointer]="!gameRunning">
+    </canvas>
+    
+    <div class="game-overlay" *ngIf="!gameRunning">
+      <div class="overlay-content">
+        <h3 *ngIf="!gameStarted" class="game-title">🎮 Breakout Game</h3>
+        <h3 *ngIf="gameStarted && gameOver && score === 0" class="game-over">Game Over!</h3>
+        <h3 *ngIf="gameStarted && gameOver && bricks.length === 0" class="game-won">You Win! 🎉</h3>
+        <h3 *ngIf="gameStarted && gameOver && score > 0 && bricks.length > 0" class="game-over">Game Over!<br>Final Score: {{ score }}</h3>
+        
+        <p *ngIf="!gameStarted" class="game-instructions">
+          Break all the bricks to win!<br>
+          Catch power-ups for bonus points! 💎<br>
+          <span class="device-instructions">
+            <strong>Desktop:</strong> Move mouse to control paddle<br>
+            <strong>Mobile:</strong> Touch and drag to control paddle
+          </span>
+        </p>
+        
+        <p-button 
+          [label]="!gameStarted ? 'Start Game' : 'Play Again'"
+          icon="pi pi-play"
+          (onClick)="startGame()"
+          class="start-button">
+        </p-button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="game-info">
+    <p class="info-text">Enjoy this mini-game while waiting for other players to join!</p>
+  </div>
+</div>

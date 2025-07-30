@@ -1,0 +1,126 @@
+<div class="game-join-container">
+  <div class="game-join-card">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <h1>🎮 Join the Fun!</h1>
+          <p>Create a new game or join an existing one</p>
+        </div>
+      </ng-template>
+
+      <div class="tabs-container">
+        <div class="tab-buttons">
+          <button 
+            type="button"
+            class="tab-button"
+            [class.active]="activeTab === 'create'"
+            (click)="activeTab = 'create'"
+          >
+            <i class="pi pi-plus"></i>
+            Create Game
+          </button>
+          <button 
+            type="button"
+            class="tab-button"
+            [class.active]="activeTab === 'join'"
+            (click)="activeTab = 'join'"
+          >
+            <i class="pi pi-sign-in"></i>
+            Join Game
+          </button>
+        </div>
+
+        <div class="tab-content" *ngIf="activeTab === 'create'">
+          <form [formGroup]="createGameForm" (ngSubmit)="onCreateGame()" class="game-form">
+            <div class="form-field">
+              <label for="createPlayerName">Your Name</label>
+              <input 
+                pInputText 
+                id="createPlayerName" 
+                formControlName="playerName"
+                class="w-full"
+                placeholder="Enter your name"
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="createPassword">Password (Optional)</label>
+              <p-password 
+                id="createPassword" 
+                formControlName="password"
+                [feedback]="false"
+                [toggleMask]="true"
+                class="w-full"
+                placeholder="Leave empty for a public game"
+              />
+              <small class="text-muted">Leave empty for a public game</small>
+            </div>
+
+            <p-button 
+              type="submit"
+              label="Create Game"
+              icon="pi pi-plus"
+              [loading]="isLoading$ | async"
+              [disabled]="createGameForm.invalid"
+              class="w-full create-button"
+              size="large"
+            />
+          </form>
+        </div>
+
+        <div class="tab-content" *ngIf="activeTab === 'join'">
+          <form [formGroup]="joinGameForm" (ngSubmit)="onJoinGame()" class="game-form">
+            <div class="form-field">
+              <label for="joinGameCode">Game Code</label>
+              <input 
+                pInputText 
+                id="joinGameCode" 
+                formControlName="gameCode"
+                class="w-full"
+                placeholder="Enter game code"
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="joinPlayerName">Your Name</label>
+              <input 
+                pInputText 
+                id="joinPlayerName" 
+                formControlName="playerName"
+                class="w-full"
+                placeholder="Enter your name"
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="joinPassword">Password (if required)</label>
+              <p-password 
+                id="joinPassword" 
+                formControlName="password"
+                [feedback]="false"
+                [toggleMask]="true"
+                class="w-full"
+                placeholder="Enter password if required"
+              />
+            </div>
+
+            <p-button 
+              type="submit"
+              label="Join Game"
+              icon="pi pi-sign-in"
+              [loading]="isLoading$ | async"
+              [disabled]="joinGameForm.invalid"
+              class="w-full join-button"
+              size="large"
+            />
+          </form>
+        </div>
+      </div>
+
+      <div *ngIf="error$ | async as error" class="error-message">
+        <i class="pi pi-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+    </p-card>
+  </div>
+</div>
