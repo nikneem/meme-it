@@ -15,7 +15,7 @@ public class SasTokenService : ISasTokenService
 
     public async Task<string> GenerateUploadSasTokenAsync(string fileName, CancellationToken cancellationToken = default)
     {
-        var uploadContainer = _blobServiceClient.GetBlobContainerClient(MemesConstants.UploadContainerName);
+        var uploadContainer = _blobServiceClient.GetBlobContainerClient(AspireConstants.BlobUploadContainerName);
         
         // Ensure upload container exists
         await uploadContainer.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
@@ -31,7 +31,7 @@ public class SasTokenService : ISasTokenService
         // Create SAS token that expires in 10 minutes
         var sasBuilder = new BlobSasBuilder
         {
-            BlobContainerName = MemesConstants.UploadContainerName,
+            BlobContainerName = AspireConstants.BlobUploadContainerName,
             BlobName = fileName,
             Resource = "b", // blob
             ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(10)

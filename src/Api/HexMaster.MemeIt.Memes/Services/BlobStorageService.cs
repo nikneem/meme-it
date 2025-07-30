@@ -14,8 +14,8 @@ public class BlobStorageService : IBlobStorageService
 
     public async Task<string> MoveFromUploadToMemesAsync(string sourceFileName, CancellationToken cancellationToken = default)
     {
-        var uploadContainer = _blobServiceClient.GetBlobContainerClient(MemesConstants.UploadContainerName);
-        var memesContainer = _blobServiceClient.GetBlobContainerClient(MemesConstants.MemesContainerName);
+        var uploadContainer = _blobServiceClient.GetBlobContainerClient(AspireConstants.BlobUploadContainerName);
+        var memesContainer = _blobServiceClient.GetBlobContainerClient(AspireConstants.BlobMemesContainerName);
         
         // Ensure containers exist
         await uploadContainer.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
@@ -47,7 +47,7 @@ public class BlobStorageService : IBlobStorageService
 
     public async Task DeleteFromMemesAsync(string fileName, CancellationToken cancellationToken = default)
     {
-        var memesContainer = _blobServiceClient.GetBlobContainerClient(MemesConstants.MemesContainerName);
+        var memesContainer = _blobServiceClient.GetBlobContainerClient(AspireConstants.BlobMemesContainerName);
         var blobClient = memesContainer.GetBlobClient(Path.GetFileName(fileName));
         await blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
     }

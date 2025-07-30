@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Aspire\AspireConstants.cs" Link="AspireConstants.cs" />
+    <Compile Include="..\SolutionItems\AspireConstants.cs" Link="AspireConstants.cs" />
   </ItemGroup>
 
   <ItemGroup>

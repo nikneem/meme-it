@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\AspireConstants.cs" Link="AspireConstants.cs" />
+    <Compile Include="..\..\..\SolutionItems\AspireConstants.cs" Link="AspireConstants.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,9 +28,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\HexMaster.MemeIt.Api\HexMaster.MemeIt.Api.csproj" />
   </ItemGroup>
-
-  <Target Name="InstallFrontendPackages" BeforeTargets="Build">
-    <Exec Command="npm install" WorkingDirectory="../../../../Web" Condition="!Exists('../../../../Web/node_modules')" />
-  </Target>
 
 </Project>

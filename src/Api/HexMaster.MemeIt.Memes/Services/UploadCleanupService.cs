@@ -56,7 +56,7 @@ public class UploadCleanupService : BackgroundService
 
         try
         {
-            var uploadContainer = _blobServiceClient.GetBlobContainerClient(MemesConstants.UploadContainerName);
+            var uploadContainer = _blobServiceClient.GetBlobContainerClient(AspireConstants.BlobUploadContainerName);
             
             // Check if container exists
             var containerExists = await uploadContainer.ExistsAsync(cancellationToken);

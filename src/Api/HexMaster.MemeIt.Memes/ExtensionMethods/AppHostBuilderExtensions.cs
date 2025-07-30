@@ -22,10 +22,10 @@ public static class AppHostBuilderExtensions
     public static IHostApplicationBuilder AddMemesServices(this IHostApplicationBuilder builder)
     {
         // Register Aspire integrations for Azure services
-        builder.AddAzureBlobServiceClient("BlobConnection");
+        builder.AddAzureBlobServiceClient(AspireConstants.BlobServiceName);
         
         // Configure CosmosDB with camelCase serialization
-        builder.AddAzureCosmosContainer("MemeTemplates", configureClientOptions: options =>
+        builder.AddAzureCosmosContainer(AspireConstants.CosmosConfigurationContainer, configureClientOptions: options =>
         {
             options.SerializerOptions = new CosmosSerializationOptions
             {

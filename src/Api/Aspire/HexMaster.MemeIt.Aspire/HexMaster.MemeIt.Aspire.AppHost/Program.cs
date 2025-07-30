@@ -34,13 +34,12 @@ if (builder.Environment.IsDevelopment())
         em.WithLifetime(ContainerLifetime.Persistent);
     });
 }
-var blobs = storage.AddBlobs("BlobConnection");
-
-blobs.AddBlobContainer("upload");
-blobs.AddBlobContainer("memes");
+var blobs = storage.AddBlobs(AspireConstants.BlobServiceName);
+storage.AddBlobContainer(AspireConstants.BlobUploadContainerName,AspireConstants.BlobServiceName);
+storage.AddBlobContainer(AspireConstants.BlobMemesContainerName,AspireConstants.BlobServiceName);
 
 // Add Azure CosmosDB (with emulator for development)
-var cosmos = builder.AddAzureCosmosDB("CosmosConnection");
+var cosmos = builder.AddAzureCosmosDB(AspireConstants.CosmosConnection);
 if (builder.Environment.IsDevelopment())
 {
     cosmos.RunAsEmulator(emulator =>
@@ -49,8 +48,8 @@ if (builder.Environment.IsDevelopment())
         emulator.WithDataVolume();
     });
 }
-var memesDatabase = cosmos.AddCosmosDatabase("MemeItDatabase");
-var memeTemplatesContainer = memesDatabase.AddContainer("MemeTemplates", "/partitionKey");
+var memesDatabase = cosmos.AddCosmosDatabase(AspireConstants.CosmosDatabaseName);
+var memeTemplatesContainer = memesDatabase.AddContainer(AspireConstants.CosmosConfigurationContainer, "/partitionKey");
 
 var api = builder.AddProject<Projects.HexMaster_MemeIt_Api>(AspireConstants.MemeItApiProjectName)
     .WithReference(orleans)
