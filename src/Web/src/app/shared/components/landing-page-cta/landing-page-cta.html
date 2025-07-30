@@ -1,33 +1,64 @@
-<p-card [style]="{ width: '50rem', overflow: 'hidden' }">
-    <ng-template #title>Create Amazing Memes</ng-template>
-    <ng-template #subtitle>Easy drag & drop meme creation tool</ng-template>
-    <p>
-        Transform your images and videos into hilarious memes with our intuitive drag-and-drop interface. 
-        Add text areas anywhere on your media, customize fonts and colors, and create viral-worthy content in minutes!
-    </p>
-    <p class="mt-4">
-        <strong>Features:</strong>
-    </p>
-    <ul class="list-disc list-inside mt-2 space-y-1">
-        <li>Support for JPG, PNG, WEBP images and MP4 videos</li>
-        <li>Drag and drop text areas with custom positioning</li>
-        <li>Customizable fonts, sizes, and colors</li>
-        <li>Real-time preview while editing</li>
-        <li>Professional meme templates</li>
-    </ul>
-    <ng-template #footer>
-        <div class="flex gap-4 mt-4">
-            <button pButton 
-                    label="Start Creating" 
-                    icon="pi pi-plus"
-                    routerLink="/management/memes/create"
-                    class="p-button-lg"></button>
-            <button pButton 
-                    label="View Templates" 
-                    icon="pi pi-images"
-                    [outlined]="true"
-                    routerLink="/management/memes"
-                    class="p-button-lg"></button>
+<div class="game-hero">
+    <div class="hero-content">
+        <h2 class="hero-title">The Ultimate Multiplayer Meme Battle!</h2>
+        <p class="hero-subtitle">
+            Compete with friends in hilarious meme-making showdowns. Create, vote, and laugh your way to victory!
+        </p>
+        
+        <div class="game-features">
+            <div class="feature-item">
+                <i class="pi pi-users feature-icon"></i>
+                <span>2-25 Players</span>
+            </div>
+            <div class="feature-item">
+                <i class="pi pi-clock feature-icon"></i>
+                <span>5 Rounds of Fun</span>
+            </div>
+            <div class="feature-item">
+                <i class="pi pi-star feature-icon"></i>
+                <span>Vote & Score</span>
+            </div>
         </div>
-    </ng-template>
-</p-card>
+
+        <div class="how-to-play">
+            <h3>How to Play:</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Create or join a game lobby</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Add funny text to meme images</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Vote on other players' memes</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">Win with the highest score!</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button pButton 
+                    label="Create Game" 
+                    icon="pi pi-plus"
+                    size="large"
+                    class="primary-btn"></button>
+            <button pButton 
+                    label="Join Game" 
+                    icon="pi pi-sign-in"
+                    size="large"
+                    severity="secondary"
+                    [outlined]="true"
+                    class="secondary-btn"></button>
+        </div>
+
+        <p class="tagline">
+            <em>"If you can dream it, you can meme it!"</em>
+        </p>
+    </div>
+</div>
