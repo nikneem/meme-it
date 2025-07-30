@@ -107,5 +107,50 @@ export const gameReducer = createReducer(
         currentPlayers: state.currentGame.currentPlayers - 1
       }
     };
-  })
+  }),
+
+  // Game State Persistence
+  on(GameActions.restoreGameState, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(GameActions.restoreGameStateSuccess, (state, { game, player, isInLobby }) => ({
+    ...state,
+    currentGame: game,
+    currentPlayer: player,
+    isInLobby,
+    isLoading: false,
+    error: null
+  })),
+
+  on(GameActions.restoreGameStateFailure, (state) => ({
+    ...state,
+    isLoading: false,
+    error: null,
+    isInLobby: false
+  })),
+
+  // Game State Verification
+  on(GameActions.verifyGameState, (state) => ({
+    ...state,
+    isLoading: true
+  })),
+
+  on(GameActions.verifyGameStateSuccess, (state, { game }) => ({
+    ...state,
+    currentGame: game,
+    isLoading: false,
+    error: null
+  })),
+
+  on(GameActions.verifyGameStateFailure, (state, { error }) => ({
+    ...state,
+    currentGame: null,
+    currentPlayer: null,
+    isInLobby: false,
+    isLoading: false,
+    error
+  }))
 );

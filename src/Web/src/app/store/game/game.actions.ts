@@ -60,3 +60,29 @@ export const playerLeft = createAction(
   '[Game] Player Left',
   props<{ playerId: string }>()
 );
+
+// Game State Persistence Actions
+export const restoreGameState = createAction('[Game] Restore Game State');
+
+export const restoreGameStateSuccess = createAction(
+  '[Game] Restore Game State Success',
+  props<{ game: Game; player: Player; isInLobby: boolean }>()
+);
+
+export const restoreGameStateFailure = createAction('[Game] Restore Game State Failure');
+
+// Game State Verification Actions
+export const verifyGameState = createAction(
+  '[Game] Verify Game State',
+  props<{ gameId: string; playerId: string }>()
+);
+
+export const verifyGameStateSuccess = createAction(
+  '[Game] Verify Game State Success',
+  props<{ game: Game }>()
+);
+
+export const verifyGameStateFailure = createAction(
+  '[Game] Verify Game State Failure',
+  props<{ error: string }>()
+);

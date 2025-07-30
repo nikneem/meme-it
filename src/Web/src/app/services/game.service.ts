@@ -29,8 +29,9 @@ export class GameService {
     return this.http.post<JoinGameResponse>(`${this.baseUrl}/join`, request);
   }
 
-  leaveGame(gameId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${gameId}/leave`);
+  leaveGame(gameCode: string, playerId: string): Observable<void> {
+    const body = { gameCode, playerId };
+    return this.http.post<void>(`${this.baseUrl}/leave`, body);
   }
 
   getGame(gameId: string): Observable<Game> {
