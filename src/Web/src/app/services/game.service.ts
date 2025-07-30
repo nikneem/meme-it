@@ -21,10 +21,16 @@ export interface GameValidationResponse {
 }
 
 // Backend response interfaces (matching the C# backend)
+interface BackendPlayerResponse {
+  id: string;
+  name: string;
+  isReady: boolean;
+}
+
 interface BackendCreateGameResponse {
   gameCode: string;
   status: string;
-  players: string[];
+  players: BackendPlayerResponse[];
   playerId: string;
   isPasswordProtected: boolean;
   settings: {
@@ -37,7 +43,7 @@ interface BackendCreateGameResponse {
 interface BackendGameDetailsResponse {
   gameCode: string;
   status: string;
-  players: string[];
+  players: BackendPlayerResponse[];
   playerId: string;
   isPasswordProtected: boolean;
   settings: {
@@ -72,6 +78,13 @@ export class GameService {
     return this.http.post<void>(`${this.baseUrl}/leave`, body);
   }
 
+  setPlayerReadyStatus(gameCode: string, playerId: string, isReady: boolean): Observable<CreateGameResponse> {
+    const request = { playerId, gameCode, isReady };
+    return this.http.post<BackendGameDetailsResponse>(`${this.baseUrl}/ready`, request).pipe(
+      map(response => this.mapBackendResponseToFrontend(response))
+    );
+  }
+
   getGame(gameId: string, playerId?: string): Observable<Game> {
     const url = playerId ? `${this.baseUrl}/${gameId}?playerId=${playerId}` : `${this.baseUrl}/${gameId}`;
     return this.http.get<BackendGameDetailsResponse>(url).pipe(
@@ -100,7 +113,7 @@ export class GameService {
       game,
       player: currentPlayer || {
         id: response.playerId,
-        name: response.players[0] || 'Unknown',
+        name: response.players[0]?.name || 'Unknown',
         isHost: true, // First player is typically the host
         isReady: false
       }
@@ -118,16 +131,16 @@ export class GameService {
       currentPlayers: response.players.length,
       createdAt: new Date(), // Backend doesn't provide this, use current time
       host: {
-        id: response.playerId,
-        name: response.players[0] || 'Host',
+        id: response.players[0]?.id || response.playerId,
+        name: response.players[0]?.name || 'Host',
         isHost: true,
-        isReady: false
+        isReady: response.players[0]?.isReady || false
       },
-      players: response.players.map((playerName, index) => ({
-        id: index === 0 ? response.playerId : `player-${index}`, // Only first player has real ID
-        name: playerName,
-        isHost: index === 0,
-        isReady: false
+      players: response.players.map((player, index) => ({
+        id: player.id,
+        name: player.name,
+        isHost: index === 0, // First player is the host
+        isReady: player.isReady
       })),
       settings: {
         maxPlayers: response.settings.maxPlayers,

@@ -6,6 +6,7 @@ using HexMaster.MemeIt.Games.Features.CreateGame;
 using HexMaster.MemeIt.Games.Features.GetGame;
 using HexMaster.MemeIt.Games.Features.JoinGame;
 using HexMaster.MemeIt.Games.Features.LeaveGame;
+using HexMaster.MemeIt.Games.Features.SetPlayerReadyStatus;
 using HexMaster.MemeIt.Games.Features.StartGame;
 using HexMaster.MemeIt.Games.Features.UpdateSettings;
 using HexMaster.MemeIt.Games.ValueObjects;
@@ -51,6 +52,11 @@ public static class GameEndpoints
 
         group.MapPost("/settings", UpdateSettings)
             .WithName(nameof(UpdateSettings))
+            .Produces(StatusCodes.Status200OK)
+            .ProducesValidationProblem();
+
+        group.MapPost("/ready", SetPlayerReadyStatus)
+            .WithName(nameof(SetPlayerReadyStatus))
             .Produces(StatusCodes.Status200OK)
             .ProducesValidationProblem();
     }
@@ -168,4 +174,22 @@ public static class GameEndpoints
         return Results.Ok(response);
     }
 
+    private static async Task<IResult> SetPlayerReadyStatus(
+        [FromBody] SetPlayerReadyStatusRequest requestPayload,
+        [FromServices] ICommandHandler<SetPlayerReadyStatusCommand, GameDetailsResponse> handler)
+    {
+        var playerId = requestPayload?.PlayerId;
+        var gameCode = requestPayload?.GameCode;
+        if (string.IsNullOrWhiteSpace(playerId) || string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { "PlayerId", ["PlayerId is required."] },
+                { "GameCode", ["GameCode is required."] }
+            });
+        }
+        var command = new SetPlayerReadyStatusCommand(playerId, gameCode, requestPayload?.IsReady ?? false);
+        var response = await handler.HandleAsync(command, CancellationToken.None);
+        return Results.Ok(response);
+    }
 }

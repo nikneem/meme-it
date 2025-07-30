@@ -17,4 +17,16 @@ public class GamePlayerGrain([PersistentState(stateName: "gamePlayerState", stor
         await state.WriteStateAsync();
         return initialState;
     }
+
+    public async Task<GamePlayerState> SetReadyStatus(bool isReady)
+    {
+        state.State.IsReady = isReady;
+        await state.WriteStateAsync();
+        return state.State;
+    }
+
+    public Task<GamePlayerState> GetCurrentState()
+    {
+        return Task.FromResult(state.State);
+    }
 }

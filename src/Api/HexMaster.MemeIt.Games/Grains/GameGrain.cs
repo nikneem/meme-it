@@ -35,7 +35,8 @@ public class GameGrain(IGrainFactory grainFactory,
             Status = GameStatus.Waiting.Id,
             Password = createGameState.Password,
             LeaderId = initialPlayerState.Id,
-            Settings = new GameSettings()
+            Settings = new GameSettings(),
+            PlayerReadyStates = new Dictionary<string, bool> { { initialPlayerState.Id, false } }
         };
         await state.WriteStateAsync();
         _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
@@ -67,6 +68,7 @@ public class GameGrain(IGrainFactory grainFactory,
         await playerGrain.CreatePlayer(newPlayerState);
 
         state.State.Players.Add((newPlayerState.Id, newPlayerState.Name));
+        state.State.PlayerReadyStates[newPlayerState.Id] = false; // New players start as not ready
         await state.WriteStateAsync();
         _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
         return state.State;
@@ -84,6 +86,7 @@ public class GameGrain(IGrainFactory grainFactory,
             throw new InvalidOperationException("Player not found in this game.");
         }
         state.State.Players.Remove(player);
+        state.State.PlayerReadyStates.Remove(playerId); // Clean up ready state
         // If leader leaves, assign new leader if any players remain
         if (state.State.LeaderId == playerId)
         {
@@ -127,7 +130,46 @@ public class GameGrain(IGrainFactory grainFactory,
         {
             throw new InvalidOperationException("Game can only be started from waiting status.");
         }
+        
+        // Check that all players are ready
+        var allPlayersReady = state.State.Players.All(p => state.State.PlayerReadyStates.GetValueOrDefault(p.Id, false));
+        if (!allPlayersReady)
+        {
+            throw new InvalidOperationException("All players must be ready before starting the game.");
+        }
+        
+        // Require at least 2 players
+        if (state.State.Players.Count < 2)
+        {
+            throw new InvalidOperationException("At least 2 players are required to start the game.");
+        }
+        
         state.State.Status = GameStatus.Active.Id;
+        await state.WriteStateAsync();
+        _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
+        return state.State;
+    }
+
+    public async Task<GameState> SetPlayerReadyStatus(string playerId, bool isReady)
+    {
+        if (state.State.Status != GameStatus.Waiting.Id)
+        {
+            throw new InvalidOperationException("Player ready status can only be changed while the game is waiting.");
+        }
+        
+        var player = state.State.Players.FirstOrDefault(p => p.Id == playerId);
+        if (player == default)
+        {
+            throw new InvalidOperationException("Player not found in this game.");
+        }
+
+        // Update the player's ready status in the game state
+        state.State.PlayerReadyStates[playerId] = isReady;
+        
+        // Also update the player grain's state
+        var playerGrain = grainFactory.GetGrain<IGamePlayerGrain>(playerId);
+        await playerGrain.SetReadyStatus(isReady);
+        
         await state.WriteStateAsync();
         _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
         return state.State;

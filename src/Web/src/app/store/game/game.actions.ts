@@ -102,3 +102,19 @@ export const refreshGameStateFromServerFailure = createAction(
   '[Game] Refresh Game State From Server Failure',
   props<{ error: string }>()
 );
+
+// Player Ready Status Actions
+export const setPlayerReadyStatus = createAction(
+  '[Game] Set Player Ready Status',
+  props<{ isReady: boolean }>()
+);
+
+export const setPlayerReadyStatusSuccess = createAction(
+  '[Game] Set Player Ready Status Success',
+  props<{ game: Game; player: Player }>()
+);
+
+export const setPlayerReadyStatusFailure = createAction(
+  '[Game] Set Player Ready Status Failure',
+  props<{ error: string }>()
+);

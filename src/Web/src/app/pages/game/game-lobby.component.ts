@@ -19,7 +19,7 @@ import {
   selectPlayerCount,
   selectGameCode 
 } from '../../store/game/game.selectors';
-import { leaveGame } from '../../store/game/game.actions';
+import { leaveGame, setPlayerReadyStatus } from '../../store/game/game.actions';
 import { BreakoutGameComponent } from '../../shared/components/breakout-game/breakout-game.component';
 
 @Component({
@@ -92,8 +92,11 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   }
 
   toggleReady() {
-    // Dispatch action to toggle ready status
-    console.log('Toggling ready status...');
+    this.currentPlayer$.pipe(takeUntil(this.destroy$)).subscribe(player => {
+      if (player) {
+        this.store.dispatch(setPlayerReadyStatus({ isReady: !player.isReady }));
+      }
+    });
   }
 
   onLeaveGame() {

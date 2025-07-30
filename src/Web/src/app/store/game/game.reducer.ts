@@ -177,5 +177,26 @@ export const gameReducer = createReducer(
     isInLobby: false,
     isLoading: false,
     error
+  })),
+
+  // Player Ready Status
+  on(GameActions.setPlayerReadyStatus, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(GameActions.setPlayerReadyStatusSuccess, (state, { game, player }) => ({
+    ...state,
+    currentGame: game,
+    currentPlayer: player,
+    isLoading: false,
+    error: null
+  })),
+
+  on(GameActions.setPlayerReadyStatusFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
   }))
 );

@@ -238,4 +238,43 @@ export class GameEffects {
     ),
     { dispatch: false }
   );
+
+  // Player Ready Status Effects
+  setPlayerReadyStatus$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.setPlayerReadyStatus),
+      withLatestFrom(
+        this.store.select(selectCurrentGame),
+        this.store.select(selectCurrentPlayer)
+      ),
+      switchMap(([action, game, player]) => {
+        if (!game || !player) {
+          return of(GameActions.setPlayerReadyStatusFailure({ error: 'Game or player not found' }));
+        }
+        
+        return this.gameService.setPlayerReadyStatus(game.code, player.id, action.isReady).pipe(
+          map(({ game: updatedGame, player: updatedPlayer }) => 
+            GameActions.setPlayerReadyStatusSuccess({ game: updatedGame, player: updatedPlayer })
+          ),
+          catchError((error) =>
+            of(GameActions.setPlayerReadyStatusFailure({ error: error.message || 'Failed to set ready status' }))
+          )
+        );
+      })
+    )
+  );
+
+  setPlayerReadyStatusSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.setPlayerReadyStatusSuccess),
+      withLatestFrom(
+        this.store.select(selectIsInLobby)
+      ),
+      tap(([action, isInLobby]) => {
+        // Update persisted state with new data
+        this.gamePersistenceService.saveGameState(action.game, action.player, isInLobby);
+      })
+    ),
+    { dispatch: false }
+  );
 }
