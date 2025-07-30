@@ -17,8 +17,7 @@ public class GetGameQueryHandler(IGrainFactory grainFactory) : IQueryHandler<Get
             return new OperationResult<GameDetailsResponse>(false, null);
         }
 
-        return new OperationResult<GameDetailsResponse>(true, GameDetailsResponse.FromGameState(currentGameState));
-
-
+        var playerId = query.PlayerId ?? string.Empty;
+        return new OperationResult<GameDetailsResponse>(true, GameDetailsResponse.FromGameState(currentGameState, playerId));
     }
 }

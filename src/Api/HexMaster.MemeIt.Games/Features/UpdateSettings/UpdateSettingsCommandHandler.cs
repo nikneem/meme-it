@@ -13,6 +13,6 @@ public class UpdateSettingsCommandHandler(IGrainFactory grainFactory)
     {
         var gameGrain = grainFactory.GetGrain<IGameGrain>(command.GameCode);
         var gameState = await gameGrain.UpdateSettings(command.PlayerId, command.Settings);
-        return GameDetailsResponse.FromGameState(gameState);
+        return GameDetailsResponse.FromGameState(gameState, command.PlayerId);
     }
 }

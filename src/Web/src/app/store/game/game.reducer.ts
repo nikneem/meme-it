@@ -152,5 +152,30 @@ export const gameReducer = createReducer(
     isInLobby: false,
     isLoading: false,
     error
+  })),
+
+  // Server-Based Game State Refresh
+  on(GameActions.refreshGameStateFromServer, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(GameActions.refreshGameStateFromServerSuccess, (state, { game, player }) => ({
+    ...state,
+    currentGame: game,
+    currentPlayer: player,
+    isInLobby: true,
+    isLoading: false,
+    error: null
+  })),
+
+  on(GameActions.refreshGameStateFromServerFailure, (state, { error }) => ({
+    ...state,
+    currentGame: null,
+    currentPlayer: null,
+    isInLobby: false,
+    isLoading: false,
+    error
   }))
 );

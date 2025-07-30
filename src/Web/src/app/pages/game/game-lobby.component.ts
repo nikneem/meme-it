@@ -67,11 +67,22 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
   getStatusSeverity(status: string): 'success' | 'info' | 'warning' | 'danger' {
     switch (status) {
-      case 'waiting': return 'info';
-      case 'in-progress': return 'success';
-      case 'finished': return 'success';
-      case 'cancelled': return 'danger';
-      default: return 'info';
+      case 'waiting':
+      case 'Waiting':
+        return 'info';
+      case 'in-progress':
+      case 'InProgress':
+      case 'active':
+      case 'Active':
+        return 'success';
+      case 'finished':
+      case 'Finished':
+        return 'success';
+      case 'cancelled':
+      case 'Cancelled':
+        return 'danger';
+      default:
+        return 'info';
     }
   }
 

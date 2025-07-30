@@ -112,37 +112,69 @@ export class GameEffects {
     { dispatch: false }
   );
 
-  // Game State Restoration
+  // Game State Restoration - Now uses server as source of truth
   restoreGameState$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.restoreGameState),
-      map(() => {
+      switchMap(() => {
         const persistedState = this.gamePersistenceService.loadGameState();
         
-        if (persistedState && persistedState.currentGame && persistedState.currentPlayer) {
-          return GameActions.restoreGameStateSuccess({
-            game: persistedState.currentGame,
-            player: persistedState.currentPlayer,
-            isInLobby: persistedState.isInLobby
-          });
+        if (persistedState && persistedState.gameCode && persistedState.playerId && persistedState.playerName) {
+          // Dispatch server refresh action with persisted data
+          return of(GameActions.refreshGameStateFromServer({
+            gameCode: persistedState.gameCode,
+            playerId: persistedState.playerId,
+            playerName: persistedState.playerName
+          }));
         } else {
-          return GameActions.restoreGameStateFailure();
+          return of(GameActions.restoreGameStateFailure());
         }
       })
     )
   );
 
-  // Verify game state with server after restoration
-  restoreGameStateSuccess$ = createEffect(() =>
+  // Refresh game state from server
+  refreshGameStateFromServer$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(GameActions.restoreGameStateSuccess),
-      map(({ game, player }) => 
-        GameActions.verifyGameState({ gameId: game.id, playerId: player.id })
+      ofType(GameActions.refreshGameStateFromServer),
+      switchMap(({ gameCode, playerId, playerName }) =>
+        this.gameService.validateGameAndPlayer(gameCode, playerId, playerName).pipe(
+          map(response => {
+            if (response.isValid) {
+              return GameActions.refreshGameStateFromServerSuccess({
+                game: response.game,
+                player: response.player
+              });
+            } else {
+              throw new Error('Player is no longer in the game or game does not exist');
+            }
+          }),
+          catchError(error => {
+            // Clear invalid persisted state
+            this.gamePersistenceService.clearGameState();
+            this.router.navigate(['/home']);
+            return of(GameActions.refreshGameStateFromServerFailure({ 
+              error: error.message || 'Failed to restore game state from server' 
+            }));
+          })
+        )
       )
     )
   );
 
-  // Game State Verification
+  // Handle successful server refresh
+  refreshGameStateFromServerSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.refreshGameStateFromServerSuccess),
+      tap(({ game, player }) => {
+        // Update persisted state with fresh data from server
+        this.gamePersistenceService.saveGameState(game, player, true);
+      })
+    ),
+    { dispatch: false }
+  );
+
+  // Game State Verification (kept for backward compatibility or manual verification)
   verifyGameState$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.verifyGameState),

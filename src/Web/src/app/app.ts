@@ -4,7 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { SettingsService } from './shared/services/settings.service';
 import { GamePersistenceService } from './shared/services/game-persistence.service';
-import { restoreGameState } from './store/game/game.actions';
+import { refreshGameStateFromServer } from './store/game/game.actions';
 
 @Component({
   selector: 'meme-root',
@@ -28,7 +28,15 @@ export class App implements OnInit {
 
     // Try to restore game state on app initialization
     if (this.gamePersistenceService.hasValidGameState()) {
-      this.store.dispatch(restoreGameState());
+      const persistedState = this.gamePersistenceService.loadGameState();
+      
+      if (persistedState && persistedState.gameCode && persistedState.playerId && persistedState.playerName) {
+        this.store.dispatch(refreshGameStateFromServer({
+          gameCode: persistedState.gameCode,
+          playerId: persistedState.playerId,
+          playerName: persistedState.playerName
+        }));
+      }
     }
   }
 }

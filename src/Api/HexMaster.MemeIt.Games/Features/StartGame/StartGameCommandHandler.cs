@@ -13,7 +13,7 @@ public class StartGameCommandHandler(IGrainFactory grainFactory)
     {
         var gameGrain = grainFactory.GetGrain<IGameGrain>(command.GameCode);
         var gameState = await gameGrain.StartGame(command.PlayerId);
-        return GameDetailsResponse.FromGameState(gameState);
+        return GameDetailsResponse.FromGameState(gameState, command.PlayerId);
     }
 
 }

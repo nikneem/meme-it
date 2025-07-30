@@ -17,6 +17,10 @@
       <p-card header="Game Details" styleClass="bg-white/10 backdrop-blur-sm border-0">
         <div class="space-y-3 text-white">
           <div class="flex justify-between">
+            <span>Game Code:</span>
+            <span class="font-mono font-bold text-yellow-300">{{ game.code }}</span>
+          </div>
+          <div class="flex justify-between">
             <span>Game Name:</span>
             <span class="font-semibold">{{ game.name }}</span>
           </div>
@@ -39,6 +43,10 @@
           <div class="flex justify-between">
             <span>Password Protected:</span>
             <span class="font-semibold">{{ game.hasPassword ? 'Yes' : 'No' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Max Players:</span>
+            <span class="font-semibold">{{ game.settings.maxPlayers }}</span>
           </div>
         </div>
       </p-card>

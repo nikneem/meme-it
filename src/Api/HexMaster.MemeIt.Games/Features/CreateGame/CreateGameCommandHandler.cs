@@ -12,6 +12,10 @@ public class CreateGameCommandHandler(IGrainFactory grainFactory) : ICommandHand
     {
         var gameGrain = grainFactory.GetGrain<IGameGrain>(command.GameCode);
         var gameState = await gameGrain.CreateGame(command);
-        return new CreateGameResponse(gameState.GameCode);
+        
+        // Get the player ID for the creator (should be the first player)
+        var creatorPlayerId = gameState.Players.FirstOrDefault().Id ?? string.Empty;
+        
+        return CreateGameResponse.FromGameState(gameState, creatorPlayerId);
     }
 }

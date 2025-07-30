@@ -30,6 +30,7 @@ export interface GameSettings {
 export enum GameStatus {
   Waiting = 'waiting',
   InProgress = 'in-progress',
+  Active = 'active',
   Finished = 'finished',
   Cancelled = 'cancelled'
 }

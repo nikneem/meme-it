@@ -14,6 +14,10 @@ public sealed class JoinGameCommandHandler(IGrainFactory grainFactory) : IComman
     {
         var gameGrain = grainFactory.GetGrain<IGameGrain>(command.GameCode);
         var newGameState = await gameGrain.JoinGame(command);
-        return GameDetailsResponse.FromGameState(newGameState);
+        
+        // Find the player ID for the joining player by name
+        var joiningPlayerId = newGameState.Players.FirstOrDefault(p => p.Name == command.PlayerName).Id ?? string.Empty;
+        
+        return GameDetailsResponse.FromGameState(newGameState, joiningPlayerId);
     }
 }

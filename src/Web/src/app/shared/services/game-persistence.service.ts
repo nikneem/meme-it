@@ -2,8 +2,9 @@ import { Injectable, signal } from '@angular/core';
 import { Game, Player } from '../../store/game/game.models';
 
 export interface PersistedGameState {
-  currentGame: Game | null;
-  currentPlayer: Player | null;
+  gameCode: string;
+  playerId: string;
+  playerName: string;
   isInLobby: boolean;
   timestamp: number; // To handle expiration
 }
@@ -17,9 +18,15 @@ export class GamePersistenceService {
 
   saveGameState(game: Game | null, player: Player | null, isInLobby: boolean): void {
     try {
+      if (!game || !player || !isInLobby) {
+        this.clearGameState();
+        return;
+      }
+
       const gameState: PersistedGameState = {
-        currentGame: game,
-        currentPlayer: player,
+        gameCode: game.code,
+        playerId: player.id,
+        playerName: player.name,
         isInLobby,
         timestamp: Date.now()
       };
@@ -60,6 +67,9 @@ export class GamePersistenceService {
 
   hasValidGameState(): boolean {
     const gameState = this.loadGameState();
-    return gameState !== null && gameState.isInLobby && gameState.currentGame !== null && gameState.currentPlayer !== null;
+    return gameState !== null && 
+           !!gameState.gameCode && 
+           !!gameState.playerId && 
+           !!gameState.playerName;
   }
 }

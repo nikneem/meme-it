@@ -86,3 +86,19 @@ export const verifyGameStateFailure = createAction(
   '[Game] Verify Game State Failure',
   props<{ error: string }>()
 );
+
+// Server-Based Game State Refresh Actions
+export const refreshGameStateFromServer = createAction(
+  '[Game] Refresh Game State From Server',
+  props<{ gameCode: string; playerId: string; playerName: string }>()
+);
+
+export const refreshGameStateFromServerSuccess = createAction(
+  '[Game] Refresh Game State From Server Success',
+  props<{ game: Game; player: Player }>()
+);
+
+export const refreshGameStateFromServerFailure = createAction(
+  '[Game] Refresh Game State From Server Failure',
+  props<{ error: string }>()
+);
