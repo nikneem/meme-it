@@ -10,7 +10,7 @@ export interface FileValidationResult {
 })
 export class FileUploadService {
   private readonly allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4'];
-  private readonly maxFileSize = 50 * 1024 * 1024; // 50MB
+  private readonly maxFileSize = 1 * 1024 * 1024; // 1MB
 
   validateFile(file: File): FileValidationResult {
     // Check file type
@@ -25,7 +25,7 @@ export class FileUploadService {
     if (file.size > this.maxFileSize) {
       return {
         isValid: false,
-        error: 'File size must be less than 50MB.'
+        error: 'File size must be less than 1MB.'
       };
     }
 
