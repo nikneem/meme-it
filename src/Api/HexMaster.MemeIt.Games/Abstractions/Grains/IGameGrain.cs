@@ -11,6 +11,7 @@ public interface IGameGrain : IGrainWithStringKey
     Task<GameState> CreateGame(CreateGameCommand initialState);
     Task<GameState> JoinGame(JoinGameCommand playerState);
     Task<GameState> LeaveGame(string playerId);
+    Task<GameState> KickPlayer(string hostPlayerId, string targetPlayerId);
     Task<GameState> UpdateSettings(string playerId, GameSettings settings);
     Task<GameState> StartGame(string playerId);
     Task<GameState> SetPlayerReadyStatus(string playerId, bool isReady);

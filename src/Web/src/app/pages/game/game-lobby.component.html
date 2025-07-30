@@ -1,4 +1,7 @@
 <div class="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 p-4">
+  <!-- Confirmation Dialog -->
+  <p-confirmDialog></p-confirmDialog>
+  
   <div class="max-w-4xl mx-auto">
     
     <!-- Header -->
@@ -102,7 +105,7 @@
     <p-card header="Players" styleClass="bg-white/10 backdrop-blur-sm border-0 mb-8" *ngIf="currentGame$ | async as game">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div 
-          *ngFor="let player of game.players" 
+          *ngFor="let player of game.players; let i = index" 
           class="bg-white/20 rounded-lg p-4 flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-gradient-to-r from-pink-500 to-violet-500 rounded-full flex items-center justify-center">
@@ -118,6 +121,17 @@
               [value]="player.isReady ? 'Ready' : 'Not Ready'"
               [severity]="player.isReady ? 'success' : 'secondary'">
             </p-tag>
+            <!-- Kick Button - Only show for hosts and not for the player themselves -->
+            <p-button 
+              *ngIf="(isHost$ | async) && !player.isHost"
+              icon="pi pi-times"
+              severity="danger"
+              size="small"
+              [text]="true"
+              [rounded]="true"
+              title="Kick Player"
+              (onClick)="kickPlayer(player.id)">
+            </p-button>
           </div>
         </div>
       </div>

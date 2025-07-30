@@ -218,5 +218,25 @@ export const gameReducer = createReducer(
     ...state,
     isLoading: false,
     error
+  })),
+
+  // Kick Player
+  on(GameActions.kickPlayer, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(GameActions.kickPlayerSuccess, (state, { game }) => ({
+    ...state,
+    currentGame: game,
+    isLoading: false,
+    error: null
+  })),
+
+  on(GameActions.kickPlayerFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
   }))
 );

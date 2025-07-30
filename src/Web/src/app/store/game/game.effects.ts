@@ -313,4 +313,39 @@ export class GameEffects {
     ),
     { dispatch: false }
   );
+
+  // Kick Player Effects
+  kickPlayer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.kickPlayer),
+      withLatestFrom(
+        this.store.select(selectCurrentGame),
+        this.store.select(selectCurrentPlayer)
+      ),
+      switchMap(([action, game, player]) => {
+        if (!game || !player) {
+          return of(GameActions.kickPlayerFailure({ error: 'Game or player not found' }));
+        }
+        
+        return this.gameService.kickPlayer(game.code, player.id, action.targetPlayerId).pipe(
+          map((updatedGame) => 
+            GameActions.kickPlayerSuccess({ game: updatedGame })
+          ),
+          catchError((error) =>
+            of(GameActions.kickPlayerFailure({ error: error.message || 'Failed to kick player' }))
+          )
+        );
+      })
+    )
+  );
+
+  kickPlayerSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.kickPlayerSuccess),
+      tap(({ game }) => {
+        console.log('Player kicked successfully, game updated:', game);
+      })
+    ),
+    { dispatch: false }
+  );
 }

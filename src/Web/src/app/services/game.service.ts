@@ -85,6 +85,13 @@ export class GameService {
     );
   }
 
+  kickPlayer(gameCode: string, hostPlayerId: string, targetPlayerId: string): Observable<Game> {
+    const request = { gameCode, hostPlayerId, targetPlayerId };
+    return this.http.post<BackendGameDetailsResponse>(`${this.baseUrl}/kick`, request).pipe(
+      map(response => this.mapBackendGameResponseToGame(response))
+    );
+  }
+
   startGame(gameCode: string, playerId: string): Observable<Game> {
     const request = { playerId, gameCode };
     return this.http.post<BackendGameDetailsResponse>(`${this.baseUrl}/start`, request).pipe(

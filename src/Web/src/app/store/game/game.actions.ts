@@ -131,3 +131,19 @@ export const startGameFailure = createAction(
   '[Game] Start Game Failure',
   props<{ error: string }>()
 );
+
+// Kick Player Actions
+export const kickPlayer = createAction(
+  '[Game] Kick Player',
+  props<{ targetPlayerId: string }>()
+);
+
+export const kickPlayerSuccess = createAction(
+  '[Game] Kick Player Success',
+  props<{ game: Game }>()
+);
+
+export const kickPlayerFailure = createAction(
+  '[Game] Kick Player Failure',
+  props<{ error: string }>()
+);

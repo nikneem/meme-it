@@ -9,6 +9,8 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 import { Game, Player } from '../../store/game/game.models';
 import { 
@@ -19,7 +21,7 @@ import {
   selectPlayerCount,
   selectGameCode 
 } from '../../store/game/game.selectors';
-import { leaveGame, setPlayerReadyStatus, startGame } from '../../store/game/game.actions';
+import { leaveGame, setPlayerReadyStatus, startGame, kickPlayer } from '../../store/game/game.actions';
 import { BreakoutGameComponent } from '../../shared/components/breakout-game/breakout-game.component';
 
 @Component({
@@ -32,8 +34,10 @@ import { BreakoutGameComponent } from '../../shared/components/breakout-game/bre
     CardModule,
     TagModule,
     DividerModule,
+    ConfirmDialogModule,
     BreakoutGameComponent
   ],
+  providers: [ConfirmationService],
   templateUrl: './game-lobby.component.html',
   styleUrl: './game-lobby.component.scss'
 })
@@ -47,7 +51,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   playerCount$: Observable<{ current: number; max: number }>;
   gameCode$: Observable<string | undefined>;
 
-  constructor(private store: Store) {
+  constructor(private store: Store, private confirmationService: ConfirmationService) {
     this.currentGame$ = this.store.select(selectCurrentGame);
     this.currentPlayer$ = this.store.select(selectCurrentPlayer);
     this.isHost$ = this.store.select(selectIsHost);
@@ -97,6 +101,20 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     ).subscribe((player: Player | null) => {
       if (player) {
         this.store.dispatch(setPlayerReadyStatus({ isReady: !player.isReady }));
+      }
+    });
+  }
+
+  kickPlayer(targetPlayerId: string) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to kick this player from the game?',
+      header: 'Kick Player',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: 'pi pi-check',
+      rejectIcon: 'pi pi-times',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.store.dispatch(kickPlayer({ targetPlayerId }));
       }
     });
   }

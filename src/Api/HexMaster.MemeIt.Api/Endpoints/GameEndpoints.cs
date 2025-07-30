@@ -5,6 +5,7 @@ using HexMaster.MemeIt.Games.Features;
 using HexMaster.MemeIt.Games.Features.CreateGame;
 using HexMaster.MemeIt.Games.Features.GetGame;
 using HexMaster.MemeIt.Games.Features.JoinGame;
+using HexMaster.MemeIt.Games.Features.KickPlayer;
 using HexMaster.MemeIt.Games.Features.LeaveGame;
 using HexMaster.MemeIt.Games.Features.SetPlayerReadyStatus;
 using HexMaster.MemeIt.Games.Features.StartGame;
@@ -45,6 +46,11 @@ public static class GameEndpoints
             .Produces(StatusCodes.Status200OK)
             .ProducesValidationProblem();
 
+        group.MapPost("/kick", KickPlayer)
+            .WithName(nameof(KickPlayer))
+            .Produces(StatusCodes.Status200OK)
+            .ProducesValidationProblem();
+
         group.MapPost("/start", StartGame)
             .WithName(nameof(StartGame))
             .Produces(StatusCodes.Status200OK)
@@ -77,6 +83,29 @@ public static class GameEndpoints
         var command = new LeaveGameCommand(playerId, gameCode);
        var responseObject= await handler.HandleAsync(command, CancellationToken.None);
         return Results.Ok(responseObject);
+    }
+
+    private static async Task<IResult> KickPlayer(
+        [FromBody] KickPlayerRequest requestPayload,
+        [FromServices] ICommandHandler<KickPlayerCommand, GameDetailsResponse> handler)
+    {
+        var hostPlayerId = requestPayload?.HostPlayerId;
+        var targetPlayerId = requestPayload?.TargetPlayerId;
+        var gameCode = requestPayload?.GameCode;
+        
+        if (string.IsNullOrWhiteSpace(hostPlayerId) || string.IsNullOrWhiteSpace(targetPlayerId) || string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { "HostPlayerId", ["HostPlayerId is required."] },
+                { "TargetPlayerId", ["TargetPlayerId is required."] },
+                { "GameCode", ["GameCode is required."] }
+            });
+        }
+        
+        var command = new KickPlayerCommand(hostPlayerId, targetPlayerId, gameCode);
+        var response = await handler.HandleAsync(command, CancellationToken.None);
+        return Results.Ok(response);
     }
 
     private static async Task<IResult> StartGame(

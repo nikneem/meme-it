@@ -3,6 +3,7 @@ using HexMaster.MemeIt.Games.Features;
 using HexMaster.MemeIt.Games.Features.CreateGame;
 using HexMaster.MemeIt.Games.Features.GetGame;
 using HexMaster.MemeIt.Games.Features.JoinGame;
+using HexMaster.MemeIt.Games.Features.KickPlayer;
 using HexMaster.MemeIt.Games.Features.SetPlayerReadyStatus;
 using HexMaster.MemeIt.Games.Features.StartGame;
 using HexMaster.MemeIt.Games.Features.UpdateSettings;
@@ -19,6 +20,7 @@ public static class AppHostBuilderExtensions
 
         builder.Services.AddTransient<ICommandHandler<CreateGameCommand, CreateGameResponse>, CreateGameCommandHandler>();
         builder.Services.AddTransient<ICommandHandler<JoinGameCommand, GameDetailsResponse>, JoinGameCommandHandler>();
+        builder.Services.AddTransient<ICommandHandler<KickPlayerCommand, GameDetailsResponse>, KickPlayerCommandHandler>();
         builder.Services.AddTransient<ICommandHandler<SetPlayerReadyStatusCommand, GameDetailsResponse>, SetPlayerReadyStatusCommandHandler>();
         builder.Services.AddTransient<ICommandHandler<StartGameCommand, GameDetailsResponse>, StartGameCommandHandler>();
         builder.Services.AddTransient<ICommandHandler<UpdateSettingsCommand, GameDetailsResponse>, UpdateSettingsCommandHandler>();

@@ -97,6 +97,40 @@ public class GameGrain(IGrainFactory grainFactory,
         return state.State;
     }
 
+    public async Task<GameState> KickPlayer(string hostPlayerId, string targetPlayerId)
+    {
+        if (state.State.Status != GameStatus.Waiting.Id)
+        {
+            throw new InvalidOperationException("Cannot kick players when the game is not in waiting status.");
+        }
+        
+        // Verify that the host is the leader
+        if (state.State.LeaderId != hostPlayerId)
+        {
+            throw new UnauthorizedAccessException("Only the game host can kick players.");
+        }
+        
+        // Cannot kick yourself
+        if (hostPlayerId == targetPlayerId)
+        {
+            throw new InvalidOperationException("Cannot kick yourself from the game.");
+        }
+        
+        var targetPlayer = state.State.Players.FirstOrDefault(p => p.Id == targetPlayerId);
+        if (targetPlayer == default)
+        {
+            throw new InvalidOperationException("Target player not found in this game.");
+        }
+        
+        // Remove the player
+        state.State.Players.Remove(targetPlayer);
+        state.State.PlayerReadyStates.Remove(targetPlayerId); // Clean up ready state
+        
+        await state.WriteStateAsync();
+        _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
+        return state.State;
+    }
+
     public async Task<GameState> UpdateSettings(string playerId, GameSettings settings)
     {
         if (state.State.LeaderId != playerId)
