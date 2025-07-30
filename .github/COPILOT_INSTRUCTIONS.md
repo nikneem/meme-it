@@ -17,11 +17,18 @@ MemeIt is an online multiplayer party game written in C# using the latest langua
 - Implement proper error handling and validation.
 
 ## Running the Project Locally
-To run the full application locally, use the Aspire App Host. This will start all required services and configure inter-service communication automatically:
+To run the full application locally, use the Aspire App Host. This will start all required services including the Angular frontend and configure inter-service communication automatically:
 
 ```powershell
-dotnet run --project "src/Aspire/MemeIt.Aspire/MemeIt.Aspire.AppHost"
+dotnet run --project "src/Api/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost"
 ```
+
+**Important:** The Angular frontend application is automatically started by the .NET Aspire host and will be available at `http://localhost:4200`. There is no need to start the frontend project manually using `npm start` or `ng serve`.
+
+## Development Environment Guidelines
+- **Terminal Usage:** Always reuse existing terminals when possible. Avoid opening new terminal windows unnecessarily.
+- **Application Startup:** Use the single Aspire AppHost command to start the entire application stack (backend APIs, frontend, databases, etc.).
+- **Frontend Access:** Once Aspire is running, access the Angular application directly at `http://localhost:4200`.
 
 ## API Design
 - Prefer minimal APIs where possible for new endpoints.

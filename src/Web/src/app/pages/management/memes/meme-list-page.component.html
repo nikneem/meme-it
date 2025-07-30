@@ -1,0 +1,99 @@
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+  <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Meme Templates</h1>
+        <p class="text-gray-600">Manage your meme templates</p>
+      </div>
+      <button 
+        pButton 
+        label="Create New Meme" 
+        icon="pi pi-plus" 
+        (click)="createNewMeme()"
+        class="p-button-lg">
+      </button>
+    </div>
+  </div>
+
+  <p-card>
+    <p-table 
+      [value]="memeTemplates()" 
+      [loading]="isLoading()"
+      [paginator]="true" 
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      styleClass="p-datatable-lg">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 80px">Image</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th style="width: 120px">Created</th>
+          <th style="width: 100px">Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-meme>
+        <tr>
+          <td>
+            <img 
+              [src]="meme.sourceImageUrl" 
+              [alt]="meme.name"
+              class="w-16 h-16 object-cover rounded border border-gray-200"
+              (error)="onImageError($event)" />
+          </td>
+          <td>
+            <div class="font-medium text-gray-900">{{ meme.name }}</div>
+          </td>
+          <td>
+            <div class="text-gray-600">
+              {{ meme.description || 'No description' }}
+            </div>
+          </td>
+          <td>
+            <div class="text-sm text-gray-500">
+              {{ formatDate(meme.createdAt) }}
+            </div>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <button 
+                pButton 
+                icon="pi pi-trash" 
+                severity="danger"
+                [outlined]="true"
+                size="small"
+                pTooltip="Delete meme template"
+                (click)="confirmDelete(meme)">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center py-8">
+            <div class="text-gray-500">
+              <i class="pi pi-image text-4xl mb-4 block"></i>
+              <div class="text-lg font-medium mb-2">No meme templates found</div>
+              <div class="text-sm">Create your first meme template to get started</div>
+              <button 
+                pButton 
+                label="Create New Meme" 
+                icon="pi pi-plus" 
+                class="mt-4"
+                (click)="createNewMeme()">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>
+
+<p-confirmDialog></p-confirmDialog>
+<p-toast position="top-right"></p-toast>

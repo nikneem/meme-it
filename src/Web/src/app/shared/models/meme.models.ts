@@ -73,3 +73,11 @@ export interface MemeTemplate {
   sourceHeight: number;
   textAreas: MemeTextArea[];
 }
+
+export interface MemeTemplateListItem {
+  id: string;
+  name: string;
+  description?: string;
+  sourceImageUrl: string;
+  createdAt: string;
+}

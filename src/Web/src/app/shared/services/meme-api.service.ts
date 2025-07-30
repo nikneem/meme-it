@@ -6,7 +6,8 @@ import {
   CreateMemeResponse, 
   GenerateUploadSasRequest, 
   GenerateUploadSasResponse,
-  MemeTemplate 
+  MemeTemplate,
+  MemeTemplateListItem 
 } from '../models/meme.models';
 
 @Injectable({
@@ -37,8 +38,8 @@ export class MemeApiService {
     return this.http.get<MemeTemplate>(`${this.baseUrl}/${id}`);
   }
 
-  getMemes(): Observable<MemeTemplate[]> {
-    return this.http.get<MemeTemplate[]>(this.baseUrl);
+  getMemes(): Observable<MemeTemplateListItem[]> {
+    return this.http.get<MemeTemplateListItem[]>(this.baseUrl);
   }
 
   updateMeme(id: string, request: CreateMemeRequest): Observable<MemeTemplate> {

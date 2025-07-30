@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+.p-table {
+  .p-datatable-tbody > tr > td {
+    vertical-align: middle;
+  }
+}
+
+.meme-thumbnail {
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  
+  .pi {
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+}
