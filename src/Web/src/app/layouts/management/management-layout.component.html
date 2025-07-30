@@ -1,0 +1,76 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Navigation Bar -->
+  <nav class="navbar bg-white shadow-sm border-b" role="navigation" aria-label="Management navigation">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16 flex-nowrap">
+        <!-- Logo -->
+        <div class="flex items-center flex-shrink-0">
+          <a routerLink="/home" class="text-2xl font-bold text-primary hover:text-primary-dark transition-colors" 
+             aria-label="MemeIt - Go to homepage">
+            MemeIt
+          </a>
+        </div>
+        
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex md:items-center md:space-x-6" aria-label="Primary navigation">
+          <a routerLink="/management/memes" 
+             class="text-gray-700 hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium"
+             routerLinkActive="text-primary bg-gray-100"
+             aria-label="View meme templates">
+            Meme Templates
+          </a>
+        </nav>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-4 flex-shrink-0">
+          <button pButton 
+                  label="Create Meme" 
+                  icon="pi pi-plus"
+                  routerLink="/management/memes/create"
+                  class="hidden sm:inline-flex"
+                  aria-label="Create a new meme template"></button>
+                  
+          <!-- Mobile menu button -->
+          <button pButton 
+                  icon="pi pi-bars"
+                  [text]="true"
+                  class="md:hidden"
+                  type="button"
+                  [attr.aria-expanded]="isMobileMenuOpen()"
+                  aria-label="Toggle mobile navigation menu"
+                  aria-controls="mobile-menu"
+                  (click)="toggleMobileMenu()"></button>
+        </div>
+      </div>
+      
+      <!-- Mobile Navigation Menu -->
+      <div id="mobile-menu" 
+           class="md:hidden overflow-hidden transition-all duration-300 ease-in-out" 
+           [class.max-h-0]="!isMobileMenuOpen()"
+           [class.max-h-96]="isMobileMenuOpen()"
+           [attr.aria-hidden]="!isMobileMenuOpen()">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
+          <a routerLink="/management/memes" 
+             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100 transition-colors"
+             routerLinkActive="text-primary bg-gray-100"
+             (click)="closeMobileMenu()"
+             aria-label="View meme templates">
+            Meme Templates
+          </a>
+          <a routerLink="/management/memes/create" 
+             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100 transition-colors"
+             routerLinkActive="text-primary bg-gray-100"
+             (click)="closeMobileMenu()"
+             aria-label="Create a new meme template">
+            Create Meme
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-6" role="main">
+    <router-outlet />
+  </main>
+</div>
