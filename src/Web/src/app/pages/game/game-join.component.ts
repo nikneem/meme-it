@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
@@ -38,7 +39,8 @@ export class GameJoinComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private store: Store
+    private store: Store,
+    private route: ActivatedRoute
   ) {
     this.isLoading$ = this.store.select(selectIsLoading);
     this.error$ = this.store.select(selectGameError);
@@ -46,6 +48,17 @@ export class GameJoinComponent implements OnInit {
 
   ngOnInit() {
     this.initializeForms();
+    this.setInitialTabFromQueryParams();
+  }
+
+  private setInitialTabFromQueryParams() {
+    const tab = this.route.snapshot.queryParams['tab'];
+    if (tab === 'create' || tab === 'join') {
+      this.activeTab = tab;
+    } else {
+      // Default to 'create' if no valid tab parameter is provided
+      this.activeTab = 'create';
+    }
   }
 
   private initializeForms() {

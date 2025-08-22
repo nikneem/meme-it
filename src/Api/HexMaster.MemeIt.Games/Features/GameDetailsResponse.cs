@@ -29,3 +29,27 @@ public record GameDetailsResponse(string GameCode, string Status, List<PlayerRes
             );
     }
 }
+
+// Broadcast-specific response without player ID for WebPubSub messages
+public record GameStateBroadcastResponse(string GameCode, string Status, List<PlayerResponse> Players, bool IsPasswordProtected, GameSettingsResponse Settings)
+{
+    public static GameStateBroadcastResponse FromGameState(GameState gameState)
+    {
+        var players = gameState.Players.Select(p => new PlayerResponse(
+            p.Id, 
+            p.Name, 
+            gameState.PlayerReadyStates.GetValueOrDefault(p.Id, false)
+        )).ToList();
+
+        return new GameStateBroadcastResponse(
+            gameState.GameCode,
+            gameState.Status,
+            players,
+            !string.IsNullOrWhiteSpace(gameState.Password),
+            new GameSettingsResponse(
+                gameState.Settings.MaxPlayers,
+                gameState.Settings.NumberOfRounds,
+                gameState.Settings.Category)
+            );
+    }
+}

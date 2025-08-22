@@ -13,10 +13,10 @@ export class LandingPageCta {
   constructor(private router: Router) {}
 
   onCreateGame() {
-    this.router.navigate(['/game']);
+    this.router.navigate(['/game'], { queryParams: { tab: 'create' } });
   }
 
   onJoinGame() {
-    this.router.navigate(['/game']);
+    this.router.navigate(['/game'], { queryParams: { tab: 'join' } });
   }
 }

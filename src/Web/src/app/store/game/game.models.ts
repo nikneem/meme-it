@@ -20,6 +20,27 @@ export interface Player {
   score?: number;
 }
 
+// Server broadcast response structure (without playerId)
+export interface GameStateBroadcast {
+  gameCode: string;
+  status: string;
+  players: ServerPlayer[];
+  isPasswordProtected: boolean;
+  settings: ServerGameSettings;
+}
+
+export interface ServerPlayer {
+  id: string;
+  name: string;
+  isReady: boolean;
+}
+
+export interface ServerGameSettings {
+  maxPlayers: number;
+  numberOfRounds: number;
+  category: string;
+}
+
 export interface GameSettings {
   maxPlayers: number;
   timePerRound: number;
@@ -48,7 +69,6 @@ export interface JoinGameRequest {
 
 export interface GameState {
   currentGame: Game | null;
-  currentPlayer: Player | null;
   isLoading: boolean;
   error: string | null;
   isInLobby: boolean;
@@ -56,7 +76,6 @@ export interface GameState {
 
 export const initialGameState: GameState = {
   currentGame: null,
-  currentPlayer: null,
   isLoading: false,
   error: null,
   isInLobby: false

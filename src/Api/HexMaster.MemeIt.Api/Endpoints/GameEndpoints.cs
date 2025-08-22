@@ -220,31 +220,36 @@ public static class GameEndpoints
         };
         var response = await handler.HandleAsync(command, CancellationToken.None);
 
-        // Broadcast player joined event
+        // Broadcast game updated event (contains all player information)
         if (response != null)
         {
             var joinedPlayer = response.Players?.FirstOrDefault(p => p.Name == requestPayload.PlayerName);
             if (joinedPlayer != null)
             {
-                var playerJoinedMessage = new GameUpdateMessage
-                {
-                    Type = GameUpdateMessageTypes.PlayerJoined,
-                    Data = joinedPlayer,
-                    GameCode = requestPayload.GameCode
-                };
-                
-                _ = Task.Run(async () => await webPubSubService.BroadcastToGameAsync(requestPayload.GameCode, playerJoinedMessage));
+                Console.WriteLine($"Player {joinedPlayer.Name} (ID: {joinedPlayer.Id}) successfully joined game {requestPayload.GameCode}");
+            }
+            else
+            {
+                Console.WriteLine($"Warning: Could not find joined player {requestPayload.PlayerName} in response players list");
             }
 
-            // Also broadcast full game update
+            // Broadcast full game update (this contains the new player information)
+            var broadcastData = new GameStateBroadcastResponse(
+                response.GameCode,
+                response.Status,
+                response.Players ?? new List<PlayerResponse>(),
+                response.IsPasswordProtected,
+                response.Settings);
+            
             var gameUpdatedMessage = new GameUpdateMessage
             {
                 Type = GameUpdateMessageTypes.GameUpdated,
-                Data = response,
+                Data = broadcastData,
                 GameCode = requestPayload.GameCode
             };
             
-            _ = Task.Run(async () => await webPubSubService.BroadcastToGameAsync(requestPayload.GameCode, gameUpdatedMessage));
+            Console.WriteLine($"Broadcasting GameUpdated message for game {requestPayload.GameCode} with {response.Players?.Count() ?? 0} players");
+            await webPubSubService.BroadcastToGameAsync(requestPayload.GameCode, gameUpdatedMessage);
         }
 
         return Results.Ok(response);
@@ -252,7 +257,8 @@ public static class GameEndpoints
 
     private static async Task<IResult> SetPlayerReadyStatus(
         [FromBody] SetPlayerReadyStatusRequest requestPayload,
-        [FromServices] ICommandHandler<SetPlayerReadyStatusCommand, GameDetailsResponse> handler)
+        [FromServices] ICommandHandler<SetPlayerReadyStatusCommand, GameDetailsResponse> handler,
+        [FromServices] HexMaster.MemeIt.Core.Services.IWebPubSubService webPubSubService)
     {
         var playerId = requestPayload?.PlayerId;
         var gameCode = requestPayload?.GameCode;
@@ -266,6 +272,17 @@ public static class GameEndpoints
         }
         var command = new SetPlayerReadyStatusCommand(playerId, gameCode, requestPayload?.IsReady ?? false);
         var response = await handler.HandleAsync(command, CancellationToken.None);
+
+        // Broadcast player ready status changed event
+        var playerReadyStatusChangedMessage = new GameUpdateMessage
+        {
+            Type = GameUpdateMessageTypes.PlayerReadyStatusChanged,
+            Data = new { playerId, isReady = requestPayload?.IsReady ?? false },
+            GameCode = gameCode
+        };
+        
+        _ = Task.Run(async () => await webPubSubService.BroadcastToGameAsync(gameCode, playerReadyStatusChangedMessage));
+
         return Results.Ok(response);
     }
 

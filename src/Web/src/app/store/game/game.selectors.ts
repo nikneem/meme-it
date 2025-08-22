@@ -8,11 +8,6 @@ export const selectCurrentGame = createSelector(
   (state) => state.currentGame
 );
 
-export const selectCurrentPlayer = createSelector(
-  selectGameState,
-  (state) => state.currentPlayer
-);
-
 export const selectIsLoading = createSelector(
   selectGameState,
   (state) => state.isLoading
@@ -28,16 +23,10 @@ export const selectIsInLobby = createSelector(
   (state) => state.isInLobby
 );
 
-export const selectIsHost = createSelector(
-  selectCurrentPlayer,
-  (player) => player?.isHost ?? false
-);
-
 export const selectCanStartGame = createSelector(
   selectCurrentGame,
-  selectIsHost,
-  (game, isHost) => {
-    if (!game || !isHost) return false;
+  (game) => {
+    if (!game) return false;
     return game.players.length >= 2 && game.players.every(p => p.isReady);
   }
 );

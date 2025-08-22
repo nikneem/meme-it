@@ -9,7 +9,7 @@ export const createGame = createAction(
 
 export const createGameSuccess = createAction(
   '[Game] Create Game Success',
-  props<{ game: Game; player: Player }>()
+  props<{ game: Game }>()
 );
 
 export const createGameFailure = createAction(
@@ -25,7 +25,7 @@ export const joinGame = createAction(
 
 export const joinGameSuccess = createAction(
   '[Game] Join Game Success',
-  props<{ game: Game; player: Player }>()
+  props<{ game: Game }>()
 );
 
 export const joinGameFailure = createAction(
@@ -121,7 +121,7 @@ export const restoreGameState = createAction('[Game] Restore Game State');
 
 export const restoreGameStateSuccess = createAction(
   '[Game] Restore Game State Success',
-  props<{ game: Game; player: Player; isInLobby: boolean }>()
+  props<{ game: Game; isInLobby: boolean }>()
 );
 
 export const restoreGameStateFailure = createAction('[Game] Restore Game State Failure');
@@ -150,7 +150,7 @@ export const refreshGameStateFromServer = createAction(
 
 export const refreshGameStateFromServerSuccess = createAction(
   '[Game] Refresh Game State From Server Success',
-  props<{ game: Game; player: Player }>()
+  props<{ game: Game }>()
 );
 
 export const refreshGameStateFromServerFailure = createAction(
@@ -166,7 +166,7 @@ export const setPlayerReadyStatus = createAction(
 
 export const setPlayerReadyStatusSuccess = createAction(
   '[Game] Set Player Ready Status Success',
-  props<{ game: Game; player: Player }>()
+  props<{ game: Game }>()
 );
 
 export const setPlayerReadyStatusFailure = createAction(

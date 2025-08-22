@@ -15,13 +15,12 @@ import { ConfirmationService } from 'primeng/api';
 import { Game, Player } from '../../store/game/game.models';
 import { WebPubSubService, WebSocketConnectionStatus } from '../../services/web-pubsub.service';
 import { 
-  selectCurrentGame, 
-  selectCurrentPlayer, 
-  selectIsHost, 
+  selectCurrentGame,
   selectCanStartGame,
   selectPlayerCount,
   selectGameCode 
 } from '../../store/game/game.selectors';
+import { selectCurrentPlayer, selectIsCurrentPlayerHost } from '../../store/player/player.selectors';
 import { leaveGame, setPlayerReadyStatus, startGame, kickPlayer, ensureWebPubSubConnection } from '../../store/game/game.actions';
 import { BreakoutGameComponent } from '../../shared/components/breakout-game/breakout-game.component';
 
@@ -62,7 +61,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   ) {
     this.currentGame$ = this.store.select(selectCurrentGame);
     this.currentPlayer$ = this.store.select(selectCurrentPlayer);
-    this.isHost$ = this.store.select(selectIsHost);
+    this.isHost$ = this.store.select(selectIsCurrentPlayerHost);
     this.canStartGame$ = this.store.select(selectCanStartGame);
     this.playerCount$ = this.store.select(selectPlayerCount);
     this.gameCode$ = this.store.select(selectGameCode);

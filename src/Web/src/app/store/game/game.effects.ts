@@ -1,15 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Router } from '@angular/router';
-import { catchError, map, switchMap, tap, withLatestFrom, takeUntil, filter } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, withLatestFrom, takeUntil, filter, take } from 'rxjs/operators';
 import { of, Subject, EMPTY } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { GameService } from '../../services/game.service';
 import { GamePersistenceService } from '../../shared/services/game-persistence.service';
 import { WebPubSubService, GameUpdateMessageTypes, GameUpdateMessage } from '../../services/web-pubsub.service';
 import { WebPubSubConnectionService } from '../../services/web-pubsub-connection.service';
-import { selectCurrentGame, selectCurrentPlayer, selectIsInLobby } from './game.selectors';
+import { selectCurrentGame, selectIsInLobby } from './game.selectors';
+import { selectCurrentPlayer } from '../player/player.selectors';
 import * as GameActions from './game.actions';
+import * as PlayerActions from '../player/player.actions';
 
 @Injectable()
 export class GameEffects {
@@ -29,7 +31,10 @@ export class GameEffects {
       ofType(GameActions.createGame),
       switchMap(({ request }) =>
         this.gameService.createGame(request).pipe(
-          map(({ game, player }) => GameActions.createGameSuccess({ game, player })),
+          switchMap(({ game, player }) => [
+            GameActions.createGameSuccess({ game }),
+            PlayerActions.setCurrentPlayer({ player })
+          ]),
           catchError((error) => 
             of(GameActions.createGameFailure({ error: error.message || 'Failed to create game' }))
           )
@@ -60,7 +65,10 @@ export class GameEffects {
       ofType(GameActions.joinGame),
       switchMap(({ request }) =>
         this.gameService.joinGame(request).pipe(
-          map(({ game, player }) => GameActions.joinGameSuccess({ game, player })),
+          switchMap(({ game, player }) => [
+            GameActions.joinGameSuccess({ game }),
+            PlayerActions.setCurrentPlayer({ player })
+          ]),
           catchError((error) =>
             of(GameActions.joinGameFailure({ error: error.message || 'Failed to join game' }))
           )
@@ -143,19 +151,24 @@ export class GameEffects {
   refreshGameStateFromServer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.refreshGameStateFromServer),
-      switchMap(({ gameCode, playerId, playerName }) =>
-        this.gameService.validateGameAndPlayer(gameCode, playerId, playerName).pipe(
-          map(response => {
+      switchMap(({ gameCode, playerId, playerName }) => {
+        console.log('Effect: Starting server refresh for', { gameCode, playerId, playerName });
+        return this.gameService.validateGameAndPlayer(gameCode, playerId, playerName).pipe(
+          switchMap(response => {
+            console.log('Effect: Server validation response', response);
             if (response.isValid) {
-              return GameActions.refreshGameStateFromServerSuccess({
-                game: response.game,
-                player: response.player
-              });
+              return [
+                GameActions.refreshGameStateFromServerSuccess({
+                  game: response.game
+                }),
+                PlayerActions.setCurrentPlayer({ player: response.player })
+              ];
             } else {
               throw new Error('Player is no longer in the game or game does not exist');
             }
           }),
           catchError(error => {
+            console.error('Effect: Server refresh failed', error);
             // Clear invalid persisted state
             this.gamePersistenceService.clearGameState();
             this.router.navigate(['/home']);
@@ -164,7 +177,7 @@ export class GameEffects {
             }));
           })
         )
-      )
+      })
     )
   );
 
@@ -172,7 +185,9 @@ export class GameEffects {
   refreshGameStateFromServerSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.refreshGameStateFromServerSuccess),
-      tap(({ game, player }) => {
+      withLatestFrom(this.store.select(selectCurrentPlayer)),
+      tap(([{ game }, player]) => {
+        console.log('Effect: Server refresh successful, updating persistence', { game, player });
         // Update persisted state with fresh data from server
         this.gamePersistenceService.saveGameState(game, player, true);
       })
@@ -184,7 +199,9 @@ export class GameEffects {
   refreshGameStateFromServerSuccessWebPubSub$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.refreshGameStateFromServerSuccess),
-      map(({ game, player }) => {
+      withLatestFrom(this.store.select(selectCurrentPlayer)),
+      map(([{ game }, player]) => {
+        console.log('Effect: Server refresh successful, attempting WebPubSub connection', { gameCode: game.code, playerId: player?.id });
         if (game && player) {
           return GameActions.connectToWebPubSub({ 
             gameCode: game.code, 
@@ -276,9 +293,10 @@ export class GameEffects {
         }
         
         return this.gameService.setPlayerReadyStatus(game.code, player.id, action.isReady).pipe(
-          map(({ game: updatedGame, player: updatedPlayer }) => 
-            GameActions.setPlayerReadyStatusSuccess({ game: updatedGame, player: updatedPlayer })
-          ),
+          switchMap(({ game: updatedGame, player: updatedPlayer }) => [
+            GameActions.setPlayerReadyStatusSuccess({ game: updatedGame }),
+            PlayerActions.updatePlayerReadyStatus({ isReady: updatedPlayer.isReady })
+          ]),
           catchError((error) =>
             of(GameActions.setPlayerReadyStatusFailure({ error: error.message || 'Failed to set ready status' }))
           )
@@ -291,11 +309,12 @@ export class GameEffects {
     this.actions$.pipe(
       ofType(GameActions.setPlayerReadyStatusSuccess),
       withLatestFrom(
+        this.store.select(selectCurrentPlayer),
         this.store.select(selectIsInLobby)
       ),
-      tap(([action, isInLobby]) => {
+      tap(([action, player, isInLobby]) => {
         // Update persisted state with new data
-        this.gamePersistenceService.saveGameState(action.game, action.player, isInLobby);
+        this.gamePersistenceService.saveGameState(action.game, player, isInLobby);
       })
     ),
     { dispatch: false }
@@ -376,11 +395,14 @@ export class GameEffects {
   connectToWebPubSub$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.connectToWebPubSub),
-      switchMap(({ gameCode, playerId }) =>
-        this.webPubSubConnectionService.getConnectionUrl(gameCode, playerId).pipe(
+      switchMap(({ gameCode, playerId }) => {
+        console.log('Effect: Starting WebPubSub connection', { gameCode, playerId });
+        return this.webPubSubConnectionService.getConnectionUrl(gameCode, playerId).pipe(
           switchMap((connectionResponse) => {
+            console.log('Effect: WebPubSub connection URL received', connectionResponse);
             if (connectionResponse.isSuccess) {
               return this.webPubSubService.connect(connectionResponse.connectionUrl, gameCode).then(() => {
+                console.log('Effect: WebPubSub connected successfully');
                 // Start listening to messages after successful connection
                 this.startListeningToMessages();
                 return GameActions.connectToWebPubSubSuccess({ 
@@ -388,23 +410,26 @@ export class GameEffects {
                   gameCode 
                 });
               }).catch((error) => {
+                console.error('Effect: WebPubSub connection failed', error);
                 return GameActions.connectToWebPubSubFailure({ 
                   error: error.message || 'Failed to connect to WebPubSub' 
                 });
               });
             } else {
+              console.error('Effect: Failed to get WebPubSub connection URL', connectionResponse.errorMessage);
               return of(GameActions.connectToWebPubSubFailure({ 
                 error: connectionResponse.errorMessage || 'Failed to get connection URL' 
               }));
             }
           }),
-          catchError((error) =>
-            of(GameActions.connectToWebPubSubFailure({ 
+          catchError((error) => {
+            console.error('Effect: WebPubSub connection error', error);
+            return of(GameActions.connectToWebPubSubFailure({ 
               error: error.message || 'Failed to connect to WebPubSub' 
-            }))
-          )
+            }));
+          })
         )
-      )
+      })
     )
   );
 
@@ -521,10 +546,35 @@ export class GameEffects {
         
         switch (message.type) {
           case GameUpdateMessageTypes.GAME_UPDATED:
+            console.log('WebPubSub: Received GAME_UPDATED message:', {
+              messageData: message.data,
+              playerCount: message.data?.players?.length,
+              players: message.data?.players?.map((p: any) => ({ id: p.id, name: p.name })),
+              timestamp: new Date().toISOString()
+            });
             this.store.dispatch(GameActions.realTimeGameUpdated({ game: message.data }));
             break;
             
           case GameUpdateMessageTypes.PLAYER_JOINED:
+            console.log('WebPubSub: Received PLAYER_JOINED message:', {
+              messageData: message.data,
+              playerId: message.data?.id,
+              playerName: message.data?.name,
+              timestamp: new Date().toISOString(),
+              fullMessage: message
+            });
+            
+            // Get current game state for debugging
+            this.store.select(selectCurrentGame).pipe(
+              take(1)
+            ).subscribe(currentGame => {
+              console.log('Current game state when PLAYER_JOINED received:', {
+                currentGame: currentGame,
+                existingPlayers: currentGame?.players?.map((p: any) => ({ id: p.id, name: p.name })),
+                newPlayerAlreadyExists: currentGame?.players?.some((p: any) => p.id === message.data?.id)
+              });
+            });
+            
             this.store.dispatch(GameActions.realTimePlayerJoined({ player: message.data }));
             break;
             
