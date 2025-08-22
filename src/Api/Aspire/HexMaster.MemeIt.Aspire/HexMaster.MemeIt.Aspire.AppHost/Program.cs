@@ -7,7 +7,7 @@ using HexMaster.MemeIt.Aspire;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var redis = builder.AddRedis(AspireConstants.RedisCacheName, 64820)
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithLifetime(ContainerLifetime.Session);
 
 var orleans = builder.AddOrleans(AspireConstants.MemeItOrleansCluster)
     .WithClustering(redis)

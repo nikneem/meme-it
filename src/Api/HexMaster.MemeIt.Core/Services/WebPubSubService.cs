@@ -42,10 +42,9 @@ public class WebPubSubService : IWebPubSubService
             
             // Generate client access URI with specific permissions
             var clientAccessUri = await _webPubSubClient.GetClientAccessUriAsync(
-                userId: userId ?? playerId,
-                roles: new[] { "webpubsub.joinLeaveGroup", "webpubsub.sendToGroup" },
-                groups: new[] { groupName },
-                expiresAfter: TimeSpan.FromHours(2) // Token valid for 2 hours
+                DateTimeOffset.UtcNow.AddHours(1),
+                userId ?? playerId,
+                new[] { $"webpubsub.joinLeaveGroup.{groupName}", $"webpubsub.sendToGroup.{groupName}" }
             );
 
             return new WebPubSubConnectionResponse

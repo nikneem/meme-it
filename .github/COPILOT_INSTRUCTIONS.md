@@ -6,7 +6,8 @@ MemeIt is an online multiplayer party game written in C# using the latest langua
 ## Technology Stack
 - **Language:** C# (latest features)
 - **Framework:** .NET 9
-- **Orchestration:** .NET Aspire
+- **Orchestration:** .NET Aspire (manages both backend and frontend services)
+- **Frontend:** Angular (TypeScript, SCSS) - orchestrated through Aspire
 - **State Management:** Microsoft Orleans (for game state)
 - **Testing:** xUnit (with plain .NET Assert statements)
 
@@ -17,18 +18,35 @@ MemeIt is an online multiplayer party game written in C# using the latest langua
 - Implement proper error handling and validation.
 
 ## Running the Project Locally
-To run the full application locally, use the Aspire App Host. This will start all required services including the Angular frontend and configure inter-service communication automatically:
+To run the full application locally, use the Aspire App Host. This will start and orchestrate all required services including the Angular frontend, backend APIs, and databases, and configure inter-service communication automatically:
 
 ```powershell
 dotnet run --project "src/Api/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost"
 ```
 
-**Important:** The Angular frontend application is automatically started by the .NET Aspire host and will be available at `http://localhost:4200`. There is no need to start the frontend project manually using `npm start` or `ng serve`.
+**Important:** Both the backend APIs and the Angular frontend application are fully orchestrated and automatically started by the .NET Aspire host. The frontend will be available at its designated port (typically `http://localhost:4200` or another assigned port). There is no need to start any services manually using `npm start`, `ng serve`, or separate `dotnet run` commands.
+
+### VS Code Tasks
+The project includes comprehensive VS Code tasks in `.vscode/tasks.json` for common development operations:
+- **`build-all`** (default build): Install frontend deps, build backend, build frontend
+- **`start-aspire`**: Start Aspire orchestration with proper background task handling
+- **`dev`**: Complete development workflow - build all then start Aspire
+- **`run-tests`**: Execute all backend unit tests
+- **`clean-all`** / **`rebuild-all`**: Clean and rebuild operations
+
+Use `Ctrl+Shift+P` → "Tasks: Run Task" in VS Code to access these tasks, or `Ctrl+Shift+B` for the default build task.
 
 ## Development Environment Guidelines
 - **Terminal Usage:** Always reuse existing terminals when possible. Avoid opening new terminal windows unnecessarily.
-- **Application Startup:** Use the single Aspire AppHost command to start the entire application stack (backend APIs, frontend, databases, etc.).
-- **Frontend Access:** Once Aspire is running, access the Angular application directly at `http://localhost:4200`.
+- **Application Startup:** Use the single Aspire AppHost command to start the entire application stack. All services (backend APIs, Angular frontend, databases, etc.) are orchestrated and managed through .NET Aspire.
+- **Frontend Access:** Once Aspire is running, access the Angular application at the port assigned by Aspire orchestration (check the Aspire dashboard for the exact URL).
+- **Service Dependencies:** All inter-service communication and port assignments are handled automatically by Aspire. Manual service startup is not required and should be avoided.
+- **VS Code Tasks:** Use the predefined VS Code tasks for common operations:
+  - `build-all`: Build both backend and frontend (default build task)
+  - `start-aspire`: Start the Aspire orchestration
+  - `dev`: Build everything and start development environment
+  - `run-tests`: Execute unit tests
+  - `clean-all` / `rebuild-all`: Clean and rebuild operations
 
 ## API Design
 - Prefer minimal APIs where possible for new endpoints.
