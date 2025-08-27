@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { GameLobbyGuard } from './guards/game-lobby.guard';
+import { GameActiveGuard } from './guards/game-active.guard';
 
 export const routes: Routes = [
     {
@@ -18,6 +19,11 @@ export const routes: Routes = [
                 path: 'game/lobby',
                 loadComponent: () => import('./pages/game/game-lobby.component').then(m => m.GameLobbyComponent),
                 canActivate: [GameLobbyGuard]
+            },
+            {
+                path: 'game/active',
+                loadComponent: () => import('./pages/game/game-active.component').then(m => m.GameActiveComponent),
+                canActivate: [GameActiveGuard]
             },
             // Add more public routes here (game pages, about, etc.)
             { path: '', redirectTo: 'home', pathMatch: 'full' }

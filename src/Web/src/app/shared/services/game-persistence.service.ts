@@ -9,11 +9,19 @@ export interface PersistedGameState {
   timestamp: number; // To handle expiration
 }
 
+export interface RoundTimerState {
+  gameCode: string;
+  roundNumber: number;
+  startTime: number;
+  timePerRound: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class GamePersistenceService {
   private readonly STORAGE_KEY = 'meme-it-game-state';
+  private readonly TIMER_STORAGE_KEY = 'meme-it-round-timer';
   private readonly EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
   saveGameState(game: Game | null, player: Player | null, isInLobby: boolean): void {
@@ -71,5 +79,33 @@ export class GamePersistenceService {
            !!gameState.gameCode && 
            !!gameState.playerId && 
            !!gameState.playerName;
+  }
+
+  saveRoundTimerState(timerState: RoundTimerState): void {
+    try {
+      localStorage.setItem(this.TIMER_STORAGE_KEY, JSON.stringify(timerState));
+    } catch (error) {
+      console.warn('Failed to save round timer state to localStorage:', error);
+    }
+  }
+
+  getRoundTimerState(): RoundTimerState | null {
+    try {
+      const stored = localStorage.getItem(this.TIMER_STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (error) {
+      console.warn('Failed to load round timer state from localStorage:', error);
+    }
+    return null;
+  }
+
+  clearRoundTimerState(): void {
+    try {
+      localStorage.removeItem(this.TIMER_STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear round timer state from localStorage:', error);
+    }
   }
 }

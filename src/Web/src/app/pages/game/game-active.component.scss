@@ -1,0 +1,39 @@
+// Game Active Component Styles
+
+.game-active-container {
+  min-height: 100vh;
+}
+
+.meme-preview-container {
+  position: relative;
+  display: inline-block;
+}
+
+.meme-text-overlay {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  padding: 4px;
+  word-wrap: break-word;
+  line-height: 1.2;
+}
+
+.timer-critical {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.text-input-counter {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}

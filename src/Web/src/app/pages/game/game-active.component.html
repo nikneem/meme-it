@@ -1,0 +1,147 @@
+<div class="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 p-4">
+  <div class="max-w-6xl mx-auto">
+    
+    <!-- Header with Round Info and Timer -->
+    <div class="text-center mb-8">
+      <div class="bg-white/20 backdrop-blur-sm rounded-lg p-6 inline-block min-w-96">
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-white">
+            <h1 class="text-3xl font-bold mb-2">Round {{ roundState().currentRound }} of {{ roundState().totalRounds }}</h1>
+            <p class="text-lg opacity-80">Create your meme!</p>
+          </div>
+        </div>
+        
+        <!-- Timer -->
+        <div class="space-y-2">
+          <div class="flex justify-between text-white text-sm">
+            <span>Time Remaining</span>
+            <span class="font-mono font-bold">{{ timeDisplay() }}</span>
+          </div>
+          <p-progressBar 
+            [value]="timePercentage()" 
+            [showValue]="false"
+            styleClass="h-3">
+          </p-progressBar>
+        </div>
+        
+        <!-- Round Status -->
+        <div class="mt-4" *ngIf="roundState().isCompleted">
+          <p-tag value="Round Complete" severity="success" styleClass="text-lg px-4 py-2"></p-tag>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" *ngIf="!isLoading() && currentMeme(); else loadingTemplate">
+      
+      <!-- Meme Preview -->
+      <div class="space-y-4">
+        <p-card header="Your Meme" styleClass="bg-white/10 backdrop-blur-sm border-0">
+          <div class="relative inline-block mx-auto" *ngIf="currentMeme() as meme">
+            <!-- Background Image -->
+            <img 
+              [src]="meme.sourceImageUrl" 
+              [alt]="meme.name"
+              class="max-w-full h-auto rounded-lg shadow-lg"
+              [style.max-width.px]="Math.min(meme.sourceWidth, 500)" />
+            
+            <!-- Text Overlays -->
+            <div 
+              *ngFor="let textArea of meme.textAreas; let i = index"
+              class="absolute flex items-center justify-center text-center font-bold text-white"
+              [style.left.%]="(textArea.x / meme.sourceWidth) * 100"
+              [style.top.%]="(textArea.y / meme.sourceHeight) * 100"
+              [style.width.%]="(textArea.width / meme.sourceWidth) * 100"
+              [style.height.%]="(textArea.height / meme.sourceHeight) * 100"
+              [style.font-size.px]="Math.max(12, textArea.fontSize * 0.8)"
+              [style.color]="textArea.fontColor || '#FFFFFF'"
+              [style.font-family]="textArea.fontFamily || 'Arial, sans-serif'"
+              [style.font-weight]="textArea.fontBold ? 'bold' : 'normal'"
+              [style.text-shadow]="'2px 2px 4px rgba(0,0,0,0.8)'"
+              [style.padding]="'4px'">
+              {{ getMemeTextInput(i)?.value || 'Type your text...' }}
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Text Input Controls -->
+      <div class="space-y-4">
+        <p-card header="Add Your Text" styleClass="bg-white/10 backdrop-blur-sm border-0">
+          <div class="space-y-4">
+            <div 
+              *ngFor="let textInput of memeTextInputs(); let i = index"
+              class="space-y-2">
+              <label 
+                [for]="'text-input-' + i" 
+                class="block text-white font-medium">
+                Text Area {{ i + 1 }}
+              </label>
+              <input 
+                pInputText 
+                [id]="'text-input-' + i"
+                [value]="textInput.value"
+                [attr.maxlength]="textInput.maxLength"
+                [placeholder]="'Enter text for area ' + (i + 1)"
+                [disabled]="roundState().isCompleted"
+                class="w-full"
+                (input)="onTextInputChange(textInput.id, $any($event.target).value)" />
+              <div class="text-right text-xs text-white/70">
+                {{ textInput.value.length }} / {{ textInput.maxLength }}
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3 pt-4">
+              <p-button 
+                label="Save Meme"
+                icon="pi pi-save"
+                styleClass="w-full p-button-success p-button-lg"
+                [disabled]="!canSaveMeme() || roundState().isCompleted"
+                [loading]="isSaving()"
+                (onClick)="saveMeme()">
+              </p-button>
+
+              <p-button 
+                label="Leave Game"
+                icon="pi pi-sign-out"
+                severity="danger"
+                styleClass="w-full p-button-outlined"
+                [disabled]="isSaving()"
+                (onClick)="onLeaveGame()">
+              </p-button>
+            </div>
+
+            <!-- Help Text -->
+            <div class="text-sm text-white/80 bg-white/10 rounded-lg p-3 mt-4">
+              <h4 class="font-semibold mb-2">💡 Tips:</h4>
+              <ul class="space-y-1">
+                <li>• Type your text in the input fields above</li>
+                <li>• Your text will appear on the meme preview in real-time</li>
+                <li>• Make it funny to score more points!</li>
+                <li>• Save your meme before time runs out</li>
+              </ul>
+            </div>
+          </div>
+        </p-card>
+      </div>
+    </div>
+
+    <!-- Loading Template -->
+    <ng-template #loadingTemplate>
+      <div class="text-center">
+        <p-card styleClass="bg-white/10 backdrop-blur-sm border-0 inline-block">
+          <div class="space-y-4">
+            <i class="pi pi-spin pi-spinner text-4xl text-white"></i>
+            <p class="text-white text-xl">Loading your meme...</p>
+            <p class="text-white/70">Please wait while we prepare the round</p>
+          </div>
+        </p-card>
+      </div>
+    </ng-template>
+
+  </div>
+  
+  <!-- Toast Messages -->
+  <p-toast position="top-right"></p-toast>
+</div>

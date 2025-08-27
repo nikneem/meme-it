@@ -349,8 +349,21 @@ export class GameEffects {
     this.actions$.pipe(
       ofType(GameActions.startGameSuccess),
       tap(({ game }) => {
-        // Navigate to game or update state as needed
+        // Navigate to active game page when game starts
         console.log('Game started successfully:', game);
+        this.router.navigate(['/game/active']);
+      })
+    ),
+    { dispatch: false }
+  );
+
+  // Navigation effect for real-time game start events
+  realTimeGameStarted$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.realTimeGameStarted),
+      tap(({ game }) => {
+        console.log('Real-time game started event received:', game);
+        this.router.navigate(['/game/active']);
       })
     ),
     { dispatch: false }

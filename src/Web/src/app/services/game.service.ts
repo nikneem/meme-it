@@ -106,6 +106,11 @@ export class GameService {
     );
   }
 
+  getRandomMemeForPlayer(gameCode: string, playerId: string): Observable<any> {
+    const request = { gameCode, playerId };
+    return this.http.post<any>(`${this.baseUrl}/random-memes`, request);
+  }
+
   validateGameAndPlayer(gameCode: string, playerId: string, playerName: string): Observable<GameValidationResponse> {
     return this.getGame(gameCode, playerId).pipe(
       map(game => {

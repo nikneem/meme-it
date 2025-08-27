@@ -12,6 +12,8 @@ using HexMaster.MemeIt.Games.Features.SetPlayerReadyStatus;
 using HexMaster.MemeIt.Games.Features.StartGame;
 using HexMaster.MemeIt.Games.Features.UpdateSettings;
 using HexMaster.MemeIt.Games.ValueObjects;
+using HexMaster.MemeIt.Memes.Abstractions;
+using HexMaster.MemeIt.Memes.Models;
 using Localizr.Core.Abstractions.Cqrs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -71,6 +73,11 @@ public static class GameEndpoints
             .WithName(nameof(GetWebPubSubConnection))
             .Produces(StatusCodes.Status200OK)
             .ProducesValidationProblem();
+
+        group.MapPost("/random-memes", GetRandomMemesForGame)
+            .WithName(nameof(GetRandomMemesForGame))
+            .Produces(StatusCodes.Status200OK)
+            .ProducesValidationProblem();
     }
     private static async Task<IResult> LeaveGame(
         [FromBody] LeaveGameRequest requestPayload,
@@ -124,25 +131,6 @@ public static class GameEndpoints
         var command = new KickPlayerCommand(hostPlayerId, targetPlayerId, gameCode);
         var response = await handler.HandleAsync(command, CancellationToken.None);
         return Results.Ok(response);
-    }
-
-    private static async Task<IResult> StartGame(
-        [FromBody] StartGameRequest requestPayload,
-        [FromServices] ICommandHandler<StartGameCommand, object> handler)
-    {
-        var playerId = requestPayload?.PlayerId;
-        var gameCode = requestPayload?.GameCode;
-        if (string.IsNullOrWhiteSpace(playerId) || string.IsNullOrWhiteSpace(gameCode))
-        {
-            return Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                { "PlayerId", ["PlayerId is required."] },
-                { "GameCode", ["GameCode is required."] }
-            });
-        }
-        var command = new StartGameCommand(playerId, gameCode);
-        await handler.HandleAsync(command, CancellationToken.None);
-        return Results.Ok();
     }
 
     private static async Task<IResult> UpdateSettings(
@@ -286,6 +274,45 @@ public static class GameEndpoints
         return Results.Ok(response);
     }
 
+    private static async Task<IResult> StartGame(
+        [FromBody] StartGameRequest requestPayload,
+        [FromServices] ICommandHandler<StartGameCommand, GameDetailsResponse> handler,
+        [FromServices] IWebPubSubService webPubSubService)
+    {
+        var playerId = requestPayload?.PlayerId;
+        var gameCode = requestPayload?.GameCode;
+
+        if (string.IsNullOrWhiteSpace(playerId) || string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { "PlayerId", ["PlayerId is required."] },
+                { "GameCode", ["GameCode is required."] }
+            });
+        }
+
+        var command = new StartGameCommand(playerId, gameCode);
+        var response = await handler.HandleAsync(command, CancellationToken.None);
+
+        // Broadcast game started event
+        var gameStartedMessage = new GameUpdateMessage
+        {
+            Type = GameUpdateMessageTypes.GameStarted,
+            Data = new
+            {
+                gameCode,
+                status = "InProgress",
+                startedAt = DateTime.UtcNow,
+                startedBy = playerId
+            },
+            GameCode = gameCode
+        };
+
+        _ = Task.Run(async () => await webPubSubService.BroadcastToGameAsync(gameCode, gameStartedMessage));
+
+        return Results.Ok(response);
+    }
+
     private static async Task<IResult> GetWebPubSubConnection(
         [FromBody] WebPubSubConnectionRequest requestPayload,
         [FromServices] IQueryHandler<GetGameQuery, OperationResult<GameDetailsResponse>> gameHandler,
@@ -330,6 +357,113 @@ public static class GameEndpoints
         catch (Exception)
         {
             return Results.Problem("Failed to generate Web PubSub connection", statusCode: 500);
+        }
+    }
+
+    private static async Task<IResult> GetRandomMemesForGame(
+        [FromBody] GetRandomMemesRequest requestPayload,
+        [FromServices] IQueryHandler<GetGameQuery, OperationResult<GameDetailsResponse>> gameHandler,
+        [FromServices] HexMaster.MemeIt.Memes.Abstractions.IMemeTemplateRepository memeRepository)
+    {
+        var gameCode = requestPayload?.GameCode;
+        var playerId = requestPayload?.PlayerId;
+
+        if (string.IsNullOrWhiteSpace(gameCode) || string.IsNullOrWhiteSpace(playerId))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                { "GameCode", ["GameCode is required."] },
+                { "PlayerId", ["PlayerId is required."] }
+            });
+        }
+
+        try
+        {
+            // First validate that the player exists in the game and game is active
+            var query = new GetGameQuery(gameCode, playerId);
+            var gameResult = await gameHandler.HandleAsync(query, CancellationToken.None);
+
+            if (!gameResult.Success)
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    { "Game", ["Game not found or player is not part of this game."] }
+                });
+            }
+
+            var game = gameResult.ResponseObject;
+            if (game?.Players?.Any(p => p.Id == playerId) != true)
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    { "Player", ["Player is not part of this game."] }
+                });
+            }
+
+            // Only allow this when game is active/in progress
+            if (game.Status != "Active" && game.Status != "InProgress")
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    { "Game", ["Game must be active to get random memes."] }
+                });
+            }
+
+            // Get all available memes
+            var allMemes = await memeRepository.GetAllAsync();
+            var memeList = allMemes.ToList();
+
+            if (!memeList.Any())
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    { "Memes", ["No memes available."] }
+                });
+            }
+
+            // Select a random meme for this player
+            var random = new Random();
+            var randomIndex = random.Next(0, memeList.Count);
+            var selectedMeme = memeList[randomIndex];
+
+            var response = new GetRandomMemeResponse
+            {
+                PlayerId = playerId,
+                GameCode = gameCode,
+                MemeTemplate = new RandomMemeTemplateResponse
+                {
+                    Id = selectedMeme.Id,
+                    Name = selectedMeme.Name,
+                    Description = selectedMeme.Description ?? string.Empty,
+                    ImageUrl = selectedMeme.SourceImageUrl,
+                    SourceWidth = selectedMeme.SourceWidth,
+                    SourceHeight = selectedMeme.SourceHeight,
+                    TextAreas = selectedMeme.TextAreas.Select((ta, index) => new RandomMemeTextAreaResponse
+                    {
+                        Id = index.ToString(), // Using index as ID since TextArea doesn't have ID
+                        X = ta.X,
+                        Y = ta.Y,
+                        Width = ta.Width,
+                        Height = ta.Height,
+                        MaxLength = ta.MaxLength,
+                        FontSize = ta.FontSize,
+                        FontFamily = ta.FontFamily,
+                        Color = ta.FontColor,
+                        IsBold = ta.FontBold,
+                        IsItalic = false, // Not available in current model
+                        IsUnderline = false, // Not available in current model
+                        TextAlign = "left", // Default value
+                        VerticalAlign = "middle" // Default value
+                    }).ToList()
+                },
+                AssignedAt = DateTime.UtcNow
+            };
+
+            return Results.Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem($"Failed to get random meme: {ex.Message}", statusCode: 500);
         }
     }
 }
