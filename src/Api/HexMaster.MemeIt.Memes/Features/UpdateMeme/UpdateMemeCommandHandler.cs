@@ -2,6 +2,7 @@ using HexMaster.MemeIt.Core.DataTransferObjects;
 using HexMaster.MemeIt.Memes.Abstractions;
 using HexMaster.MemeIt.Memes.DataTransferObjects;
 using HexMaster.MemeIt.Memes.Models;
+using HexMaster.MemeIt.Memes.Services;
 using Localizr.Core.Abstractions.Cqrs;
 
 namespace HexMaster.MemeIt.Memes.Features.UpdateMeme;
@@ -9,10 +10,12 @@ namespace HexMaster.MemeIt.Memes.Features.UpdateMeme;
 public class UpdateMemeCommandHandler : ICommandHandler<UpdateMemeCommand, OperationResult<MemeTemplateResponse>>
 {
     private readonly IMemeTemplateRepository _repository;
+    private readonly IBlobUrlService _blobUrlService;
 
-    public UpdateMemeCommandHandler(IMemeTemplateRepository repository)
+    public UpdateMemeCommandHandler(IMemeTemplateRepository repository, IBlobUrlService blobUrlService)
     {
         _repository = repository;
+        _blobUrlService = blobUrlService;
     }
 
     public async ValueTask<OperationResult<MemeTemplateResponse>> HandleAsync(UpdateMemeCommand command, CancellationToken cancellationToken)
@@ -33,18 +36,21 @@ public class UpdateMemeCommandHandler : ICommandHandler<UpdateMemeCommand, Opera
         existingTemplate.Update(
             command.Name,
             command.Description,
-            existingTemplate.SourceImageUrl, // Keep the same source image URL
+            existingTemplate.SourceImageUrl, // Keep the same source image filename
             existingTemplate.SourceWidth,    // Keep the same dimensions
             existingTemplate.SourceHeight,
             textAreas);
 
         var updatedTemplate = await _repository.UpdateAsync(existingTemplate, cancellationToken);
         
+        // Construct full URL for response
+        var fullImageUrl = _blobUrlService.GetMemeImageUrl(updatedTemplate.SourceImageUrl);
+        
         var response = new MemeTemplateResponse(
             updatedTemplate.Id,
             updatedTemplate.Name,
             updatedTemplate.Description,
-            updatedTemplate.SourceImageUrl,
+            fullImageUrl,
             updatedTemplate.SourceWidth,
             updatedTemplate.SourceHeight,
             updatedTemplate.TextAreas.Select(ta => new MemeTextArea(

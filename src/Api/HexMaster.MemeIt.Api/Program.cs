@@ -1,4 +1,5 @@
 using HexMaster.MemeIt.Api.Endpoints;
+using HexMaster.MemeIt.Api.Services;
 using HexMaster.MemeIt.Games.ExtensionMethods;
 using HexMaster.MemeIt.Memes.ExtensionMethods;
 using Microsoft.AspNetCore.Http.Json;
@@ -48,6 +49,9 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
+// Register background service for meme template seeding
+builder.Services.AddHostedService<MemeTemplateSeederBackgroundService>();
 
 var app = builder.Build();
 

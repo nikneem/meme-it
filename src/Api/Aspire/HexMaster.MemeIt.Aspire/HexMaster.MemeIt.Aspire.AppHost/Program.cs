@@ -1,8 +1,17 @@
 using Aspire.Hosting;
 using Azure.Provisioning;
 using Azure.Provisioning.Storage;
-using Microsoft.Extensions.Hosting;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Queues;
 using HexMaster.MemeIt.Aspire;
+using HexMaster.MemeIt.Aspire.AppHost.Services;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -36,8 +45,36 @@ if (builder.Environment.IsDevelopment())
     });
 }
 var blobs = storage.AddBlobs(AspireConstants.BlobServiceName);
-storage.AddBlobContainer(AspireConstants.BlobUploadContainerName,AspireConstants.BlobServiceName);
-storage.AddBlobContainer(AspireConstants.BlobMemesContainerName,AspireConstants.BlobServiceName);
+storage.AddBlobContainer(AspireConstants.BlobUploadContainerName, AspireConstants.BlobServiceName);
+var memesContainer = storage.AddBlobContainer(AspireConstants.BlobMemesContainerName, AspireConstants.BlobServiceName);
+
+blobs.OnResourceReady(async (resource, @event, cancellationToken) =>
+{
+    var logger = @event.Services.GetRequiredService<ILogger<Program>>();
+    var blobSeeder = new BlobSeeder(logger, AspireConstants.BlobMemesContainerName);
+
+    try
+    {
+        var connectionString = await resource.ConnectionStringExpression.GetValueAsync(cancellationToken);
+        var blobServiceClient = new BlobServiceClient(connectionString);
+
+        // Ensure the container exists
+        try
+        {
+            var containerClient = await blobServiceClient.CreateBlobContainerAsync(AspireConstants.BlobMemesContainerName, PublicAccessType.Blob);
+        }
+        catch
+        {
+            logger.LogInformation("Blob container '{ContainerName}' already exists.", AspireConstants.BlobMemesContainerName);
+        }
+
+        await blobSeeder.SeedEmbeddedResourcesAsync(blobServiceClient, cancellationToken);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while seeding embedded meme resources");
+    }
+});
 
 // Add Azure CosmosDB (with emulator for development)
 var cosmos = builder.AddAzureCosmosDB(AspireConstants.CosmosConnection);

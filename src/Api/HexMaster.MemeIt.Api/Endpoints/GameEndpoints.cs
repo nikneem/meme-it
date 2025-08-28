@@ -363,7 +363,8 @@ public static class GameEndpoints
     private static async Task<IResult> GetRandomMemesForGame(
         [FromBody] GetRandomMemesRequest requestPayload,
         [FromServices] IQueryHandler<GetGameQuery, OperationResult<GameDetailsResponse>> gameHandler,
-        [FromServices] HexMaster.MemeIt.Memes.Abstractions.IMemeTemplateRepository memeRepository)
+        [FromServices] HexMaster.MemeIt.Memes.Abstractions.IMemeTemplateRepository memeRepository,
+        [FromServices] HexMaster.MemeIt.Memes.Services.IBlobUrlService blobUrlService)
     {
         var gameCode = requestPayload?.GameCode;
         var playerId = requestPayload?.PlayerId;
@@ -426,6 +427,9 @@ public static class GameEndpoints
             var randomIndex = random.Next(0, memeList.Count);
             var selectedMeme = memeList[randomIndex];
 
+            // Construct full URL from filename
+            var fullImageUrl = blobUrlService.GetMemeImageUrl(selectedMeme.SourceImageUrl);
+
             var response = new GetRandomMemeResponse
             {
                 PlayerId = playerId,
@@ -435,7 +439,7 @@ public static class GameEndpoints
                     Id = selectedMeme.Id,
                     Name = selectedMeme.Name,
                     Description = selectedMeme.Description ?? string.Empty,
-                    ImageUrl = selectedMeme.SourceImageUrl,
+                    ImageUrl = fullImageUrl,
                     SourceWidth = selectedMeme.SourceWidth,
                     SourceHeight = selectedMeme.SourceHeight,
                     TextAreas = selectedMeme.TextAreas.Select((ta, index) => new RandomMemeTextAreaResponse

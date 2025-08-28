@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
 
@@ -12,7 +12,40 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Memes\38iqvl.webp" />
+    <None Remove="Memes\3pdf2w.webp" />
+    <None Remove="Memes\434i5j.webp" />
+    <None Remove="Memes\51g8j3.mp4" />
+    <None Remove="Memes\5c7lwq.png" />
+    <None Remove="Memes\5mir21.jpg" />
+    <None Remove="Memes\8d317n.webp" />
+    <None Remove="Memes\always-has-been.webp" />
+    <None Remove="Memes\bernie-sanders.webp" />
+    <None Remove="Memes\cartoon.jpg" />
+    <None Remove="Memes\elf.png" />
+    <None Remove="Memes\hands-up.webp" />
+    <None Remove="Memes\schoolbus-vs-train.webp" />
+    <None Remove="Memes\sneak-behind-tree.webp" />
+    <None Remove="Memes\talking-to-wall.mp4" />
+    <None Remove="Memes\Tuxedo-Winnie-The-Pooh.png" />
+    <None Remove="Memes\winnie-the-pooh-tuxedo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\..\..\SolutionItems\AspireConstants.cs" Link="AspireConstants.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Memes\always-has-been.webp" />
+    <EmbeddedResource Include="Memes\bernie-sanders.webp" />
+    <EmbeddedResource Include="Memes\cartoon.jpg" />
+    <EmbeddedResource Include="Memes\elf.png" />
+    <EmbeddedResource Include="Memes\hands-up.webp" />
+    <EmbeddedResource Include="Memes\obama.jpg" />
+    <EmbeddedResource Include="Memes\schoolbus-vs-train.webp" />
+    <EmbeddedResource Include="Memes\sneak-behind-tree.webp" />
+    <EmbeddedResource Include="Memes\talking-to-wall.mp4" />
+    <EmbeddedResource Include="Memes\winnie-the-pooh-tuxedo.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +55,7 @@
 	  <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.4.1" />
 	  <PackageReference Include="Aspire.Hosting.Azure.CosmosDB" Version="9.4.1" />
 	  <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.4.1" />
+	  <PackageReference Include="Azure.Storage.Blobs" Version="12.24.1" />
     <PackageReference Include="System.Text.Json" Version="9.0.8" />
   </ItemGroup>
 

@@ -43,7 +43,8 @@ public class BlobStorageService : IBlobStorageService
         // Delete from upload container
         await sourceBlobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
         
-        return destinationBlobClient.Uri.ToString();
+        // Return only the filename instead of full URL
+        return newFileName;
     }
 
     public async Task DeleteFromMemesAsync(string fileName, CancellationToken cancellationToken = default)

@@ -38,6 +38,8 @@ public static class AppHostBuilderExtensions
         builder.Services.AddScoped<IMemeTemplateRepository, MemeTemplateRepository>();
         builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
         builder.Services.AddScoped<ISasTokenService, SasTokenService>();
+        builder.Services.AddScoped<MemeTemplateSeeder>();
+        builder.Services.AddScoped<IBlobUrlService, BlobUrlService>();
 
         // Register background services
         builder.Services.AddHostedService<UploadCleanupService>();

@@ -1,5 +1,6 @@
 using HexMaster.MemeIt.Memes.Abstractions;
 using HexMaster.MemeIt.Memes.DataTransferObjects;
+using HexMaster.MemeIt.Memes.Services;
 using Localizr.Core.Abstractions.Cqrs;
 
 namespace HexMaster.MemeIt.Memes.Features.ListMemes;
@@ -7,10 +8,12 @@ namespace HexMaster.MemeIt.Memes.Features.ListMemes;
 public class ListMemesQueryHandler : IQueryHandler<ListMemesQuery, IEnumerable<MemeTemplateListResponse>>
 {
     private readonly IMemeTemplateRepository _repository;
+    private readonly IBlobUrlService _blobUrlService;
 
-    public ListMemesQueryHandler(IMemeTemplateRepository repository)
+    public ListMemesQueryHandler(IMemeTemplateRepository repository, IBlobUrlService blobUrlService)
     {
         _repository = repository;
+        _blobUrlService = blobUrlService;
     }
 
     public async ValueTask<IEnumerable<MemeTemplateListResponse>> HandleAsync(ListMemesQuery query, CancellationToken cancellationToken)
@@ -21,7 +24,7 @@ public class ListMemesQueryHandler : IQueryHandler<ListMemesQuery, IEnumerable<M
             mt.Id,
             mt.Name,
             mt.Description,
-            mt.SourceImageUrl,
+            _blobUrlService.GetMemeImageUrl(mt.SourceImageUrl),
             mt.CreatedAt)).ToList();
     }
 }

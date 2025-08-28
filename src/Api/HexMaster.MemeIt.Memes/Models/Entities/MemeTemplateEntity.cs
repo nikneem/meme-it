@@ -14,6 +14,10 @@ public class MemeTemplateEntity
     
     public string? Description { get; set; }
     
+    /// <summary>
+    /// Contains only the filename (e.g., "obama.jpg"), not the full URL.
+    /// Full URL is constructed by combining blob storage base URL + container name + filename.
+    /// </summary>
     public string SourceImageUrl { get; set; } = string.Empty;
     
     public int SourceWidth { get; set; }
