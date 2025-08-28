@@ -9,6 +9,7 @@ public class MemeTemplateSeederBackgroundService : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<MemeTemplateSeederBackgroundService> _logger;
     private const int StartupDelayMilliseconds = 5000; // 5 seconds
+    private bool _hasRun = false;
 
     public MemeTemplateSeederBackgroundService(
         IServiceProvider serviceProvider,
@@ -23,6 +24,12 @@ public class MemeTemplateSeederBackgroundService : BackgroundService
         try
         {
             // Wait for startup delay
+            if (_hasRun)
+            {
+                _logger.LogInformation("MemeTemplateSeederBackgroundService has already run, skipping execution.");
+                return;
+            }
+            _hasRun = true;
             _logger.LogInformation("MemeTemplateSeederBackgroundService starting with {Delay}ms delay...", StartupDelayMilliseconds);
             await Task.Delay(StartupDelayMilliseconds, stoppingToken);
 
