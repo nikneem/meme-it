@@ -1,17 +1,22 @@
 using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using Azure.Provisioning;
 using Azure.Provisioning.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Queues;
 using HexMaster.MemeIt.Aspire;
+using HexMaster.MemeIt.Aspire.AppHost.Helpers;
 using HexMaster.MemeIt.Aspire.AppHost.Services;
+using Humanizer.Localisation;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Threading;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -26,8 +31,7 @@ var orleans = builder.AddOrleans(AspireConstants.MemeItOrleansCluster)
 var storage = builder.AddAzureStorage("Storage").ConfigureInfrastructure(infra =>
 {
     var blobStorage = infra.GetProvisionableResources().OfType<BlobService>().Single();
-
-    blobStorage.CorsRules.Add(new BicepValue<StorageCorsRule>(new StorageCorsRule
+        blobStorage.CorsRules.Add(new BicepValue<StorageCorsRule>(new StorageCorsRule
     {
         AllowedOrigins = [new BicepValue<string>("http://localhost:4200")],
         AllowedMethods = [CorsRuleAllowedMethod.Get, CorsRuleAllowedMethod.Put, CorsRuleAllowedMethod.Options],
@@ -35,8 +39,8 @@ var storage = builder.AddAzureStorage("Storage").ConfigureInfrastructure(infra =
         ExposedHeaders = [new BicepValue<string>("*")],
         MaxAgeInSeconds = new BicepValue<int>(3600)
     }));
+    });
 
-});
 if (builder.Environment.IsDevelopment())
 {
     storage.RunAsEmulator(em =>
@@ -47,37 +51,14 @@ if (builder.Environment.IsDevelopment())
 var blobs = storage.AddBlobs(AspireConstants.BlobServiceName);
 storage.AddBlobContainer(AspireConstants.BlobUploadContainerName, AspireConstants.BlobServiceName);
 var memesContainer = storage.AddBlobContainer(AspireConstants.BlobMemesContainerName, AspireConstants.BlobServiceName);
+blobs.WithDataLoadCommand();
 
-blobs.OnResourceReady(async (resource, @event, cancellationToken) =>
-{
-    var logger = @event.Services.GetRequiredService<ILogger<Program>>();
-    var blobSeeder = new BlobSeeder(logger, AspireConstants.BlobMemesContainerName);
 
-    try
-    {
-        var connectionString = await resource.ConnectionStringExpression.GetValueAsync(cancellationToken);
-        var blobServiceClient = new BlobServiceClient(connectionString);
-
-        // Ensure the container exists
-        try
-        {
-            var containerClient = await blobServiceClient.CreateBlobContainerAsync(AspireConstants.BlobMemesContainerName, PublicAccessType.Blob);
-        }
-        catch
-        {
-            logger.LogInformation("Blob container '{ContainerName}' already exists.", AspireConstants.BlobMemesContainerName);
-        }
-
-        await blobSeeder.SeedEmbeddedResourcesAsync(blobServiceClient, cancellationToken);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "An error occurred while seeding embedded meme resources");
-    }
-});
 
 // Add Azure CosmosDB (with emulator for development)
-var cosmos = builder.AddAzureCosmosDB(AspireConstants.CosmosConnection);
+var cosmos = builder.AddAzureCosmosDB(AspireConstants.CosmosConnection)
+    .WithDataLoadCommand();
+
 if (builder.Environment.IsDevelopment())
 {
     cosmos.RunAsEmulator(emulator =>
@@ -98,6 +79,33 @@ var api = builder.AddProject<Projects.HexMaster_MemeIt_Api>(AspireConstants.Meme
     .WaitFor(cosmos)
     .WithReplicas(2)
     .WithExternalHttpEndpoints();
+//api.WithCommand(
+//    name: "seed-data",
+//    displayName: "Seed initial data",
+//    executeCommand: async context => {
+
+////        api.Resource.GetEndpoints
+
+//        var container = context.ServiceProvider.GetRequiredService<Container>();
+//        var logger = context.ServiceProvider.GetRequiredService<ILogger<MemeTemplateSeeder>>();
+//        var seeder = new MemeTemplateSeeder(logger);
+//        await seeder.SeedTemplatesAsync(container, context.CancellationToken);
+
+//        //        var x = HexMaster.MemeIt.
+
+
+//        return CommandResults.Success();
+//    },
+//commandOptions: new CommandOptions
+//{
+//    IconName = "DrawerArrowDownload",
+//    IconVariant = IconVariant.Filled,
+//    Description = "Seeds the database with initial meme templates",
+//}
+
+//    );
+
+
 
 // Add Angular frontend application
 var frontEndSourceFolder = Path.GetFullPath(builder.AppHostDirectory + "../../../../../Web");

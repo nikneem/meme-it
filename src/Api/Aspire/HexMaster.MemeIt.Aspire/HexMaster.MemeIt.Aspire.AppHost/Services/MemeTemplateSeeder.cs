@@ -1,11 +1,12 @@
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
-using HexMaster.MemeIt.Memes.Models.Entities;
 
-namespace HexMaster.MemeIt.Memes.Services;
+namespace HexMaster.MemeIt.Aspire.AppHost.Services;
 
 public class MemeTemplateSeeder(ILogger<MemeTemplateSeeder> logger)
 {
+    internal const string CosmosDbPartitionKey = "meme-template";
+
     private readonly ILogger<MemeTemplateSeeder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public async Task SeedTemplatesAsync(Container cosmosContainer, CancellationToken cancellationToken = default)
@@ -54,7 +55,7 @@ internal static class ObamaTemplate
             SourceWidth = 1015,
             CreatedAt = DateTimeOffset.UtcNow,
             SourceImageUrl = "obama.jpg", // Store only filename, not full URL
-            PartitionKey = MemesConstants.CosmosDbPartitionKey,
+            PartitionKey = MemeTemplateSeeder.CosmosDbPartitionKey,
             TextAreas = [
                 new TextAreaEntity
                 {
@@ -102,7 +103,7 @@ internal static class WallTalk
             SourceWidth = 640,
             CreatedAt = DateTimeOffset.UtcNow,
             SourceImageUrl = "talking-to-wall.mp4", // Store only filename, not full URL
-            PartitionKey = MemesConstants.CosmosDbPartitionKey,
+            PartitionKey = MemeTemplateSeeder.CosmosDbPartitionKey,
             TextAreas = [
                 new TextAreaEntity
                 {
@@ -152,7 +153,7 @@ internal static class Cartoon
             SourceWidth = 1600,
             CreatedAt = DateTimeOffset.UtcNow,
             SourceImageUrl = "cartoon.jpg", // Store only filename, not full URL
-            PartitionKey = MemesConstants.CosmosDbPartitionKey,
+            PartitionKey = MemeTemplateSeeder.CosmosDbPartitionKey,
             TextAreas = [
                 new TextAreaEntity
                 {
@@ -203,7 +204,7 @@ internal class AlwaysHasBeen
             SourceWidth = 960,
             CreatedAt = DateTimeOffset.UtcNow,
             SourceImageUrl = "always-has-been.webp", // Store only filename, not full URL
-            PartitionKey = MemesConstants.CosmosDbPartitionKey,
+            PartitionKey = MemeTemplateSeeder.CosmosDbPartitionKey,
             TextAreas = [
                 new TextAreaEntity
                 {
@@ -253,7 +254,7 @@ internal class BernieSanders
             SourceWidth = 926,
             CreatedAt = DateTimeOffset.UtcNow,
             SourceImageUrl = "bernie-sanders.webp", // Store only filename, not full URL
-            PartitionKey = MemesConstants.CosmosDbPartitionKey,
+            PartitionKey = MemeTemplateSeeder.CosmosDbPartitionKey,
             TextAreas = [
                 new TextAreaEntity
                 {
@@ -302,7 +303,7 @@ internal class ElfsTalking
             SourceWidth = 768,
             CreatedAt = DateTimeOffset.UtcNow,
             SourceImageUrl = "elfs-talking.png", // Store only filename, not full URL
-            PartitionKey = MemesConstants.CosmosDbPartitionKey,
+            PartitionKey = MemeTemplateSeeder.CosmosDbPartitionKey,
             TextAreas = [
                 new TextAreaEntity
                 {
@@ -381,7 +382,7 @@ internal class HandsUp
             SourceWidth = 936,
             CreatedAt = DateTimeOffset.UtcNow,
             SourceImageUrl = "hands-up.webp", // Store only filename, not full URL
-            PartitionKey = MemesConstants.CosmosDbPartitionKey,
+            PartitionKey = MemeTemplateSeeder.CosmosDbPartitionKey,
             TextAreas = [
                 new TextAreaEntity
                 {

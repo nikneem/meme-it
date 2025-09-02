@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageReference Include="Microsoft.Orleans.Clustering.Redis" Version="9.2.1" />
     <PackageReference Include="Microsoft.Orleans.Persistence.Redis" Version="9.2.1" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.6.9" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.7.2" />
   </ItemGroup>
 
   <ItemGroup>

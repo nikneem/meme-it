@@ -55,7 +55,7 @@
 	  <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.4.1" />
 	  <PackageReference Include="Aspire.Hosting.Azure.CosmosDB" Version="9.4.1" />
 	  <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.4.1" />
-	  <PackageReference Include="Azure.Storage.Blobs" Version="12.24.1" />
+	  <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.8" />
   </ItemGroup>
 
