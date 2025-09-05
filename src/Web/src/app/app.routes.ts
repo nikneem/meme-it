@@ -16,12 +16,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/game/game-join.component').then(m => m.GameJoinComponent)
             },
             {
-                path: 'game/lobby',
+                path: 'game/:gameCode/lobby',
                 loadComponent: () => import('./pages/game/game-lobby.component').then(m => m.GameLobbyComponent),
                 canActivate: [GameLobbyGuard]
             },
             {
-                path: 'game/active',
+                path: 'game/:gameCode/active',
                 loadComponent: () => import('./pages/game/game-active.component').then(m => m.GameActiveComponent),
                 canActivate: [GameActiveGuard]
             },

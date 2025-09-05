@@ -146,9 +146,9 @@ export class GameActiveComponent implements OnInit, OnDestroy {
   private updateRoundStateFromGame(game: Game): void {
     const newState: GameRoundState = {
       currentRound: 1, // TODO: Get from game state when rounds are implemented
-      totalRounds: game.settings.totalRounds,
+      totalRounds: game.settings?.totalRounds || 5,
       timeRemaining: this.calculateTimeRemaining(game),
-      totalTime: game.settings.timePerRound,
+      totalTime: game.settings?.timePerRound || 30,
       isCompleted: false,
       startTime: Date.now() // TODO: Get actual round start time from game state
     };
@@ -160,11 +160,11 @@ export class GameActiveComponent implements OnInit, OnDestroy {
     // TODO: Calculate based on actual round start time from server
     // For now, check if we have persisted timer state
     const persistedState = this.gamePersistenceService.getRoundTimerState();
-    if (persistedState && persistedState.gameCode === game.code) {
+    if (persistedState && persistedState.gameCode === game.gameCode) {
       const elapsed = (Date.now() - persistedState.startTime) / 1000;
-      return Math.max(0, game.settings.timePerRound - elapsed);
+      return Math.max(0, (game.settings?.timePerRound || 30) - elapsed);
     }
-    return game.settings.timePerRound;
+    return game.settings?.timePerRound || 30;
   }
 
   private async initializeGameRound(): Promise<void> {
@@ -181,10 +181,10 @@ export class GameActiveComponent implements OnInit, OnDestroy {
       const game = this.getCurrentGameSync();
       if (game) {
         this.gamePersistenceService.saveRoundTimerState({
-          gameCode: game.code,
+          gameCode: game.gameCode,
           roundNumber: 1, // TODO: Get actual round number
           startTime: Date.now(),
-          timePerRound: game.settings.timePerRound
+          timePerRound: game.settings?.timePerRound || 30
         });
       }
 
@@ -212,7 +212,7 @@ export class GameActiveComponent implements OnInit, OnDestroy {
       }
 
       // Call server endpoint to get random meme for this player
-      const response = await firstValueFrom(this.gameService.getRandomMemeForPlayer(game.code, player.id));
+      const response = await firstValueFrom(this.gameService.getRandomMemeForPlayer(game.gameCode, player.id));
       
       if (response && response.memeTemplate) {
         const meme: MemeTemplate = {
@@ -325,7 +325,7 @@ export class GameActiveComponent implements OnInit, OnDestroy {
 
       // TODO: Call API to save completed meme
       console.log('Saving meme:', {
-        gameCode: game.code,
+        gameCode: game.gameCode,
         memeTemplateId: meme.id,
         texts: memeTexts,
         roundNumber: this.roundState().currentRound

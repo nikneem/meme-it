@@ -36,7 +36,9 @@ public class GameGrain(IGrainFactory grainFactory,
             Password = createGameState.Password,
             LeaderId = initialPlayerState.Id,
             Settings = new GameSettings(),
-            PlayerReadyStates = new Dictionary<string, bool> { { initialPlayerState.Id, false } }
+            PlayerReadyStates = new Dictionary<string, bool> { { initialPlayerState.Id, false } },
+            PlayerMemeAssignments = new Dictionary<string, PlayerMemeAssignment>(),
+            CurrentRound = 1
         };
         await state.WriteStateAsync();
         _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
@@ -206,6 +208,53 @@ public class GameGrain(IGrainFactory grainFactory,
         
         await state.WriteStateAsync();
         _gameWatchers.Notify(watcher => watcher.OnGameUpdated(state.State));
+        return state.State;
+    }
+
+    public Task<PlayerMemeAssignment?> GetPlayerMemeAssignment(string playerId)
+    {
+        // Validate player exists in the game
+        var player = state.State.Players.FirstOrDefault(p => p.Id == playerId);
+        if (player == default)
+        {
+            throw new InvalidOperationException("Player not found in this game.");
+        }
+
+        // Check if player has an assignment for the current round
+        var key = $"{playerId}_Round{state.State.CurrentRound}";
+        var assignment = state.State.PlayerMemeAssignments.GetValueOrDefault(key);
+        return Task.FromResult(assignment);
+    }
+
+    public async Task<GameState> AssignMemeToPlayer(string playerId, string memeTemplateId, string memeTemplateName, string memeTemplateImageUrl)
+    {
+        // Validate player exists in the game
+        var player = state.State.Players.FirstOrDefault(p => p.Id == playerId);
+        if (player == default)
+        {
+            throw new InvalidOperationException("Player not found in this game.");
+        }
+
+        // Only allow this when game is active/in progress
+        if (state.State.Status != GameStatus.Active.Id && state.State.Status != "InProgress")
+        {
+            throw new InvalidOperationException("Memes can only be assigned when the game is active.");
+        }
+
+        // Create the assignment key (player + round)
+        var key = $"{playerId}_Round{state.State.CurrentRound}";
+        
+        // Create or update the assignment
+        state.State.PlayerMemeAssignments[key] = new PlayerMemeAssignment
+        {
+            MemeTemplateId = memeTemplateId,
+            MemeTemplateName = memeTemplateName,
+            MemeTemplateImageUrl = memeTemplateImageUrl,
+            CurrentRound = state.State.CurrentRound,
+            AssignedAt = DateTime.UtcNow
+        };
+
+        await state.WriteStateAsync();
         return state.State;
     }
 }

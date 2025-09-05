@@ -1,15 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Router } from '@angular/router';
-import { catchError, map, switchMap, tap, withLatestFrom, takeUntil, filter, take } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, withLatestFrom, takeUntil, filter, take, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { of, Subject, EMPTY } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { GameService } from '../../services/game.service';
 import { GamePersistenceService } from '../../shared/services/game-persistence.service';
 import { WebPubSubService, GameUpdateMessageTypes, GameUpdateMessage } from '../../services/web-pubsub.service';
 import { WebPubSubConnectionService } from '../../services/web-pubsub-connection.service';
-import { selectCurrentGame, selectIsInLobby } from './game.selectors';
+import { selectCurrentGame } from './game.selectors';
 import { selectCurrentPlayer } from '../player/player.selectors';
+import { GameStatus } from './game.models';
 import * as GameActions from './game.actions';
 import * as PlayerActions from '../player/player.actions';
 
@@ -46,16 +47,22 @@ export class GameEffects {
   createGameSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.createGameSuccess),
-      withLatestFrom(
-        this.store.select(selectCurrentGame),
-        this.store.select(selectCurrentPlayer),
-        this.store.select(selectIsInLobby)
-      ),
-      tap(([action, game, player, isInLobby]) => {
-        // Save game state to localStorage
-        this.gamePersistenceService.saveGameState(game, player, isInLobby);
-        this.router.navigate(['/game/lobby']);
-      })
+      switchMap(({ game }) => 
+        // Wait for the current player to be set in the store
+        this.store.select(selectCurrentPlayer).pipe(
+          filter(player => !!player), // Wait until player is available
+          take(1), // Take only the first emission
+          tap(player => {
+            console.log('Effect: Game created successfully, navigating to lobby', { 
+              gameCode: game.gameCode, 
+              playerId: player.id 
+            });
+            // Store player data for the game code
+            this.gamePersistenceService.storePlayerData(game.gameCode, player.id, player.name);
+            this.router.navigate(['/game', game.gameCode, 'lobby']);
+          })
+        )
+      )
     ), 
     { dispatch: false }
   );
@@ -80,16 +87,22 @@ export class GameEffects {
   joinGameSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.joinGameSuccess),
-      withLatestFrom(
-        this.store.select(selectCurrentGame),
-        this.store.select(selectCurrentPlayer),
-        this.store.select(selectIsInLobby)
-      ),
-      tap(([action, game, player, isInLobby]) => {
-        // Save game state to localStorage
-        this.gamePersistenceService.saveGameState(game, player, isInLobby);
-        this.router.navigate(['/game/lobby']);
-      })
+      switchMap(({ game }) => 
+        // Wait for the current player to be set in the store
+        this.store.select(selectCurrentPlayer).pipe(
+          filter(player => !!player), // Wait until player is available
+          take(1), // Take only the first emission
+          tap(player => {
+            console.log('Effect: Game joined successfully, navigating to lobby', { 
+              gameCode: game.gameCode, 
+              playerId: player.id 
+            });
+            // Store player data for the game code
+            this.gamePersistenceService.storePlayerData(game.gameCode, player.id, player.name);
+            this.router.navigate(['/game', game.gameCode, 'lobby']);
+          })
+        )
+      )
     ),
     { dispatch: false }
   );
@@ -106,7 +119,7 @@ export class GameEffects {
           return of(GameActions.leaveGameSuccess());
         }
         
-        return this.gameService.leaveGame(game.code, player.id).pipe(
+        return this.gameService.leaveGame(game.gameCode, player.id).pipe(
           map(() => GameActions.leaveGameSuccess()),
           catchError(() => of(GameActions.leaveGameSuccess())) // Even if API fails, clear local state
         );
@@ -117,40 +130,34 @@ export class GameEffects {
   leaveGameSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.leaveGameSuccess),
-      tap(() => {
-        // Clear game state from localStorage
-        this.gamePersistenceService.clearGameState();
+      withLatestFrom(
+        this.store.select(selectCurrentGame)
+      ),
+      tap(([action, game]) => {
+        // Clear player data for this game code
+        if (game) {
+          this.gamePersistenceService.clearPlayerData(game.gameCode);
+        }
         this.router.navigate(['/home']);
       })
     ),
     { dispatch: false }
   );
 
-  // Game State Restoration - Now uses server as source of truth
-  restoreGameState$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(GameActions.restoreGameState),
-      switchMap(() => {
-        const persistedState = this.gamePersistenceService.loadGameState();
-        
-        if (persistedState && persistedState.gameCode && persistedState.playerId && persistedState.playerName) {
-          // Dispatch server refresh action with persisted data
-          return of(GameActions.refreshGameStateFromServer({
-            gameCode: persistedState.gameCode,
-            playerId: persistedState.playerId,
-            playerName: persistedState.playerName
-          }));
-        } else {
-          return of(GameActions.restoreGameStateFailure());
-        }
-      })
-    )
-  );
+  // Game State Restoration is now handled by guards based on route parameters and sessionStorage
 
   // Refresh game state from server
   refreshGameStateFromServer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.refreshGameStateFromServer),
+      // Debounce to prevent rapid successive calls during multiple refreshes
+      debounceTime(50), // Reduced from 100ms to 50ms for faster response
+      // Only proceed if the request parameters have actually changed
+      distinctUntilChanged((prev, curr) => 
+        prev.gameCode === curr.gameCode && 
+        prev.playerId === curr.playerId && 
+        prev.playerName === curr.playerName
+      ),
       switchMap(({ gameCode, playerId, playerName }) => {
         console.log('Effect: Starting server refresh for', { gameCode, playerId, playerName });
         return this.gameService.validateGameAndPlayer(gameCode, playerId, playerName).pipe(
@@ -166,12 +173,13 @@ export class GameEffects {
             } else {
               throw new Error('Player is no longer in the game or game does not exist');
             }
+
           }),
           catchError(error => {
             console.error('Effect: Server refresh failed', error);
-            // Clear invalid persisted state
-            this.gamePersistenceService.clearGameState();
-            this.router.navigate(['/home']);
+            // Game validation errors are now handled by guards
+            // No need to clear persistence here as guards will redirect appropriately
+            console.log('Effect: Game refresh failed:', error.message);
             return of(GameActions.refreshGameStateFromServerFailure({ 
               error: error.message || 'Failed to restore game state from server' 
             }));
@@ -181,15 +189,16 @@ export class GameEffects {
     )
   );
 
-  // Handle successful server refresh
+  // Handle successful server refresh - no persistence needed since data is in sessionStorage
   refreshGameStateFromServerSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.refreshGameStateFromServerSuccess),
-      withLatestFrom(this.store.select(selectCurrentPlayer)),
-      tap(([{ game }, player]) => {
-        console.log('Effect: Server refresh successful, updating persistence', { game, player });
-        // Update persisted state with fresh data from server
-        this.gamePersistenceService.saveGameState(game, player, true);
+      tap(({ game }) => {
+        console.log('Effect: Server refresh successful, game restored', { 
+          game: game?.gameCode, 
+          gameStatus: game?.status 
+        });
+        // No need to save state - it's already in sessionStorage by game code
       })
     ),
     { dispatch: false }
@@ -199,12 +208,17 @@ export class GameEffects {
   refreshGameStateFromServerSuccessWebPubSub$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.refreshGameStateFromServerSuccess),
-      withLatestFrom(this.store.select(selectCurrentPlayer)),
+      withLatestFrom(
+        this.store.select(selectCurrentPlayer)
+      ),
       map(([{ game }, player]) => {
-        console.log('Effect: Server refresh successful, attempting WebPubSub connection', { gameCode: game.code, playerId: player?.id });
+        console.log('Effect: Server refresh successful, attempting WebPubSub connection', { 
+          gameCode: game.gameCode, 
+          playerId: player?.id
+        });
         if (game && player) {
           return GameActions.connectToWebPubSub({ 
-            gameCode: game.code, 
+            gameCode: game.gameCode, 
             playerId: player.id 
           });
         }
@@ -229,9 +243,8 @@ export class GameEffects {
             return GameActions.verifyGameStateSuccess({ game });
           }),
           catchError(error => {
-            // If verification fails, clear persisted state and redirect
-            this.gamePersistenceService.clearGameState();
-            this.router.navigate(['/home']);
+            // Verification failures are handled by guards, just report the error
+            console.log('Game verification failed:', error.message);
             return of(GameActions.verifyGameStateFailure({ 
               error: error.message || 'Game no longer exists or player removed' 
             }));
@@ -246,12 +259,11 @@ export class GameEffects {
       ofType(GameActions.verifyGameStateSuccess),
       withLatestFrom(
         this.store.select(selectCurrentGame),
-        this.store.select(selectCurrentPlayer),
-        this.store.select(selectIsInLobby)
+        this.store.select(selectCurrentPlayer)
       ),
-      tap(([action, game, player, isInLobby]) => {
-        // Update persisted state with verified data
-        this.gamePersistenceService.saveGameState(action.game, player, isInLobby);
+      tap(([action, game, player]) => {
+        // No persistence needed - game state updates are real-time only
+        console.log('Game state verification successful', { gameCode: action.game.gameCode });
       })
     ),
     { dispatch: false }
@@ -267,13 +279,11 @@ export class GameEffects {
       ),
       withLatestFrom(
         this.store.select(selectCurrentGame),
-        this.store.select(selectCurrentPlayer),
-        this.store.select(selectIsInLobby)
+        this.store.select(selectCurrentPlayer)
       ),
-      tap(([action, game, player, isInLobby]) => {
-        if (game && player && isInLobby) {
-          this.gamePersistenceService.saveGameState(game, player, isInLobby);
-        }
+      tap(([action, game, player]) => {
+        // Real-time game updates don't need persistence - sessionStorage is only updated on join/create
+        console.log('Game state updated via real-time', { gameCode: game?.gameCode, action: action.type });
       })
     ),
     { dispatch: false }
@@ -292,7 +302,7 @@ export class GameEffects {
           return of(GameActions.setPlayerReadyStatusFailure({ error: 'Game or player not found' }));
         }
         
-        return this.gameService.setPlayerReadyStatus(game.code, player.id, action.isReady).pipe(
+        return this.gameService.setPlayerReadyStatus(game.gameCode, player.id, action.isReady).pipe(
           switchMap(({ game: updatedGame, player: updatedPlayer }) => [
             GameActions.setPlayerReadyStatusSuccess({ game: updatedGame }),
             PlayerActions.updatePlayerReadyStatus({ isReady: updatedPlayer.isReady })
@@ -309,12 +319,11 @@ export class GameEffects {
     this.actions$.pipe(
       ofType(GameActions.setPlayerReadyStatusSuccess),
       withLatestFrom(
-        this.store.select(selectCurrentPlayer),
-        this.store.select(selectIsInLobby)
+        this.store.select(selectCurrentPlayer)
       ),
-      tap(([action, player, isInLobby]) => {
-        // Update persisted state with new data
-        this.gamePersistenceService.saveGameState(action.game, player, isInLobby);
+      tap(([action, player]) => {
+        // Real-time updates don't need to update sessionStorage
+        console.log('Real-time game update received', { gameCode: action.game.gameCode });
       })
     ),
     { dispatch: false }
@@ -333,7 +342,7 @@ export class GameEffects {
           return of(GameActions.startGameFailure({ error: 'Game or player not found' }));
         }
         
-        return this.gameService.startGame(game.code, player.id).pipe(
+        return this.gameService.startGame(game.gameCode, player.id).pipe(
           map((updatedGame) => 
             GameActions.startGameSuccess({ game: updatedGame })
           ),
@@ -351,7 +360,11 @@ export class GameEffects {
       tap(({ game }) => {
         // Navigate to active game page when game starts
         console.log('Game started successfully:', game);
-        this.router.navigate(['/game/active']);
+        if (game?.gameCode) {
+          this.router.navigate(['/game', game.gameCode, 'active']);
+        } else {
+          console.error('Cannot navigate to active game: game code is undefined', game);
+        }
       })
     ),
     { dispatch: false }
@@ -363,7 +376,51 @@ export class GameEffects {
       ofType(GameActions.realTimeGameStarted),
       tap(({ game }) => {
         console.log('Real-time game started event received:', game);
-        this.router.navigate(['/game/active']);
+        if (game?.gameCode) {
+          this.router.navigate(['/game', game.gameCode, 'active']);
+        } else {
+          console.error('Cannot navigate to active game: game code is undefined', game);
+        }
+      })
+    ),
+    { dispatch: false }
+  );
+
+  // Navigation effect for game status changes to Active/InProgress
+  gameStatusChanged$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.gameUpdated),
+      withLatestFrom(this.store.select(selectCurrentGame)),
+      filter(([action, currentGame]) => {
+        // Ensure we have valid game data
+        if (!action.game || !action.game.gameCode) {
+          console.warn('Game status change ignored: missing game or game code', action.game);
+          return false;
+        }
+        
+        // Only navigate if the game status has changed to Active or InProgress
+        const newStatus = action.game.status;
+        const oldStatus = currentGame?.status;
+        
+        const isGameStarting = (newStatus === GameStatus.Active || newStatus === GameStatus.InProgress) && 
+                              (oldStatus !== GameStatus.Active && oldStatus !== GameStatus.InProgress);
+        
+        console.log('Game status change detected:', { 
+          oldStatus, 
+          newStatus, 
+          isGameStarting,
+          gameCode: action.game.gameCode 
+        });
+        
+        return isGameStarting;
+      }),
+      tap(([action, currentGame]) => {
+        console.log('Game started via status change, navigating to active page:', action.game.gameCode);
+        if (action.game?.gameCode) {
+          this.router.navigate(['/game', action.game.gameCode, 'active']);
+        } else {
+          console.error('Cannot navigate to active game: game code is undefined', action.game);
+        }
       })
     ),
     { dispatch: false }
@@ -382,7 +439,7 @@ export class GameEffects {
           return of(GameActions.kickPlayerFailure({ error: 'Game or player not found' }));
         }
         
-        return this.gameService.kickPlayer(game.code, player.id, action.targetPlayerId).pipe(
+        return this.gameService.kickPlayer(game.gameCode, player.id, action.targetPlayerId).pipe(
           map((updatedGame) => 
             GameActions.kickPlayerSuccess({ game: updatedGame })
           ),
@@ -466,9 +523,9 @@ export class GameEffects {
       ),
       switchMap(([action, game, player]) => {
         if (game && player && !this.webPubSubService.isConnected()) {
-          console.log('Ensuring WebPubSub connection for game:', game.code, 'player:', player.id);
+          console.log('Ensuring WebPubSub connection for game:', game.gameCode, 'player:', player.id);
           return of(GameActions.connectToWebPubSub({ 
-            gameCode: game.code, 
+            gameCode: game.gameCode, 
             playerId: player.id 
           }));
         }
@@ -487,7 +544,7 @@ export class GameEffects {
       map(([{ game }, player]) => {
         if (game && player) {
           return GameActions.connectToWebPubSub({ 
-            gameCode: game.code, 
+            gameCode: game.gameCode, 
             playerId: player.id 
           });
         }
@@ -507,7 +564,7 @@ export class GameEffects {
       map(([{ game }, player]) => {
         if (game && player) {
           return GameActions.connectToWebPubSub({ 
-            gameCode: game.code, 
+            gameCode: game.gameCode, 
             playerId: player.id 
           });
         }
@@ -561,11 +618,18 @@ export class GameEffects {
           case GameUpdateMessageTypes.GAME_UPDATED:
             console.log('WebPubSub: Received GAME_UPDATED message:', {
               messageData: message.data,
+              gameCode: message.data?.gameCode,
+              gameStatus: message.data?.status,
               playerCount: message.data?.players?.length,
               players: message.data?.players?.map((p: any) => ({ id: p.id, name: p.name })),
               timestamp: new Date().toISOString()
             });
-            this.store.dispatch(GameActions.realTimeGameUpdated({ game: message.data }));
+            
+            if (message.data) {
+              this.store.dispatch(GameActions.realTimeGameUpdated({ game: message.data }));
+            } else {
+              console.error('GAME_UPDATED message missing data:', message);
+            }
             break;
             
           case GameUpdateMessageTypes.PLAYER_JOINED:
@@ -609,7 +673,19 @@ export class GameEffects {
             break;
             
           case GameUpdateMessageTypes.GAME_STARTED:
-            this.store.dispatch(GameActions.realTimeGameStarted({ game: message.data }));
+            console.log('WebPubSub: Received GAME_STARTED message:', {
+              messageData: message.data,
+              gameCode: message.data?.gameCode,
+              gameStatus: message.data?.status,
+              timestamp: new Date().toISOString(),
+              fullMessage: message
+            });
+            
+            if (message.data?.gameCode) {
+              this.store.dispatch(GameActions.realTimeGameStarted({ game: message.data }));
+            } else {
+              console.error('GAME_STARTED message missing game code:', message);
+            }
             break;
             
           default:

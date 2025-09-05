@@ -35,7 +35,7 @@
         <div class="space-y-3 text-white">
           <div class="flex justify-between">
             <span>Game Code:</span>
-            <span class="font-mono font-bold text-yellow-300">{{ game.code }}</span>
+            <span class="font-mono font-bold text-yellow-300">{{ game.gameCode }}</span>
           </div>
           <div class="flex justify-between">
             <span>Game Name:</span>
@@ -51,11 +51,11 @@
           </div>
           <div class="flex justify-between">
             <span>Rounds:</span>
-            <span class="font-semibold">{{ game.settings.totalRounds }}</span>
+            <span class="font-semibold">{{ game.settings?.totalRounds || 'N/A' }}</span>
           </div>
           <div class="flex justify-between">
             <span>Time per Round:</span>
-            <span class="font-semibold">{{ game.settings.timePerRound }}s</span>
+            <span class="font-semibold">{{ game.settings?.timePerRound || 'N/A' }}s</span>
           </div>
           <div class="flex justify-between">
             <span>Password Protected:</span>
@@ -63,7 +63,7 @@
           </div>
           <div class="flex justify-between">
             <span>Max Players:</span>
-            <span class="font-semibold">{{ game.settings.maxPlayers }}</span>
+            <span class="font-semibold">{{ game.settings?.maxPlayers || 'N/A' }}</span>
           </div>
         </div>
       </p-card>

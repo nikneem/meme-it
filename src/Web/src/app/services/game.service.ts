@@ -112,9 +112,35 @@ export class GameService {
   }
 
   validateGameAndPlayer(gameCode: string, playerId: string, playerName: string): Observable<GameValidationResponse> {
+    console.log('GameService.validateGameAndPlayer called with:', { gameCode, playerId, playerName });
     return this.getGame(gameCode, playerId).pipe(
       map(game => {
-        const player = game.players.find(p => p.id === playerId && p.name === playerName);
+        console.log('GameService: Backend returned game with players:', game.players.map(p => ({ id: p.id, name: p.name })));
+        
+        // First try exact match (ID and name)
+        let player = game.players.find(p => p.id === playerId && p.name === playerName);
+        
+        // If exact match fails, try ID-only match (more forgiving for refresh scenarios)
+        if (!player) {
+          console.log('GameService: Exact match failed, trying ID-only match');
+          player = game.players.find(p => p.id === playerId);
+          
+          if (player) {
+            console.log('GameService: Found player by ID only, name mismatch detected:', {
+              storedName: playerName,
+              currentName: player.name
+            });
+          }
+        }
+        
+        console.log('GameService: Player validation result:', { 
+          foundPlayer: !!player, 
+          searchedForId: playerId, 
+          searchedForName: playerName,
+          foundPlayerId: player?.id,
+          foundPlayerName: player?.name
+        });
+        
         return {
           game,
           player: player || { id: playerId, name: playerName, isHost: false, isReady: false },
@@ -140,31 +166,40 @@ export class GameService {
   }
 
   private mapBackendGameResponseToGame(response: BackendGameDetailsResponse): Game {
+    // Provide default settings if backend doesn't send them
+    const defaultSettings = {
+      maxPlayers: 8,
+      numberOfRounds: 5,
+      category: 'general'
+    };
+    
+    const settings = response.settings || defaultSettings;
+    
     return {
       id: response.gameCode,
-      code: response.gameCode,
+      gameCode: response.gameCode,
       name: `Game ${response.gameCode}`, // Backend doesn't provide name, so we create one
       status: this.mapBackendStatusToGameStatus(response.status),
       hasPassword: response.isPasswordProtected,
-      maxPlayers: response.settings.maxPlayers,
-      currentPlayers: response.players.length,
+      maxPlayers: settings.maxPlayers,
+      currentPlayers: response.players?.length || 0,
       createdAt: new Date(), // Backend doesn't provide this, use current time
       host: {
-        id: response.players[0]?.id || response.playerId,
-        name: response.players[0]?.name || 'Host',
+        id: response.players?.[0]?.id || response.playerId || '',
+        name: response.players?.[0]?.name || 'Host',
         isHost: true,
-        isReady: response.players[0]?.isReady || false
+        isReady: response.players?.[0]?.isReady || false
       },
-      players: response.players.map((player, index) => ({
+      players: (response.players || []).map((player, index) => ({
         id: player.id,
         name: player.name,
         isHost: index === 0, // First player is the host
         isReady: player.isReady
       })),
       settings: {
-        maxPlayers: response.settings.maxPlayers,
+        maxPlayers: settings.maxPlayers,
         timePerRound: 30, // Default value, backend doesn't provide this
-        totalRounds: response.settings.numberOfRounds,
+        totalRounds: settings.numberOfRounds,
         allowsSpectators: false // Default value, backend doesn't provide this
       }
     };

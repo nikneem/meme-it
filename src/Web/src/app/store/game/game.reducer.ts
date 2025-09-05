@@ -380,7 +380,7 @@ export const gameReducer = createReducer(
   on(GameActions.refreshGameStateFromServerSuccess, (state, { game }) => ({
     ...state,
     currentGame: game,
-    isInLobby: true,
+    isInLobby: game.status === GameStatus.Waiting, // Set isInLobby based on actual game status
     isLoading: false,
     error: null
   })),

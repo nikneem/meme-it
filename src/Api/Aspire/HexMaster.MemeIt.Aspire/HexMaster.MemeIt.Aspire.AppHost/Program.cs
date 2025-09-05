@@ -48,10 +48,13 @@ if (builder.Environment.IsDevelopment())
         em.WithLifetime(ContainerLifetime.Persistent);
     });
 }
-var blobs = storage.AddBlobs(AspireConstants.BlobServiceName);
-storage.AddBlobContainer(AspireConstants.BlobUploadContainerName, AspireConstants.BlobServiceName);
-var memesContainer = storage.AddBlobContainer(AspireConstants.BlobMemesContainerName, AspireConstants.BlobServiceName);
-blobs.WithDataLoadCommand();
+var blobs = storage
+    .AddBlobs(AspireConstants.BlobServiceName)
+    .WithDataLoadCommand();
+storage
+    .AddBlobContainer(AspireConstants.BlobUploadContainerName, AspireConstants.BlobServiceName);
+var memesContainer = storage
+    .AddBlobContainer(AspireConstants.BlobMemesContainerName, AspireConstants.BlobServiceName);
 
 
 

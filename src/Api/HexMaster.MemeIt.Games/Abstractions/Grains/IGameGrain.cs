@@ -15,4 +15,6 @@ public interface IGameGrain : IGrainWithStringKey
     Task<GameState> UpdateSettings(string playerId, GameSettings settings);
     Task<GameState> StartGame(string playerId);
     Task<GameState> SetPlayerReadyStatus(string playerId, bool isReady);
+    Task<PlayerMemeAssignment?> GetPlayerMemeAssignment(string playerId);
+    Task<GameState> AssignMemeToPlayer(string playerId, string memeTemplateId, string memeTemplateName, string memeTemplateImageUrl);
 }

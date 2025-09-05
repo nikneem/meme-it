@@ -1,6 +1,6 @@
 export interface Game {
   id: string;
-  code: string;
+  gameCode: string;
   name: string;
   status: GameStatus;
   hasPassword: boolean;

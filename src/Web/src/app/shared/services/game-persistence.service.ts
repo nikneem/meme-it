@@ -1,11 +1,8 @@
-import { Injectable, signal } from '@angular/core';
-import { Game, Player } from '../../store/game/game.models';
+import { Injectable } from '@angular/core';
 
-export interface PersistedGameState {
-  gameCode: string;
+export interface PersistedGameData {
   playerId: string;
   playerName: string;
-  isInLobby: boolean;
   timestamp: number; // To handle expiration
 }
 
@@ -20,92 +17,149 @@ export interface RoundTimerState {
   providedIn: 'root'
 })
 export class GamePersistenceService {
-  private readonly STORAGE_KEY = 'meme-it-game-state';
+  private readonly GAME_DATA_PREFIX = 'meme-it-game-';
   private readonly TIMER_STORAGE_KEY = 'meme-it-round-timer';
   private readonly EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-  saveGameState(game: Game | null, player: Player | null, isInLobby: boolean): void {
+  /**
+   * Store minimal player data for a specific game code
+   */
+  storePlayerData(gameCode: string, playerId: string, playerName: string): void {
     try {
-      if (!game || !player || !isInLobby) {
-        this.clearGameState();
-        return;
-      }
+      console.log('GamePersistenceService.storePlayerData called with:', {
+        gameCode,
+        playerId,
+        playerName
+      });
 
-      const gameState: PersistedGameState = {
-        gameCode: game.code,
-        playerId: player.id,
-        playerName: player.name,
-        isInLobby,
+      const gameData: PersistedGameData = {
+        playerId,
+        playerName,
         timestamp: Date.now()
       };
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(gameState));
+
+      const storageKey = this.getGameStorageKey(gameCode);
+      console.log('GamePersistenceService: Storing player data:', { storageKey, gameData });
+      sessionStorage.setItem(storageKey, JSON.stringify(gameData));
     } catch (error) {
-      console.warn('Failed to save game state to localStorage:', error);
+      console.warn('Failed to store player data in sessionStorage:', error);
     }
   }
 
-  loadGameState(): PersistedGameState | null {
+  /**
+   * Get player data for a specific game code
+   */
+  getPlayerData(gameCode: string): PersistedGameData | null {
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
+      const storageKey = this.getGameStorageKey(gameCode);
+      const stored = sessionStorage.getItem(storageKey);
+      console.log('GamePersistenceService.getPlayerData: Raw stored data:', { gameCode, stored });
+      
       if (stored) {
-        const parsed: PersistedGameState = JSON.parse(stored);
+        const parsed: PersistedGameData = JSON.parse(stored);
+        console.log('GamePersistenceService.getPlayerData: Parsed data:', parsed);
         
-        // Check if the stored state is not expired
+        // Check if the stored data is not expired
         if (Date.now() - parsed.timestamp < this.EXPIRATION_TIME) {
+          console.log('GamePersistenceService.getPlayerData: Data is valid (not expired)');
           return parsed;
         } else {
-          // Clean up expired state
-          this.clearGameState();
+          console.log('GamePersistenceService.getPlayerData: Data is expired, clearing');
+          this.clearPlayerData(gameCode);
         }
+      } else {
+        console.log('GamePersistenceService.getPlayerData: No stored data found for game:', gameCode);
       }
     } catch (error) {
-      console.warn('Failed to load game state from localStorage:', error);
-      this.clearGameState();
+      console.warn('Failed to load player data from sessionStorage:', error);
+      this.clearPlayerData(gameCode);
     }
     return null;
   }
 
-  clearGameState(): void {
+  /**
+   * Check if valid player data exists for a game code
+   */
+  hasPlayerData(gameCode: string): boolean {
+    const playerData = this.getPlayerData(gameCode);
+    const isValid = playerData !== null && 
+           !!playerData.playerId && 
+           !!playerData.playerName;
+    console.log('GamePersistenceService.hasPlayerData:', {
+      gameCode,
+      playerData,
+      isValid,
+      hasPlayerId: !!playerData?.playerId,
+      hasPlayerName: !!playerData?.playerName
+    });
+    return isValid;
+  }
+
+  /**
+   * Remove player data for a specific game code
+   */
+  clearPlayerData(gameCode: string): void {
     try {
-      localStorage.removeItem(this.STORAGE_KEY);
+      const storageKey = this.getGameStorageKey(gameCode);
+      console.log('GamePersistenceService.clearPlayerData: Clearing data for game:', gameCode);
+      sessionStorage.removeItem(storageKey);
     } catch (error) {
-      console.warn('Failed to clear game state from localStorage:', error);
+      console.warn('Failed to clear player data from sessionStorage:', error);
     }
   }
 
-  hasValidGameState(): boolean {
-    const gameState = this.loadGameState();
-    return gameState !== null && 
-           !!gameState.gameCode && 
-           !!gameState.playerId && 
-           !!gameState.playerName;
+  /**
+   * Clear all game data from sessionStorage
+   */
+  clearAllGameData(): void {
+    try {
+      // Get all keys that match our game data pattern
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith(this.GAME_DATA_PREFIX)) {
+          keysToRemove.push(key);
+        }
+      }
+      
+      // Remove all matching keys
+      keysToRemove.forEach(key => sessionStorage.removeItem(key));
+      console.log('GamePersistenceService.clearAllGameData: Cleared', keysToRemove.length, 'game data entries');
+    } catch (error) {
+      console.warn('Failed to clear all game data from sessionStorage:', error);
+    }
   }
 
+  private getGameStorageKey(gameCode: string): string {
+    return `${this.GAME_DATA_PREFIX}${gameCode.toUpperCase()}`;
+  }
+
+  // Round timer methods remain the same
   saveRoundTimerState(timerState: RoundTimerState): void {
     try {
-      localStorage.setItem(this.TIMER_STORAGE_KEY, JSON.stringify(timerState));
+      sessionStorage.setItem(this.TIMER_STORAGE_KEY, JSON.stringify(timerState));
     } catch (error) {
-      console.warn('Failed to save round timer state to localStorage:', error);
+      console.warn('Failed to save round timer state to sessionStorage:', error);
     }
   }
 
   getRoundTimerState(): RoundTimerState | null {
     try {
-      const stored = localStorage.getItem(this.TIMER_STORAGE_KEY);
+      const stored = sessionStorage.getItem(this.TIMER_STORAGE_KEY);
       if (stored) {
         return JSON.parse(stored);
       }
     } catch (error) {
-      console.warn('Failed to load round timer state from localStorage:', error);
+      console.warn('Failed to load round timer state from sessionStorage:', error);
     }
     return null;
   }
 
   clearRoundTimerState(): void {
     try {
-      localStorage.removeItem(this.TIMER_STORAGE_KEY);
+      sessionStorage.removeItem(this.TIMER_STORAGE_KEY);
     } catch (error) {
-      console.warn('Failed to clear round timer state from localStorage:', error);
+      console.warn('Failed to clear round timer state from sessionStorage:', error);
     }
   }
 }

@@ -364,7 +364,8 @@ public static class GameEndpoints
         [FromBody] GetRandomMemesRequest requestPayload,
         [FromServices] IQueryHandler<GetGameQuery, OperationResult<GameDetailsResponse>> gameHandler,
         [FromServices] HexMaster.MemeIt.Memes.Abstractions.IMemeTemplateRepository memeRepository,
-        [FromServices] HexMaster.MemeIt.Memes.Services.IBlobUrlService blobUrlService)
+        [FromServices] HexMaster.MemeIt.Memes.Services.IBlobUrlService blobUrlService,
+        [FromServices] Orleans.IGrainFactory grainFactory)
     {
         var gameCode = requestPayload?.GameCode;
         var playerId = requestPayload?.PlayerId;
@@ -410,7 +411,58 @@ public static class GameEndpoints
                 });
             }
 
-            // Get all available memes
+            // Get the game grain to check for existing meme assignment
+            var gameGrain = grainFactory.GetGrain<HexMaster.MemeIt.Games.Abstractions.Grains.IGameGrain>(gameCode);
+            
+            // Check if player already has a meme assigned for current round
+            var existingAssignment = await gameGrain.GetPlayerMemeAssignment(playerId);
+            
+            if (existingAssignment != null)
+            {
+                // Player already has a meme assigned, get the full template details
+                var existingMeme = await memeRepository.GetByIdAsync(existingAssignment.MemeTemplateId);
+                if (existingMeme != null)
+                {
+                    var existingImageUrl = blobUrlService.GetMemeImageUrl(existingMeme.SourceImageUrl);
+                    
+                    var existingResponse = new GetRandomMemeResponse
+                    {
+                        PlayerId = playerId,
+                        GameCode = gameCode,
+                        MemeTemplate = new RandomMemeTemplateResponse
+                        {
+                            Id = existingMeme.Id,
+                            Name = existingMeme.Name,
+                            Description = existingMeme.Description ?? string.Empty,
+                            ImageUrl = existingImageUrl,
+                            SourceWidth = existingMeme.SourceWidth,
+                            SourceHeight = existingMeme.SourceHeight,
+                            TextAreas = existingMeme.TextAreas.Select((ta, index) => new RandomMemeTextAreaResponse
+                            {
+                                Id = index.ToString(),
+                                X = ta.X,
+                                Y = ta.Y,
+                                Width = ta.Width,
+                                Height = ta.Height,
+                                MaxLength = ta.MaxLength,
+                                FontSize = ta.FontSize,
+                                FontFamily = ta.FontFamily,
+                                Color = ta.FontColor,
+                                IsBold = ta.FontBold,
+                                IsItalic = false,
+                                IsUnderline = false,
+                                TextAlign = "left",
+                                VerticalAlign = "middle"
+                            }).ToList()
+                        },
+                        AssignedAt = existingAssignment.AssignedAt
+                    };
+
+                    return Results.Ok(existingResponse);
+                }
+            }
+
+            // No existing assignment, assign a new random meme
             var allMemes = await memeRepository.GetAllAsync();
             var memeList = allMemes.ToList();
 
@@ -429,6 +481,9 @@ public static class GameEndpoints
 
             // Construct full URL from filename
             var fullImageUrl = blobUrlService.GetMemeImageUrl(selectedMeme.SourceImageUrl);
+
+            // Store the assignment in the game grain
+            await gameGrain.AssignMemeToPlayer(playerId, selectedMeme.Id, selectedMeme.Name, fullImageUrl);
 
             var response = new GetRandomMemeResponse
             {

@@ -33,7 +33,7 @@ export const selectCanStartGame = createSelector(
 
 export const selectGameCode = createSelector(
   selectCurrentGame,
-  (game) => game?.code
+  (game) => game?.gameCode
 );
 
 export const selectPlayerCount = createSelector(
