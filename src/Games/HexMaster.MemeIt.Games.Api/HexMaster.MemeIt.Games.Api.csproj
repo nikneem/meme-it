@@ -10,6 +10,7 @@
     <PackageReference Include="Aspire.MongoDB.Driver" Version="13.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.1" />
   </ItemGroup>
 
   <ItemGroup>

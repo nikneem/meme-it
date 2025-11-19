@@ -17,11 +17,11 @@ public static class UsersEndpoints
         var group = builder.MapGroup("/users")
             .WithTags("Users");
 
-           group.MapPost("/join", HandleJoinUser)
-               .WithName("JoinUser")
-               .Produces<JoinUserResponse>(StatusCodes.Status200OK)
-               .ProducesValidationProblem()
-               .Produces(StatusCodes.Status401Unauthorized);
+        group.MapPost("/join", HandleJoinUser)
+            .WithName("JoinUser")
+            .Produces<JoinUserResponse>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
+            .Produces(StatusCodes.Status401Unauthorized);
 
         return builder;
     }

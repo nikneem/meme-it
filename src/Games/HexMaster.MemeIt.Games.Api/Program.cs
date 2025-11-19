@@ -1,6 +1,7 @@
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Api.Endpoints;
+using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
 using HexMaster.MemeIt.Games.Application.Games;
 using HexMaster.MemeIt.Games.Application.Services;
 using HexMaster.MemeIt.Games.Data.MongoDb;
@@ -18,10 +19,10 @@ builder.Services.AddOpenApi();
 builder.Services.AddGamesMongoData(builder.Configuration);
 builder.Services.AddSingleton<IGameCodeGenerator, RandomGameCodeGenerator>();
 builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
+builder.Services.Configure<UsersJwtOptions>(builder.Configuration.GetSection(UsersJwtOptions.SectionName));
+builder.Services.AddSingleton<IPlayerIdentityProvider, JwtPlayerIdentityProvider>();
 builder.Services.AddScoped<ICommandHandler<CreateGameCommand, CreateGameResult>, CreateGameCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<JoinGameCommand, JoinGameResult>, JoinGameCommandHandler>();
-builder.Services.AddScoped<ICommandHandler<RemovePlayerCommand, RemovePlayerResult>, RemovePlayerCommandHandler>();
-builder.Services.AddScoped<ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult>, SetPlayerReadyCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<RemovePlayerCommand, RemovePlayerResult>, RemovePlayerCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult>, SetPlayerReadyCommandHandler>();
 

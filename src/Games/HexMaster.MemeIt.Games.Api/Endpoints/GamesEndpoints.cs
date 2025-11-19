@@ -1,6 +1,7 @@
+using System;
 using System.Net.Mime;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
-using HexMaster.MemeIt.Games.Api.Infrastructure;
+using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
 using HexMaster.MemeIt.Games.Api.Requests;
 using HexMaster.MemeIt.Games.Api.Responses;
 using HexMaster.MemeIt.Games.Application.Games;
@@ -52,19 +53,34 @@ public static class GamesEndpoints
         return endpoints;
     }
 
+    private static IResult? TryResolveIdentity(HttpRequest request, IPlayerIdentityProvider provider, out PlayerIdentity identity)
+    {
+        try
+        {
+            identity = provider.GetIdentity(request);
+            return null;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            identity = default!;
+            return Results.Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Unauthorized",
+                detail: ex.Message);
+        }
+    }
+
     private static async Task<IResult> RemovePlayerAsync(
         HttpContext httpContext,
         string gameCode,
         Guid playerId,
         ICommandHandler<RemovePlayerCommand, RemovePlayerResult> handler,
+        IPlayerIdentityProvider identityProvider,
         CancellationToken cancellationToken)
     {
-        if (!PlayerIdentityHelper.TryParsePlayerId(httpContext.Request.Headers, out var adminPlayerId, out var error))
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var adminIdentity) is { } identityError)
         {
-            return Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                [PlayerIdentityHelper.PlayerIdHeaderName] = new[] { error ?? "Invalid player id." }
-            });
+            return identityError;
         }
 
         if (string.IsNullOrWhiteSpace(gameCode))
@@ -83,7 +99,7 @@ public static class GamesEndpoints
             });
         }
 
-        var command = new RemovePlayerCommand(adminPlayerId, gameCode, playerId);
+        var command = new RemovePlayerCommand(adminIdentity.UserId, gameCode, playerId);
         try
         {
             await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
@@ -119,15 +135,13 @@ public static class GamesEndpoints
         HttpContext httpContext,
         string gameCode,
         ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult> handler,
+        IPlayerIdentityProvider identityProvider,
         CancellationToken cancellationToken,
         bool isReady = true)
     {
-        if (!PlayerIdentityHelper.TryParsePlayerId(httpContext.Request.Headers, out var playerId, out var error))
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity) is { } identityError)
         {
-            return Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                [PlayerIdentityHelper.PlayerIdHeaderName] = new[] { error ?? "Invalid player id." }
-            });
+            return identityError;
         }
 
         if (string.IsNullOrWhiteSpace(gameCode))
@@ -138,7 +152,7 @@ public static class GamesEndpoints
             });
         }
 
-        var command = new SetPlayerReadyCommand(playerId, gameCode, isReady);
+        var command = new SetPlayerReadyCommand(playerIdentity.UserId, gameCode, isReady);
         try
         {
             var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
@@ -169,6 +183,7 @@ public static class GamesEndpoints
         HttpContext httpContext,
         CreateGameRequest request,
         ICommandHandler<CreateGameCommand, CreateGameResult> handler,
+        IPlayerIdentityProvider identityProvider,
         CancellationToken cancellationToken)
     {
         if (request is null)
@@ -179,23 +194,21 @@ public static class GamesEndpoints
             });
         }
 
-        if (!PlayerIdentityHelper.TryParsePlayerId(httpContext.Request.Headers, out var playerId, out var error))
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity) is { } identityError)
+        {
+            return identityError;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.DisplayName) &&
+            !string.Equals(request.DisplayName.Trim(), playerIdentity.DisplayName, StringComparison.Ordinal))
         {
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                [PlayerIdentityHelper.PlayerIdHeaderName] = new[] { error ?? "Invalid player id." }
+                [nameof(request.DisplayName)] = new[] { "Display name must match the authenticated player." }
             });
         }
 
-        if (string.IsNullOrWhiteSpace(request.DisplayName))
-        {
-            return Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                [nameof(request.DisplayName)] = new[] { "Display name is required." }
-            });
-        }
-
-        var command = new CreateGameCommand(playerId, request.DisplayName, request.Password);
+        var command = new CreateGameCommand(playerIdentity.UserId, playerIdentity.DisplayName, request.Password);
         try
         {
             var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
@@ -216,6 +229,7 @@ public static class GamesEndpoints
         string gameCode,
         JoinGameRequest request,
         ICommandHandler<JoinGameCommand, JoinGameResult> handler,
+        IPlayerIdentityProvider identityProvider,
         CancellationToken cancellationToken)
     {
         if (request is null)
@@ -226,19 +240,17 @@ public static class GamesEndpoints
             });
         }
 
-        if (!PlayerIdentityHelper.TryParsePlayerId(httpContext.Request.Headers, out var playerId, out var error))
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity) is { } identityError)
         {
-            return Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                [PlayerIdentityHelper.PlayerIdHeaderName] = new[] { error ?? "Invalid player id." }
-            });
+            return identityError;
         }
 
-        if (string.IsNullOrWhiteSpace(request.PlayerName))
+        if (!string.IsNullOrWhiteSpace(request.PlayerName) &&
+            !string.Equals(request.PlayerName.Trim(), playerIdentity.DisplayName, StringComparison.Ordinal))
         {
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                [nameof(request.PlayerName)] = new[] { "Player name is required." }
+                [nameof(request.PlayerName)] = new[] { "Player name must match the authenticated player." }
             });
         }
 
@@ -250,7 +262,7 @@ public static class GamesEndpoints
             });
         }
 
-        var command = new JoinGameCommand(playerId, request.PlayerName, gameCode, request.Password);
+        var command = new JoinGameCommand(playerIdentity.UserId, playerIdentity.DisplayName, gameCode, request.Password);
         try
         {
             var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);

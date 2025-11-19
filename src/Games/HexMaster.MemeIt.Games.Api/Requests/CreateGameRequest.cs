@@ -7,9 +7,8 @@ namespace HexMaster.MemeIt.Games.Api.Requests;
 /// </summary>
 public sealed record CreateGameRequest
 {
-    [Required]
     [MaxLength(32)]
-    public string DisplayName { get; init; } = string.Empty;
+    public string? DisplayName { get; init; }
 
     [MaxLength(32)]
     public string? Password { get; init; }
