@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HexMaster.MemeIt.Games.Abstractions\HexMaster.MemeIt.Games.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>
