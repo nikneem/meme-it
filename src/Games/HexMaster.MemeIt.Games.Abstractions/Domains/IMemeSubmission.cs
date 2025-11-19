@@ -16,7 +16,7 @@ public interface IMemeSubmission
     /// <summary>
     /// Identifier of the meme template selected for this submission.
     /// </summary>
-    string MemeTemplateId { get; }
+    Guid MemeTemplateId { get; }
 
     /// <summary>
     /// Text entries keyed by template text field identifiers.

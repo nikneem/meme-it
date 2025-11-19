@@ -8,7 +8,7 @@ public interface IMemeTextEntry
     /// <summary>
     /// Identifier of the text field as defined by the meme template.
     /// </summary>
-    string TextFieldId { get; }
+    Guid TextFieldId { get; }
 
     /// <summary>
     /// Text entered by the player for the given field.
