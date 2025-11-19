@@ -21,4 +21,6 @@ builder.AddProject<Projects.HexMaster_MemeIt_Games_Api>("hexmaster-memeit-games-
     })
     .WaitFor(gamesDatabase);
 
+builder.AddProject<Projects.HexMaster_MemeIt_Users_Api>("hexmaster-memeit-users-api");
+
 builder.Build().Run();

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{CF572ECF-22AD-42AC-863C-A550BE77A01B}"
 EndProject
@@ -26,6 +26,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Core", "HexMaster.MemeIt.Core\HexMaster.MemeIt.Core.csproj", "{DE70619E-4535-4F1E-8610-C58E1EFAE762}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.IntegrationEvents", "HexMaster.MemeIt.IntegrationEvents\HexMaster.MemeIt.IntegrationEvents.csproj", "{DB350E71-5291-42D4-950A-A09FACD155C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Users", "Users", "{E20AC9F2-EC33-427C-B8B8-BD7398E62341}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Users.Api", "Users\HexMaster.MemeIt.Users.Api\HexMaster.MemeIt.Users.Api.csproj", "{81831EA5-E18E-AA96-CB31-39DAE3FED714}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Users", "Users\HexMaster.MemeIt.Users\HexMaster.MemeIt.Users.csproj", "{6CC6B9B6-1087-41EC-B1F7-D63E31ACE2A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Users.Abstractions", "Users\HexMaster.MemeIt.Users.Abstractions\HexMaster.MemeIt.Users.Abstractions.csproj", "{281CEE45-DA6C-40A7-8954-0EBFD2E08F1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +77,18 @@ Global
 		{DB350E71-5291-42D4-950A-A09FACD155C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB350E71-5291-42D4-950A-A09FACD155C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB350E71-5291-42D4-950A-A09FACD155C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81831EA5-E18E-AA96-CB31-39DAE3FED714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81831EA5-E18E-AA96-CB31-39DAE3FED714}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81831EA5-E18E-AA96-CB31-39DAE3FED714}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81831EA5-E18E-AA96-CB31-39DAE3FED714}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CC6B9B6-1087-41EC-B1F7-D63E31ACE2A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CC6B9B6-1087-41EC-B1F7-D63E31ACE2A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CC6B9B6-1087-41EC-B1F7-D63E31ACE2A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CC6B9B6-1087-41EC-B1F7-D63E31ACE2A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{281CEE45-DA6C-40A7-8954-0EBFD2E08F1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{281CEE45-DA6C-40A7-8954-0EBFD2E08F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{281CEE45-DA6C-40A7-8954-0EBFD2E08F1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{281CEE45-DA6C-40A7-8954-0EBFD2E08F1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +103,9 @@ Global
 		{03682FC9-F4CD-4463-BD85-44D2582E62EB} = {6C4DC938-A4BE-4320-9D7D-71F5DB4295C1}
 		{DE70619E-4535-4F1E-8610-C58E1EFAE762} = {330830FB-1B8B-47B6-8433-01C99F5BAE2D}
 		{DB350E71-5291-42D4-950A-A09FACD155C7} = {330830FB-1B8B-47B6-8433-01C99F5BAE2D}
+		{81831EA5-E18E-AA96-CB31-39DAE3FED714} = {E20AC9F2-EC33-427C-B8B8-BD7398E62341}
+		{6CC6B9B6-1087-41EC-B1F7-D63E31ACE2A4} = {E20AC9F2-EC33-427C-B8B8-BD7398E62341}
+		{281CEE45-DA6C-40A7-8954-0EBFD2E08F1C} = {E20AC9F2-EC33-427C-B8B8-BD7398E62341}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0E8B39DF-4768-4F7A-88E5-447EE100829A}
