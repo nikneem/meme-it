@@ -20,6 +20,10 @@ builder.Services.AddSingleton<IGameCodeGenerator, RandomGameCodeGenerator>();
 builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
 builder.Services.AddScoped<ICommandHandler<CreateGameCommand, CreateGameResult>, CreateGameCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<JoinGameCommand, JoinGameResult>, JoinGameCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<RemovePlayerCommand, RemovePlayerResult>, RemovePlayerCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult>, SetPlayerReadyCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<RemovePlayerCommand, RemovePlayerResult>, RemovePlayerCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult>, SetPlayerReadyCommandHandler>();
 
 var app = builder.Build();
 

@@ -57,6 +57,19 @@ public interface IGame
     /// </summary>
     /// <param name="playerId">Identifier of the player to remove.</param>
     void RemovePlayer(Guid playerId);
+    /// <summary>
+    /// Sets a player's ready state in the lobby.
+    /// </summary>
+    /// <param name="playerId">Identifier of the player.</param>
+    /// <param name="isReady">Whether the player is ready to start.</param>
+    void SetPlayerReady(Guid playerId, bool isReady);
+
+    /// <summary>
+    /// Checks if all players in the lobby are ready to start the game.
+    /// </summary>
+    /// <returns>True if all players are ready; otherwise false.</returns>
+    bool AreAllPlayersReady();
+
 
     /// <summary>
     /// Records a meme submission for the specified round.

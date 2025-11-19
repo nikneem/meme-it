@@ -8,7 +8,7 @@ namespace HexMaster.MemeIt.Games.Domains;
 /// </summary>
 public sealed class GamePlayer : IGamePlayer
 {
-    public GamePlayer(Guid playerId, string displayName)
+    public GamePlayer(Guid playerId, string displayName, bool isReady = false)
     {
         PlayerId = playerId != Guid.Empty
             ? playerId
@@ -17,9 +17,13 @@ public sealed class GamePlayer : IGamePlayer
         DisplayName = !string.IsNullOrWhiteSpace(displayName)
             ? displayName
             : throw new ArgumentException("Display name must be provided", nameof(displayName));
+
+        IsReady = isReady;
     }
 
     public Guid PlayerId { get; }
 
     public string DisplayName { get; }
+
+    public bool IsReady { get; internal set; }
 }

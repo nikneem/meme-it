@@ -41,6 +41,9 @@ internal sealed class GamePlayerDocument
 
     [BsonElement("displayName")]
     public string DisplayName { get; set; } = string.Empty;
+
+    [BsonElement("isReady")]
+    public bool IsReady { get; set; }
 }
 
 internal sealed class GameRoundDocument

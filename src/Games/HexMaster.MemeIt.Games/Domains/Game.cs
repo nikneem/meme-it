@@ -87,6 +87,30 @@ public sealed class Game : IGame
         }
     }
 
+    public void SetPlayerReady(Guid playerId, bool isReady)
+    {
+        EnsureState(State.Equals(GameState.Lobby), "Player ready status can only be changed in the lobby.");
+        ValidateGuid(playerId, nameof(playerId));
+
+        var player = _players.FirstOrDefault(p => p.PlayerId == playerId);
+        if (player is null)
+        {
+            throw new InvalidOperationException("Player is not part of this game.");
+        }
+
+        player.IsReady = isReady;
+    }
+
+    public bool AreAllPlayersReady()
+    {
+        if (_players.Count == 0)
+        {
+            return false;
+        }
+
+        return _players.All(p => p.IsReady);
+    }
+
     public void AddMemeSubmission(int roundNumber, IMemeSubmission submission)
     {
         if (roundNumber <= 0)

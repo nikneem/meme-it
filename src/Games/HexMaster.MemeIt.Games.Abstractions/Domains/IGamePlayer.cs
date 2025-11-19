@@ -9,4 +9,5 @@ public interface IGamePlayer
 {
     Guid PlayerId { get; }
     string DisplayName { get; }
+    bool IsReady { get; }
 }

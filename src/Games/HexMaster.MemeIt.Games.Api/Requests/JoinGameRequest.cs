@@ -11,10 +11,6 @@ public sealed record JoinGameRequest
     [MaxLength(32)]
     public string PlayerName { get; init; } = string.Empty;
 
-    [Required]
-    [MaxLength(8)]
-    public string GameCode { get; init; } = string.Empty;
-
     [MaxLength(32)]
     public string? Password { get; init; }
 }

@@ -25,7 +25,7 @@ internal static class GameDocumentMapper
     {
         ArgumentNullException.ThrowIfNull(document);
 
-        var players = document.Players.Select(p => new GamePlayer(p.PlayerId, p.DisplayName));
+        var players = document.Players.Select(p => new GamePlayer(p.PlayerId, p.DisplayName, p.IsReady));
         var game = new Game(
             document.GameCode,
             document.AdminPlayerId,
@@ -66,7 +66,8 @@ internal static class GameDocumentMapper
         => new()
         {
             PlayerId = player.PlayerId,
-            DisplayName = player.DisplayName
+            DisplayName = player.DisplayName,
+            IsReady = player.IsReady
         };
 
     private static GameRoundDocument MapRound(IGameRound round)

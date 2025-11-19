@@ -22,7 +22,25 @@ public static class GamesEndpoints
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        group.MapPost("/join", JoinGameAsync)
+        group.MapDelete("/{gameCode}/remove-player/{playerId:guid}", RemovePlayerAsync)
+            .WithName("RemovePlayer")
+            .WithSummary("Removes a player from the game. Only the admin can perform this action.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        group.MapPatch("/{gameCode}/ready", SetPlayerReadyAsync)
+            .WithName("SetPlayerReady")
+            .WithSummary("Sets the player's ready state in the lobby.")
+            .Produces<SetPlayerReadyResponse>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+
+        group.MapPost("/{gameCode}/join", JoinGameAsync)
             .Accepts<JoinGameRequest>(MediaTypeNames.Application.Json)
             .WithName("JoinGame")
             .WithSummary("Allows a player to join an existing game by game code.")
@@ -32,6 +50,119 @@ public static class GamesEndpoints
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         return endpoints;
+    }
+
+    private static async Task<IResult> RemovePlayerAsync(
+        HttpContext httpContext,
+        string gameCode,
+        Guid playerId,
+        ICommandHandler<RemovePlayerCommand, RemovePlayerResult> handler,
+        CancellationToken cancellationToken)
+    {
+        if (!PlayerIdentityHelper.TryParsePlayerId(httpContext.Request.Headers, out var adminPlayerId, out var error))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [PlayerIdentityHelper.PlayerIdHeaderName] = new[] { error ?? "Invalid player id." }
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(gameCode)] = new[] { "Game code is required." }
+            });
+        }
+
+        if (playerId == Guid.Empty)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(playerId)] = new[] { "Player id is required." }
+            });
+        }
+
+        var command = new RemovePlayerCommand(adminPlayerId, gameCode, playerId);
+        try
+        {
+            await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+            return Results.NoContent();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                detail: ex.Message);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["game"] = new[] { ex.Message }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [ex.ParamName ?? "payload"] = new[] { ex.Message }
+            });
+        }
+    }
+
+    private static async Task<IResult> SetPlayerReadyAsync(
+        HttpContext httpContext,
+        string gameCode,
+        ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult> handler,
+        CancellationToken cancellationToken,
+        bool isReady = true)
+    {
+        if (!PlayerIdentityHelper.TryParsePlayerId(httpContext.Request.Headers, out var playerId, out var error))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [PlayerIdentityHelper.PlayerIdHeaderName] = new[] { error ?? "Invalid player id." }
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(gameCode)] = new[] { "Game code is required." }
+            });
+        }
+
+        var command = new SetPlayerReadyCommand(playerId, gameCode, isReady);
+        try
+        {
+            var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+            var response = new SetPlayerReadyResponse(result.PlayerId, result.IsReady, result.AllPlayersReady);
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["game"] = new[] { ex.Message }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [ex.ParamName ?? "payload"] = new[] { ex.Message }
+            });
+        }
     }
 
     private static async Task<IResult> CreateGameAsync(
@@ -82,6 +213,7 @@ public static class GamesEndpoints
 
     private static async Task<IResult> JoinGameAsync(
         HttpContext httpContext,
+        string gameCode,
         JoinGameRequest request,
         ICommandHandler<JoinGameCommand, JoinGameResult> handler,
         CancellationToken cancellationToken)
@@ -110,15 +242,15 @@ public static class GamesEndpoints
             });
         }
 
-        if (string.IsNullOrWhiteSpace(request.GameCode))
+        if (string.IsNullOrWhiteSpace(gameCode))
         {
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                [nameof(request.GameCode)] = new[] { "Game code is required." }
+                [nameof(gameCode)] = new[] { "Game code is required." }
             });
         }
 
-        var command = new JoinGameCommand(playerId, request.PlayerName, request.GameCode, request.Password);
+        var command = new JoinGameCommand(playerId, request.PlayerName, gameCode, request.Password);
         try
         {
             var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
