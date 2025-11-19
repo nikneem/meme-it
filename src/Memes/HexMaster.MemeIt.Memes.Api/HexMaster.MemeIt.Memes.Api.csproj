@@ -8,12 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HexMaster.MemeIt.Users\HexMaster.MemeIt.Users.csproj" />
-    <ProjectReference Include="..\HexMaster.MemeIt.Users.Abstractions\HexMaster.MemeIt.Users.Abstractions.csproj" />
     <ProjectReference Include="..\..\Aspire\HexMaster.MemeIt.Aspire\HexMaster.MemeIt.Aspire.ServiceDefaults\HexMaster.MemeIt.Aspire.ServiceDefaults.csproj" />
   </ItemGroup>
 
