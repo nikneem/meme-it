@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HexMaster.MemeIt.Games.Abstractions\HexMaster.MemeIt.Games.Abstractions.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Games\HexMaster.MemeIt.Games.csproj" />
   </ItemGroup>
 
 </Project>

@@ -39,6 +39,36 @@ public sealed class MongoGamesRepository : IGamesRepository
         await _collection.InsertOneAsync(document, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
+    public async Task<IGame?> GetByGameCodeAsync(string gameCode, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            throw new ArgumentException("Game code must be provided.", nameof(gameCode));
+        }
+
+        await EnsureIndexesAsync(cancellationToken).ConfigureAwait(false);
+
+        var filter = Builders<GameDocument>.Filter.Eq(doc => doc.GameCode, gameCode.ToUpperInvariant());
+        var document = await _collection.Find(filter).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        return document is not null ? GameDocumentMapper.FromDocument(document) : null;
+    }
+
+    public async Task UpdateAsync(IGame game, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        await EnsureIndexesAsync(cancellationToken).ConfigureAwait(false);
+
+        var document = GameDocumentMapper.ToDocument(game);
+        var filter = Builders<GameDocument>.Filter.Eq(doc => doc.GameCode, game.GameCode);
+        var result = await _collection.ReplaceOneAsync(filter, document, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        if (result.MatchedCount == 0)
+        {
+            throw new InvalidOperationException($"Game with code '{game.GameCode}' not found for update.");
+        }
+    }
+
     private async Task EnsureIndexesAsync(CancellationToken cancellationToken)
     {
         if (_indexesCreated)

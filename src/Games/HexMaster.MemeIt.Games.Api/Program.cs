@@ -19,6 +19,7 @@ builder.Services.AddGamesMongoData(builder.Configuration);
 builder.Services.AddSingleton<IGameCodeGenerator, RandomGameCodeGenerator>();
 builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
 builder.Services.AddScoped<ICommandHandler<CreateGameCommand, CreateGameResult>, CreateGameCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<JoinGameCommand, JoinGameResult>, JoinGameCommandHandler>();
 
 var app = builder.Build();
 
