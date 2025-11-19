@@ -14,6 +14,7 @@ internal sealed class GameDocument
     public string GameCode { get; set; } = string.Empty;
 
     [BsonElement("adminPlayerId")]
+    [BsonRepresentation(BsonType.String)]
     public Guid AdminPlayerId { get; set; }
 
     [BsonElement("password")]
@@ -35,6 +36,7 @@ internal sealed class GameDocument
 internal sealed class GamePlayerDocument
 {
     [BsonElement("playerId")]
+    [BsonRepresentation(BsonType.String)]
     public Guid PlayerId { get; set; }
 
     [BsonElement("displayName")]
@@ -53,9 +55,11 @@ internal sealed class GameRoundDocument
 internal sealed class MemeSubmissionDocument
 {
     [BsonElement("playerId")]
+    [BsonRepresentation(BsonType.String)]
     public Guid PlayerId { get; set; }
 
     [BsonElement("memeTemplateId")]
+    [BsonRepresentation(BsonType.String)]
     public Guid MemeTemplateId { get; set; }
 
     [BsonElement("textEntries")]
@@ -65,6 +69,7 @@ internal sealed class MemeSubmissionDocument
 internal sealed class MemeTextEntryDocument
 {
     [BsonElement("textFieldId")]
+    [BsonRepresentation(BsonType.String)]
     public Guid TextFieldId { get; set; }
 
     [BsonElement("value")]
