@@ -1,0 +1,70 @@
+<section class="landing">
+    <header class="hero">
+        <div class="hero__badge">Multiplayer Meme Party</div>
+        <h1>Spin up a lobby, drop a prompt, let the chaos crown a meme legend.</h1>
+        <p>
+            Meme-It is the lightning-fast party game where creativity, timing, and inside jokes collide.
+            Perfect for living rooms, remote teams, and streamers who live for audience participation.
+        </p>
+        <div class="hero__actions">
+            <button class="btn btn-primary">Start a Room</button>
+            <button class="btn btn-ghost">Watch a Demo</button>
+        </div>
+        <div class="hero__stats">
+            <div>
+                <span>900k+</span>
+                <small>Memes submitted this month</small>
+            </div>
+            <div>
+                <span>4.9/5</span>
+                <small>Average party rating</small>
+            </div>
+            <div>
+                <span>120</span>
+                <small>New templates weekly</small>
+            </div>
+        </div>
+    </header>
+
+    <section class="feature-grid">
+        <p class="eyebrow">Why players love Meme-It</p>
+        <h2>Stacked with party-ready magic.</h2>
+        <div class="feature-grid__items">
+            <article class="feature" *ngFor="let feature of features">
+                <h3>{{ feature.title }}</h3>
+                <p>{{ feature.description }}</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="steps">
+        <p class="eyebrow">How it works</p>
+        <h2>Three minutes to meme glory.</h2>
+        <ol>
+            <li *ngFor="let step of steps">
+                <div class="step-label">{{ step.label }}</div>
+                <div>
+                    <h3>{{ step.title }}</h3>
+                    <p>{{ step.description }}</p>
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    <section class="testimonials">
+        <p class="eyebrow">Real parties. Real chaos.</p>
+        <div class="testimonial" *ngFor="let testimonial of testimonials">
+            <p class="quote">“{{ testimonial.quote }}”</p>
+            <p class="author">{{ testimonial.author }}</p>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>Ready to meme smarter?</h2>
+        <p>Launch a lobby for free, invite up to 12 friends, and unlock premium rounds when you are ready.</p>
+        <div class="cta__actions">
+            <button class="btn btn-primary">Host Tonight’s Game</button>
+            <button class="btn btn-outline">View Pricing</button>
+        </div>
+    </section>
+</section>
