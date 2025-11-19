@@ -1,4 +1,11 @@
+using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
+using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.Games.Api.Endpoints;
+using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Services;
+using HexMaster.MemeIt.Games.Data.MongoDb;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
@@ -6,7 +13,12 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddMongoDBClient("games-db");
 builder.Services.AddOpenApi();
+builder.Services.AddGamesMongoData(builder.Configuration);
+builder.Services.AddSingleton<IGameCodeGenerator, RandomGameCodeGenerator>();
+builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
+builder.Services.AddScoped<ICommandHandler<CreateGameCommand, CreateGameResult>, CreateGameCommandHandler>();
 
 var app = builder.Build();
 
@@ -17,6 +29,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapDefaultEndpoints();
+app.MapGamesEndpoints();
 
 app.MapGet("/", () => Results.Ok("Meme-It Games API"))
    .WithTags("Diagnostics")

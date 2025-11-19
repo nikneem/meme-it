@@ -7,11 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.MongoDB.Driver" Version="13.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HexMaster.MemeIt.Games\HexMaster.MemeIt.Games.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Games.Abstractions\HexMaster.MemeIt.Games.Abstractions.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Games.Data.MongoDb\HexMaster.MemeIt.Games.Data.MongoDb.csproj" />
     <ProjectReference Include="..\..\Aspire\HexMaster.MemeIt.Aspire\HexMaster.MemeIt.Aspire.ServiceDefaults\HexMaster.MemeIt.Aspire.ServiceDefaults.csproj" />
   </ItemGroup>
 
