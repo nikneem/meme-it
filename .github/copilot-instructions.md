@@ -67,6 +67,7 @@ Only after approval should you implement the plan.
 - Unit tests: xUnit with optional Moq and Bogus.
 - Aim for ≥80% coverage in core and API modules.
 - Use factories/builders for test data; seed Bogus when asserting specific values.
+- Every code change must be backed by unit tests wherever practicable; keep overall solution coverage ≥80% and do not merge work that causes coverage regressions without explicit maintainer approval.
 
 ## MCP Server Usage (Mandatory)
 - Use the HexMaster Design Guidelines MCP server to:

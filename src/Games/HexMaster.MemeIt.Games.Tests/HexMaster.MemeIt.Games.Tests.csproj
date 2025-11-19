@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.5.0" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -16,6 +17,11 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HexMaster.MemeIt.Games\HexMaster.MemeIt.Games.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Games.Abstractions\HexMaster.MemeIt.Games.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
