@@ -1,15 +1,13 @@
-using HexMaster.MemeIt.Games.Abstractions.Grains;
-using Orleans;
+using HexMaster.MemeIt.Games.Services;
 using Localizr.Core.Abstractions.Cqrs;
 
 namespace HexMaster.MemeIt.Games.Features.SetPlayerReadyStatus;
 
-public class SetPlayerReadyStatusCommandHandler(IGrainFactory grainFactory) : ICommandHandler<SetPlayerReadyStatusCommand, GameDetailsResponse>
+public class SetPlayerReadyStatusCommandHandler(IGameService gameService) : ICommandHandler<SetPlayerReadyStatusCommand, GameDetailsResponse>
 {
     public async ValueTask<GameDetailsResponse> HandleAsync(SetPlayerReadyStatusCommand command, CancellationToken cancellationToken)
     {
-        var gameGrain = grainFactory.GetGrain<IGameGrain>(command.GameCode);
-        var gameState = await gameGrain.SetPlayerReadyStatus(command.PlayerId, command.IsReady);
+        var gameState = await gameService.SetPlayerReadyStatusAsync(command.GameCode, command.PlayerId, command.IsReady, cancellationToken);
         return GameDetailsResponse.FromGameState(gameState, command.PlayerId);
     }
 }

@@ -365,7 +365,7 @@ public static class GameEndpoints
         [FromServices] IQueryHandler<GetGameQuery, OperationResult<GameDetailsResponse>> gameHandler,
         [FromServices] HexMaster.MemeIt.Memes.Abstractions.IMemeTemplateRepository memeRepository,
         [FromServices] HexMaster.MemeIt.Memes.Services.IBlobUrlService blobUrlService,
-        [FromServices] Orleans.IGrainFactory grainFactory)
+        [FromServices] HexMaster.MemeIt.Games.Services.IGameService gameService)
     {
         var gameCode = requestPayload?.GameCode;
         var playerId = requestPayload?.PlayerId;
@@ -411,11 +411,8 @@ public static class GameEndpoints
                 });
             }
 
-            // Get the game grain to check for existing meme assignment
-            var gameGrain = grainFactory.GetGrain<HexMaster.MemeIt.Games.Abstractions.Grains.IGameGrain>(gameCode);
-            
             // Check if player already has a meme assigned for current round
-            var existingAssignment = await gameGrain.GetPlayerMemeAssignment(playerId);
+            var existingAssignment = await gameService.GetPlayerMemeAssignmentAsync(gameCode, playerId);
             
             if (existingAssignment != null)
             {
@@ -482,8 +479,8 @@ public static class GameEndpoints
             // Construct full URL from filename
             var fullImageUrl = blobUrlService.GetMemeImageUrl(selectedMeme.SourceImageUrl);
 
-            // Store the assignment in the game grain
-            await gameGrain.AssignMemeToPlayer(playerId, selectedMeme.Id, selectedMeme.Name, fullImageUrl);
+            // Store the assignment in the game service
+            await gameService.AssignMemeToPlayerAsync(gameCode, playerId, selectedMeme.Id, selectedMeme.Name, fullImageUrl);
 
             var response = new GetRandomMemeResponse
             {

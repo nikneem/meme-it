@@ -1,17 +1,23 @@
-using HexMaster.MemeIt.Games.Abstractions.Grains;
-using Orleans;
+using HexMaster.MemeIt.Games.Services;
 using System.Threading.Tasks;
 
 namespace HexMaster.MemeIt.Games.Features.LeaveGame;
 
 using Localizr.Core.Abstractions.Cqrs;
 
-public class LeaveGameCommandHandler(IGrainFactory grainFactory) : ICommandHandler<LeaveGameCommand, LeaveGameResponse>
+public class LeaveGameCommandHandler(IGameService gameService) : ICommandHandler<LeaveGameCommand, LeaveGameResponse>
 {
     public async ValueTask<LeaveGameResponse> HandleAsync(LeaveGameCommand command, CancellationToken cancellationToken)
     {
-        var gameGrain = grainFactory.GetGrain<IGameGrain>(command.GameCode);
-        await gameGrain.LeaveGame(command.PlayerId);
-        return new LeaveGameResponse(Guid.Parse(command.PlayerId));
+        try
+        {
+            await gameService.LeaveGameAsync(command.GameCode, command.PlayerId, cancellationToken);
+            return new LeaveGameResponse(Guid.Parse(command.PlayerId));
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Game has been deleted"))
+        {
+            // Game was deleted because no players remain, still return success for the leaving player
+            return new LeaveGameResponse(Guid.Parse(command.PlayerId));
+        }
     }
 }

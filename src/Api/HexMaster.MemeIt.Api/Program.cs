@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using HexMaster.MemeIt.Core.ExtensionMethods;
 using HexMaster.MemeIt.Aspire;
+using Dapr.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,13 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.AddServiceDefaults();
+
+// Add DAPR client
+builder.Services.AddSingleton<DaprClient>(provider => 
+{
+    return new DaprClientBuilder().Build();
+});
+
 builder.AddGamesServices();
 builder.AddMemesServices();
 
@@ -35,7 +43,6 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 
 builder.AddKeyedRedisClient(AspireConstants.RedisCacheName);
-builder.UseOrleans(); 
 builder.Services.AddOpenApi();
 
 // Add CORS services
@@ -59,6 +66,10 @@ app.MapDefaultEndpoints();
 
 // Use CORS middleware
 app.UseCors();
+
+// Use DAPR
+app.UseCloudEvents();
+app.MapSubscribeHandler();
 
 app.MapGamesEndpoints();
 app.MapMemeEndpoints();
