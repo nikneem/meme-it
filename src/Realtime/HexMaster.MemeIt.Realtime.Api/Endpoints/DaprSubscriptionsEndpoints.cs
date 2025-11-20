@@ -60,7 +60,7 @@ public static class DaprSubscriptionsEndpoints
                 @event.PlayerId, @event.DisplayName, @event.IsReady, @event.GameCode);
 
             // Broadcast to all connected clients
-            await hubContext.Clients.All.SendAsync(
+            await hubContext.Clients.Group(@event.GameCode).SendAsync(
                 "PlayerStateChanged",
                 new
                 {
@@ -98,7 +98,7 @@ public static class DaprSubscriptionsEndpoints
                 @event.PlayerId, @event.DisplayName, @event.GameCode);
 
             // Broadcast to all connected clients
-            await hubContext.Clients.All.SendAsync(
+            await hubContext.Clients.Group(@event.GameCode).SendAsync(
                 "PlayerRemoved",
                 new
                 {
@@ -134,7 +134,7 @@ public static class DaprSubscriptionsEndpoints
                 @event.PlayerId, @event.DisplayName, @event.GameCode);
 
             // Broadcast to all connected clients
-            await hubContext.Clients.All.SendAsync(
+            await hubContext.Clients.Group(@event.GameCode).SendAsync(
                 "PlayerJoined",
                 new
                 {

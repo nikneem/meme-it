@@ -25,6 +25,7 @@ export interface PlayerRemovedEvent {
 export class RealtimeService {
     private hubConnection?: HubConnection;
     private readonly hubUrl = 'http://localhost:5000/hubs/games';
+    private currentGameCode?: string;
 
     private playerJoinedSubject = new Subject<PlayerJoinedEvent>();
     private playerStateChangedSubject = new Subject<PlayerStateChangedEvent>();
@@ -86,6 +87,7 @@ export class RealtimeService {
 
         try {
             await this.hubConnection.invoke('JoinGameGroup', gameCode);
+            this.currentGameCode = gameCode;
             console.log(`Joined game group: ${gameCode}`);
         } catch (error) {
             console.error(`Error joining game group ${gameCode}:`, error);
@@ -103,6 +105,7 @@ export class RealtimeService {
 
         try {
             await this.hubConnection.invoke('LeaveGameGroup', gameCode);
+            this.currentGameCode = undefined;
             console.log(`Left game group: ${gameCode}`);
         } catch (error) {
             console.error(`Error leaving game group ${gameCode}:`, error);
@@ -134,8 +137,17 @@ export class RealtimeService {
             console.warn('SignalR reconnecting...', error);
         });
 
-        this.hubConnection.onreconnected((connectionId) => {
+        this.hubConnection.onreconnected(async (connectionId) => {
             console.log('SignalR reconnected. Connection ID:', connectionId);
+            // Automatically rejoin the game group after reconnection
+            if (this.currentGameCode) {
+                try {
+                    await this.hubConnection!.invoke('JoinGameGroup', this.currentGameCode);
+                    console.log(`Rejoined game group after reconnection: ${this.currentGameCode}`);
+                } catch (error) {
+                    console.error(`Failed to rejoin game group ${this.currentGameCode}:`, error);
+                }
+            }
         });
 
         this.hubConnection.onclose((error) => {

@@ -34,7 +34,7 @@ public sealed class GamesHub : Hub
     /// <param name="gameCode">The game code to join.</param>
     public async Task JoinGameGroup(string gameCode)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{gameCode}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"{gameCode}");
     }
 
     /// <summary>
@@ -43,6 +43,6 @@ public sealed class GamesHub : Hub
     /// <param name="gameCode">The game code to leave.</param>
     public async Task LeaveGameGroup(string gameCode)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameCode}");
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"{gameCode}");
     }
 }

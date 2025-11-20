@@ -34,6 +34,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   errorMessage = '';
   private gameStateSubscription?: Subscription;
   private realtimeSubscriptions: Subscription[] = [];
+  private hasJoinedRealtimeGroup = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -62,8 +63,10 @@ export class GameLobbyPage implements OnInit, OnDestroy {
           this.isLoading = false;
           this.cdr.detectChanges();
 
-          // Connect to SignalR and join game group after successfully loading game
-          this.connectToRealtime();
+          // Connect to SignalR and join game group after successfully loading game (only once)
+          if (!this.hasJoinedRealtimeGroup) {
+            this.connectToRealtime();
+          }
         }
       },
       error: (error) => {
@@ -100,6 +103,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
 
       // Join the game group
       await this.realtimeService.joinGameGroup(this.gameCode);
+      this.hasJoinedRealtimeGroup = true;
 
       // Subscribe to real-time events
       this.setupRealtimeEventHandlers();
@@ -107,6 +111,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
       console.log('Connected to realtime service for game:', this.gameCode);
     } catch (error) {
       console.error('Failed to connect to realtime service:', error);
+      this.hasJoinedRealtimeGroup = false;
       this.notificationService.error(
         'Connection Error',
         'Failed to connect to real-time updates. Some features may not work.',
@@ -129,7 +134,6 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Handle player joined events
     const playerJoinedSub = this.realtimeService.playerJoined$.subscribe(event => {
       console.log('Player joined:', event);
-      debugger;
       this.notificationService.success(
         'Player Joined',
         `${event.displayName} joined the game`,
@@ -144,7 +148,6 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Handle player state changed events
     const playerStateChangedSub = this.realtimeService.playerStateChanged$.subscribe(event => {
       console.log('Player state changed:', event);
-      debugger;
       if (this.game) {
         const player = this.game.players.find(p => p.playerId === event.playerId);
         if (player) {
@@ -164,9 +167,29 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     this.realtimeSubscriptions.push(playerStateChangedSub);
 
     // Handle player removed events
-    const playerRemovedSub = this.realtimeService.playerRemoved$.subscribe(event => {
+    const playerRemovedSub = this.realtimeService.playerRemoved$.subscribe(async event => {
       console.log('Player removed:', event);
-      debugger;
+
+      // If the current user was removed (kicked), notify and redirect
+      if (event.playerId === this.currentUserId) {
+        this.notificationService.error(
+          'Removed From Game',
+          'You were kicked from the game.',
+          undefined,
+          5000
+        );
+        try {
+          await this.realtimeService.leaveGameGroup(this.gameCode);
+          await this.realtimeService.disconnect();
+        } catch (err) {
+          console.error('Error while leaving realtime group after kick:', err);
+        }
+        this.gameService.clearGameState(this.gameCode);
+        this.router.navigate(['/']);
+        return; // Do not process further as user is leaving
+      }
+
+      // For other players simply update local state
       if (this.game) {
         this.game.players = this.game.players.filter(p => p.playerId !== event.playerId);
         this.cdr.detectChanges();
