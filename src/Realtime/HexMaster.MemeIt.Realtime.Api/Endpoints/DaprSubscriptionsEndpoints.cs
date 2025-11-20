@@ -56,8 +56,8 @@ public static class DaprSubscriptionsEndpoints
         try
         {
             logger.LogInformation(
-                "Received PlayerStateChanged event: PlayerId={PlayerId}, DisplayName={DisplayName}, IsReady={IsReady}",
-                @event.PlayerId, @event.DisplayName, @event.IsReady);
+                "Received PlayerStateChanged event: PlayerId={PlayerId}, DisplayName={DisplayName}, IsReady={IsReady}, GameCode={GameCode}",
+                @event.PlayerId, @event.DisplayName, @event.IsReady, @event.GameCode);
 
             // Broadcast to all connected clients
             await hubContext.Clients.All.SendAsync(
@@ -66,7 +66,8 @@ public static class DaprSubscriptionsEndpoints
                 {
                     @event.PlayerId,
                     @event.DisplayName,
-                    @event.IsReady
+                    @event.IsReady,
+                    @event.GameCode
                 },
                 cancellationToken);
 
@@ -93,8 +94,8 @@ public static class DaprSubscriptionsEndpoints
         try
         {
             logger.LogInformation(
-                "Received PlayerRemoved event: PlayerId={PlayerId}, DisplayName={DisplayName}",
-                @event.PlayerId, @event.DisplayName);
+                "Received PlayerRemoved event: PlayerId={PlayerId}, DisplayName={DisplayName}, GameCode={GameCode}",
+                @event.PlayerId, @event.DisplayName, @event.GameCode);
 
             // Broadcast to all connected clients
             await hubContext.Clients.All.SendAsync(
@@ -102,7 +103,8 @@ public static class DaprSubscriptionsEndpoints
                 new
                 {
                     @event.PlayerId,
-                    @event.DisplayName
+                    @event.DisplayName,
+                    @event.GameCode
                 },
                 cancellationToken);
 
@@ -148,6 +150,7 @@ public static class DaprSubscriptionsEndpoints
         {
             logger.LogError(ex, "Error processing PlayerJoined event");
             // Return 200 OK to prevent Dapr from retrying
+            // (already logged for monitoring)
             return Results.Ok();
         }
     }

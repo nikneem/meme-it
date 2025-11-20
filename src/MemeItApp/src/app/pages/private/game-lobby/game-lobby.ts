@@ -129,6 +129,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Handle player joined events
     const playerJoinedSub = this.realtimeService.playerJoined$.subscribe(event => {
       console.log('Player joined:', event);
+      debugger;
       this.notificationService.success(
         'Player Joined',
         `${event.displayName} joined the game`,
@@ -143,7 +144,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Handle player state changed events
     const playerStateChangedSub = this.realtimeService.playerStateChanged$.subscribe(event => {
       console.log('Player state changed:', event);
-
+      debugger;
       if (this.game) {
         const player = this.game.players.find(p => p.playerId === event.playerId);
         if (player) {
@@ -165,7 +166,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Handle player removed events
     const playerRemovedSub = this.realtimeService.playerRemoved$.subscribe(event => {
       console.log('Player removed:', event);
-
+      debugger;
       if (this.game) {
         this.game.players = this.game.players.filter(p => p.playerId !== event.playerId);
         this.cdr.detectChanges();
@@ -204,8 +205,9 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   copyGameCode(): void {
-    navigator.clipboard.writeText(this.gameCode);
-    this.notificationService.success('Copied!', 'Game code copied to clipboard', undefined, 2000);
+    const joinUrl = `${window.location.origin}/games/join/${this.gameCode}`;
+    navigator.clipboard.writeText(joinUrl);
+    this.notificationService.success('Copied!', 'Join link copied to clipboard', undefined, 2000);
   }
 
   get isAdmin(): boolean {

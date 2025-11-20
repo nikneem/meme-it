@@ -55,7 +55,7 @@ public sealed class RemovePlayerCommandHandler : ICommandHandler<RemovePlayerCom
         // Publish integration event if available and player existed
         if (player is not null && _publisher is not null)
         {
-            var @event = new HexMaster.MemeIt.IntegrationEvents.Events.PlayerRemovedEvent(player.PlayerId, displayName!);
+            var @event = new HexMaster.MemeIt.IntegrationEvents.Events.PlayerRemovedEvent(player.PlayerId, displayName!, game.GameCode);
             await _publisher.PublishPlayerRemovedAsync(@event, cancellationToken).ConfigureAwait(false);
         }
 

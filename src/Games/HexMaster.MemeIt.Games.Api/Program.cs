@@ -50,6 +50,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options => options.Title = "Meme-It Games API");
 }
 
+app.UseCloudEvents();
 app.UseCors("AllowAngularApp");
 app.MapDefaultEndpoints();
 app.MapGamesEndpoints();

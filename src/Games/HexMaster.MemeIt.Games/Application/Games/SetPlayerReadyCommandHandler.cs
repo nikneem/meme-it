@@ -1,5 +1,6 @@
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
+using HexMaster.MemeIt.IntegrationEvents.Events;
 using HexMaster.MemeIt.IntegrationEvents.Publishers;
 
 namespace HexMaster.MemeIt.Games.Application.Games;
@@ -42,7 +43,7 @@ public sealed class SetPlayerReadyCommandHandler : ICommandHandler<SetPlayerRead
         var player = game.Players.FirstOrDefault(p => p.PlayerId == command.PlayerId);
         if (player is not null && _publisher is not null)
         {
-            var @event = new HexMaster.MemeIt.IntegrationEvents.Events.PlayerStateChangedEvent(player.PlayerId, player.DisplayName, player.IsReady);
+            var @event = new PlayerStateChangedEvent(player.PlayerId, player.DisplayName, player.IsReady, game.GameCode);
             await _publisher.PublishPlayerStateChangedAsync(@event, cancellationToken).ConfigureAwait(false);
         }
 

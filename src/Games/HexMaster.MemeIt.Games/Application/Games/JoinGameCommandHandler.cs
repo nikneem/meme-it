@@ -1,5 +1,6 @@
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
+using HexMaster.MemeIt.IntegrationEvents.Events;
 using HexMaster.MemeIt.IntegrationEvents.Publishers;
 
 namespace HexMaster.MemeIt.Games.Application.Games;
@@ -46,7 +47,7 @@ public sealed class JoinGameCommandHandler : ICommandHandler<JoinGameCommand, Jo
         // Publish integration event
         if (_publisher is not null)
         {
-            var @event = new HexMaster.MemeIt.IntegrationEvents.Events.PlayerJoinedEvent(
+            var @event = new PlayerJoinedEvent(
                 command.PlayerId,
                 command.PlayerName,
                 game.GameCode);

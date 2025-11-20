@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -23,10 +23,11 @@ import { GameService } from '@services/game.service';
   templateUrl: './new-game.html',
   styleUrl: './new-game.scss',
 })
-export class NewGamePage {
+export class NewGamePage implements OnInit {
   gameForm: FormGroup;
   isLoading = false;
   errorMessage = '';
+  private readonly DISPLAY_NAME_KEY = 'memeit_displayName';
 
   constructor(
     private fb: FormBuilder,
@@ -38,6 +39,15 @@ export class NewGamePage {
       displayName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
       password: ['', [Validators.maxLength(50)]]
     });
+  }
+
+  ngOnInit(): void {
+    const savedDisplayName = localStorage.getItem(this.DISPLAY_NAME_KEY);
+    if (savedDisplayName) {
+      this.gameForm.patchValue({
+        displayName: savedDisplayName
+      });
+    }
   }
 
   onSubmit(): void {
@@ -54,6 +64,8 @@ export class NewGamePage {
     // First, request JWT token
     this.authService.requestToken({ displayName }).subscribe({
       next: () => {
+        // Save display name to local storage
+        localStorage.setItem(this.DISPLAY_NAME_KEY, displayName);
         // Then create the game
         this.gameService.createGame({ password }).subscribe({
           next: (game) => {

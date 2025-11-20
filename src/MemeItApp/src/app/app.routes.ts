@@ -22,6 +22,11 @@ export const routes: Routes = [
         title: 'Join a Game — Meme-It'
     },
     {
+        path: 'games/join/:gamecode',
+        component: JoinGamePage,
+        title: 'Join a Game — Meme-It'
+    },
+    {
         path: 'app/games/:code',
         component: GameLobbyPage,
         title: 'Game Lobby — Meme-It'

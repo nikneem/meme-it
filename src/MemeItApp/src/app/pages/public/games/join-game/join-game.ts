@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,21 +23,33 @@ import { GameService } from '@services/game.service';
   templateUrl: './join-game.html',
   styleUrl: './join-game.scss',
 })
-export class JoinGamePage {
+export class JoinGamePage implements OnInit {
   gameForm: FormGroup;
   isLoading = false;
   errorMessage = '';
+  private readonly DISPLAY_NAME_KEY = 'memeit_displayName';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private gameService: GameService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.gameForm = this.fb.group({
       displayName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
       gameCode: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(10)]],
       password: ['', [Validators.maxLength(50)]]
+    });
+  }
+
+  ngOnInit(): void {
+    const gamecode = this.route.snapshot.paramMap.get('gamecode');
+    const savedDisplayName = localStorage.getItem(this.DISPLAY_NAME_KEY);
+
+    this.gameForm.patchValue({
+      ...(gamecode && { gameCode: gamecode.toUpperCase() }),
+      ...(savedDisplayName && { displayName: savedDisplayName })
     });
   }
 
@@ -56,6 +68,8 @@ export class JoinGamePage {
     // First, request JWT token
     this.authService.requestToken({ displayName, gameCode }).subscribe({
       next: () => {
+        // Save display name to local storage
+        localStorage.setItem(this.DISPLAY_NAME_KEY, displayName);
         // Then join the game
         this.gameService.joinGame({ gameCode, password }).subscribe({
           next: (game) => {

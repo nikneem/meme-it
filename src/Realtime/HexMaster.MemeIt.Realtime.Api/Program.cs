@@ -51,9 +51,10 @@ if (app.Environment.IsDevelopment())
 app.MapHub<GamesHub>("/hubs/games");
 
 // Map Dapr pubsub subscription endpoints
-app.MapDaprSubscriptionsEndpoints();
-
+app.UseCloudEvents();
 // Map Dapr subscribe endpoint for service discovery
 app.MapSubscribeHandler();
+// The local endpoints in this API the make the subscriptions work
+app.MapDaprSubscriptionsEndpoints();
 
 app.Run();
