@@ -1,6 +1,9 @@
 using System;
+using System.Linq;
 using System.Net.Mime;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
+using HexMaster.MemeIt.Games.Abstractions.Application.Games;
+using HexMaster.MemeIt.Games.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
 using HexMaster.MemeIt.Games.Api.Requests;
 using HexMaster.MemeIt.Games.Api.Responses;
@@ -21,6 +24,14 @@ public static class GamesEndpoints
             .WithSummary("Creates a new game and assigns the caller as the admin.")
             .Produces<CreateGameResponse>(StatusCodes.Status201Created)
             .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        group.MapGet("/{gameCode}", GetGameDetailsAsync)
+            .WithName("GetGameDetails")
+            .WithSummary("Retrieves game details by game code. Requires player to be part of the game.")
+            .Produces<GetGameDetailsResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         group.MapDelete("/{gameCode}/remove-player/{playerId:guid}", RemovePlayerAsync)
@@ -279,6 +290,63 @@ public static class GamesEndpoints
             {
                 ["game"] = new[] { ex.Message }
             });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [ex.ParamName ?? "payload"] = new[] { ex.Message }
+            });
+        }
+    }
+
+    private static async Task<IResult> GetGameDetailsAsync(
+        HttpContext httpContext,
+        string gameCode,
+        IQueryHandler<GetGameDetailsQuery, GetGameDetailsResult> handler,
+        IPlayerIdentityProvider identityProvider,
+        CancellationToken cancellationToken)
+    {
+        var errorResult = TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity);
+        if (errorResult is not null)
+        {
+            return errorResult;
+        }
+
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(gameCode)] = new[] { "Game code is required." }
+            });
+        }
+
+        var query = new GetGameDetailsQuery(gameCode, playerIdentity.UserId);
+
+        try
+        {
+            var result = await handler.HandleAsync(query, cancellationToken).ConfigureAwait(false);
+
+            var response = new GetGameDetailsResponse(
+                result.GameCode,
+                result.State,
+                result.CreatedAt,
+                result.Players.Select(p => new PlayerDetailsDto(p.PlayerId, p.DisplayName, p.IsReady)).ToArray(),
+                result.Rounds.Select(r => new RoundDetailsDto(r.RoundNumber, r.SubmissionCount)).ToArray(),
+                result.IsAdmin);
+
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Unauthorized",
+                detail: ex.Message);
         }
         catch (ArgumentException ex)
         {

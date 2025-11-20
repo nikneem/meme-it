@@ -9,14 +9,20 @@ export interface JoinGameRequest {
 
 export interface GameResponse {
   gameCode: string;
+  state: string;
   createdAt: string;
-  status: 'waiting' | 'active' | 'completed';
   players: Player[];
+  rounds: GameRound[];
+  isAdmin: boolean;
 }
 
 export interface Player {
-  id: string;
-  name: string;
-  isHost: boolean;
-  joinedAt: string;
+  playerId: string;
+  displayName: string;
+  isReady: boolean;
+}
+
+export interface GameRound {
+  roundNumber: number;
+  submissionCount: number;
 }

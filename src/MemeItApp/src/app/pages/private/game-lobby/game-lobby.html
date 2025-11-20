@@ -2,45 +2,84 @@
 <div class="lobby-container">
   <div class="lobby-content" *ngIf="!isLoading && game">
     <header class="lobby-header">
-      <div class="game-info">
-        <h1>Game Lobby</h1>
-        <div class="game-code-display">
-          <span class="label">Game Code:</span>
-          <span class="code">{{ gameCode }}</span>
-          <button mat-icon-button (click)="copyGameCode()" title="Copy game code">
-            <mat-icon>content_copy</mat-icon>
-          </button>
+      <div class="header-top">
+        <h1 class="lobby-title">Game Lobby</h1>
+        <div class="game-status-badge" [class.lobby]="game.state === 'Lobby'"
+          [class.in-progress]="game.state === 'InProgress'">
+          <mat-icon>{{ game.state === 'Lobby' ? 'groups' : 'sports_esports' }}</mat-icon>
+          <span>{{ game.state === 'Lobby' ? 'Waiting for Players' : game.state }}</span>
         </div>
       </div>
-      <div class="status-badge" [class.waiting]="game.status === 'waiting'">
-        {{ game.status === 'waiting' ? 'Waiting for players' : game.status }}
+
+      <div class="game-code-section">
+        <div class="code-container">
+          <span class="code-label">Game Code</span>
+          <div class="code-display">
+            <span class="code-value">{{ gameCode }}</span>
+            <button mat-icon-button (click)="copyGameCode()" class="copy-button" title="Copy game code">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div class="game-stats">
+          <div class="stat-item">
+            <mat-icon>people</mat-icon>
+            <span>{{ playerCount }} Player{{ playerCount !== 1 ? 's' : '' }}</span>
+          </div>
+          <div class="stat-item" *ngIf="game.state === 'Lobby'">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ readyPlayerCount }}/{{ playerCount }} Ready</span>
+          </div>
+          <div class="stat-item" *ngIf="game.rounds.length > 0">
+            <mat-icon>emoji_events</mat-icon>
+            <span>Round {{ game.rounds.length }}</span>
+          </div>
+        </div>
       </div>
     </header>
 
     <section class="players-section">
-      <h2>Players ({{ game.players.length }})</h2>
+      <div class="section-header">
+        <h2>Players</h2>
+        <span class="player-count-badge">{{ playerCount }}</span>
+      </div>
+
       <div class="players-grid">
-        <mat-card *ngFor="let player of game.players" class="player-card">
-          <mat-card-content>
-            <div class="player-info">
-              <mat-icon class="player-icon">person</mat-icon>
-              <div class="player-details">
-                <div class="player-name">{{ player.name }}</div>
-                <div class="player-badge" *ngIf="player.isHost">Host</div>
-              </div>
+        <div *ngFor="let player of game.players" class="player-card" [class.ready]="player.isReady"
+          [class.admin]="game.isAdmin && player.playerId === game.players[0].playerId">
+          <div class="player-avatar">
+            <mat-icon>{{ player.isReady ? 'person' : 'person_outline' }}</mat-icon>
+          </div>
+          <div class="player-info">
+            <div class="player-name">{{ player.displayName }}</div>
+            <div class="player-badges">
+              <span class="badge admin-badge" *ngIf="game.isAdmin && player.playerId === game.players[0].playerId">
+                <mat-icon>stars</mat-icon>
+                Admin
+              </span>
+              <span class="badge ready-badge" *ngIf="player.isReady">
+                <mat-icon>check_circle</mat-icon>
+                Ready
+              </span>
             </div>
-          </mat-card-content>
-        </mat-card>
+          </div>
+          <div class="player-status">
+            <mat-icon *ngIf="player.isReady" class="ready-icon">verified</mat-icon>
+          </div>
+        </div>
       </div>
     </section>
 
     <footer class="lobby-actions">
-      <button mat-raised-button color="primary" *ngIf="isHost" (click)="startGame()"
-        [disabled]="game.players.length < 2" class="action-btn">
-        Start Game
-      </button>
-      <button mat-stroked-button (click)="leaveGame()" class="action-btn">
+      <button mat-raised-button color="warn" (click)="leaveGame()" class="action-btn secondary-btn">
+        <mat-icon>exit_to_app</mat-icon>
         Leave Game
+      </button>
+
+      <button mat-raised-button color="primary" *ngIf="isAdmin" (click)="startGame()"
+        [disabled]="playerCount < 2 || !allPlayersReady" class="action-btn primary-btn">
+        <mat-icon>play_arrow</mat-icon>
+        Start Game
       </button>
     </footer>
   </div>

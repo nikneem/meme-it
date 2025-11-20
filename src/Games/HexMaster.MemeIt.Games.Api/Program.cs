@@ -1,4 +1,6 @@
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
+using HexMaster.MemeIt.Games.Abstractions.Application.Games;
+using HexMaster.MemeIt.Games.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Api.Endpoints;
 using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
@@ -36,6 +38,7 @@ builder.Services.AddScoped<ICommandHandler<CreateGameCommand, CreateGameResult>,
 builder.Services.AddScoped<ICommandHandler<JoinGameCommand, JoinGameResult>, JoinGameCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<RemovePlayerCommand, RemovePlayerResult>, RemovePlayerCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult>, SetPlayerReadyCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<GetGameDetailsQuery, GetGameDetailsResult>, GetGameDetailsQueryHandler>();
 
 var app = builder.Build();
 

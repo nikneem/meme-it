@@ -6,8 +6,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GameService } from '../../../services/game.service';
-import { interval, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { NotificationService } from '@services/notification.service';
 import { GameResponse, Player } from '@models/game.model';
 
@@ -47,11 +45,10 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     }
 
     this.loadGame();
-    this.startPolling();
   }
 
   ngOnDestroy(): void {
-    this.stopPolling();
+    // No cleanup needed
   }
 
   loadGame(): void {
@@ -74,36 +71,26 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     });
   }
 
-  startPolling(): void {
-    // Poll every 3 seconds to get updated player list
-    this.pollSubscription = interval(3000)
-      .pipe(switchMap(() => this.gameService.getGame(this.gameCode)))
-      .subscribe({
-        next: (game) => {
-          this.game = game;
-        },
-        error: (error) => {
-          console.error('Polling error:', error);
-        }
-      });
-  }
-
-  stopPolling(): void {
-    if (this.pollSubscription) {
-      this.pollSubscription.unsubscribe();
-    }
-  }
-
   copyGameCode(): void {
     navigator.clipboard.writeText(this.gameCode);
+    this.notificationService.success('Copied!', 'Game code copied to clipboard', undefined, 2000);
   }
 
-  get currentPlayer(): Player | undefined {
-    return this.game?.players.find(p => p.isHost);
+  get isAdmin(): boolean {
+    return this.game?.isAdmin || false;
   }
 
-  get isHost(): boolean {
-    return this.currentPlayer?.isHost || false;
+  get playerCount(): number {
+    return this.game?.players.length || 0;
+  }
+
+  get readyPlayerCount(): number {
+    return this.game?.players.filter(p => p.isReady).length || 0;
+  }
+
+  get allPlayersReady(): boolean {
+    if (!this.game || this.game.players.length < 2) return false;
+    return this.game.players.every(p => p.isReady);
   }
 
   startGame(): void {
