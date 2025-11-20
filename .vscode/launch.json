@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Aspire AppHost",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost/bin/Debug/net10.0/HexMaster.MemeIt.Aspire.AppHost.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_ENVIRONMENT": "Development"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            }
+        }
+    ]
+}
