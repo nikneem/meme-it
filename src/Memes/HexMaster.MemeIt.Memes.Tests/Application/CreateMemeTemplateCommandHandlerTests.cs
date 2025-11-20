@@ -2,7 +2,7 @@ using Bogus;
 using FluentAssertions;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
-using HexMaster.MemeIt.Memes.Abstractions.Repositories;
+using HexMaster.MemeIt.Memes.Repositories;
 using HexMaster.MemeIt.Memes.Abstractions.ValueObjects;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Domains;
@@ -60,7 +60,7 @@ public class CreateMemeTemplateCommandHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_WithInvalidData_ShouldThrowInvalidOperationException()
+    public async Task HandleAsync_WithInvalidData_ShouldThrowArgumentException()
     {
         // Arrange
         var command = new CreateMemeTemplateCommand(
@@ -73,7 +73,7 @@ public class CreateMemeTemplateCommandHandlerTests
         );
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<ArgumentException>(() =>
             _handler.HandleAsync(command, CancellationToken.None));
     }
 }
