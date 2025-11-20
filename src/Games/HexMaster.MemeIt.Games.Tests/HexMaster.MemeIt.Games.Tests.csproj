@@ -8,6 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CoverletOutputFormat>cobertura</CoverletOutputFormat>
+    <ExcludeByFile>**/Program.cs,**/*.Api/**/*.cs,**/*.Data.*/**/*.cs,**/*.Aspire*/**/*.cs,**/*.IntegrationEvents/**/*.cs,**/*.Realtime*/**/*.cs</ExcludeByFile>
+  </PropertyGroup>
+
+  <ItemGroup>
     <PackageReference Include="Bogus" Version="35.6.5" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
