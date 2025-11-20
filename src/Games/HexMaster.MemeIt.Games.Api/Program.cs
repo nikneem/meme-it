@@ -1,3 +1,4 @@
+using Dapr.Client;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Application.Games;
 using HexMaster.MemeIt.Games.Abstractions.Application.Queries;
@@ -6,7 +7,9 @@ using HexMaster.MemeIt.Games.Api.Endpoints;
 using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
 using HexMaster.MemeIt.Games.Application.Games;
 using HexMaster.MemeIt.Games.Application.Services;
+using HexMaster.MemeIt.Games.Application.Integration;
 using HexMaster.MemeIt.Games.Data.MongoDb;
+using HexMaster.MemeIt.IntegrationEvents.Publishers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +42,10 @@ builder.Services.AddScoped<ICommandHandler<JoinGameCommand, JoinGameResult>, Joi
 builder.Services.AddScoped<ICommandHandler<RemovePlayerCommand, RemovePlayerResult>, RemovePlayerCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult>, SetPlayerReadyCommandHandler>();
 builder.Services.AddScoped<IQueryHandler<GetGameDetailsQuery, GetGameDetailsResult>, GetGameDetailsQueryHandler>();
+
+// Add Dapr client and register IntegrationEvents publisher implementation
+builder.Services.AddDaprClient();
+builder.Services.AddScoped<HexMaster.MemeIt.IntegrationEvents.Publishers.IIntegrationEventPublisher, HexMaster.MemeIt.IntegrationEvents.Publishers.DaprIntegrationEventPublisher>();
 
 var app = builder.Build();
 

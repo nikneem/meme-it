@@ -12,10 +12,12 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 public sealed class SetPlayerReadyCommandHandler : ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult>
 {
     private readonly IGamesRepository _repository;
+    private readonly HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? _publisher;
 
-    public SetPlayerReadyCommandHandler(IGamesRepository repository)
+    public SetPlayerReadyCommandHandler(IGamesRepository repository, HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? publisher = null)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _publisher = publisher;
     }
 
     public async Task<SetPlayerReadyResult> HandleAsync(SetPlayerReadyCommand command, CancellationToken cancellationToken = default)
@@ -37,6 +39,14 @@ public sealed class SetPlayerReadyCommandHandler : ICommandHandler<SetPlayerRead
         game.SetPlayerReady(command.PlayerId, command.IsReady);
 
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+
+        // Publish integration event if publisher available
+        var player = game.Players.FirstOrDefault(p => p.PlayerId == command.PlayerId);
+        if (player is not null && _publisher is not null)
+        {
+            var @event = new HexMaster.MemeIt.IntegrationEvents.Events.PlayerStateChangedEvent(player.PlayerId, player.DisplayName, player.IsReady);
+            await _publisher.PublishPlayerStateChangedAsync(@event, cancellationToken).ConfigureAwait(false);
+        }
 
         return new SetPlayerReadyResult(command.PlayerId, command.IsReady, game.AreAllPlayersReady());
     }

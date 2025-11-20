@@ -1,0 +1,10 @@
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace HexMaster.MemeIt.IntegrationEvents.Publishers;
+
+public interface IIntegrationEventPublisher
+{
+    Task PublishPlayerStateChangedAsync(Events.PlayerStateChangedEvent @event, CancellationToken cancellationToken = default);
+    Task PublishPlayerRemovedAsync(Events.PlayerRemovedEvent @event, CancellationToken cancellationToken = default);
+}

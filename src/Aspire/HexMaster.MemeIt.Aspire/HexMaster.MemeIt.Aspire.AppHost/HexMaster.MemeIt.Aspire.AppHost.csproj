@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Games\HexMaster.MemeIt.Games.Api\HexMaster.MemeIt.Games.Api.csproj" />
     <ProjectReference Include="..\..\..\Memes\HexMaster.MemeIt.Memes.Api\HexMaster.MemeIt.Memes.Api.csproj" />
+    <ProjectReference Include="..\..\..\Realtime\HexMaster.MemeIt.Realtime.Api\HexMaster.MemeIt.Realtime.Api.csproj" />
     <ProjectReference Include="..\..\..\Users\HexMaster.MemeIt.Users.Api\HexMaster.MemeIt.Users.Api.csproj" />
   </ItemGroup>
 

@@ -38,6 +38,13 @@ var usersApi = builder.AddProject<Projects.HexMaster_MemeIt_Users_Api>("hexmaste
 
 var memesApi = builder.AddProject<Projects.HexMaster_MemeIt_Memes_Api>("hexmaster-memeit-memes-api");
 
+var realtimeApi = builder.AddProject<Projects.HexMaster_MemeIt_Realtime_Api>("hexmaster-memeit-realtime-api")
+    .WithDaprSidecar(sidecar =>
+{
+    sidecar.WithReference(stateStore)
+    .WithReference(pubSub);
+});
+
 
 // Add YARP gateway
 var gateway = builder.AddYarp("gateway")
@@ -57,6 +64,9 @@ var gateway = builder.AddYarp("gateway")
             .WithTransformPathRemovePrefix("/memes")
             .WithTransformPathPrefix("/api/memes");
 
+        yarp.AddRoute("/realtime/{**catch-all}", realtimeApi)
+            .WithTransformPathRemovePrefix("/realtime")
+            .WithTransformPathPrefix("/api/realtime");
     });
 
 
@@ -69,6 +79,5 @@ if (Directory.Exists(frontEndSourceFolder))
         .WithHttpEndpoint(port: 4200, isProxied: false)
         .WithEnvironment("ASPIRE_GATEWAY_URL", gateway.GetEndpoint("http"));
 }
-
 
 builder.Build().Run();

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
@@ -12,10 +13,12 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 public sealed class RemovePlayerCommandHandler : ICommandHandler<RemovePlayerCommand, RemovePlayerResult>
 {
     private readonly IGamesRepository _repository;
+    private readonly HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? _publisher;
 
-    public RemovePlayerCommandHandler(IGamesRepository repository)
+    public RemovePlayerCommandHandler(IGamesRepository repository, HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? publisher = null)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _publisher = publisher;
     }
 
     public async Task<RemovePlayerResult> HandleAsync(RemovePlayerCommand command, CancellationToken cancellationToken = default)
@@ -39,10 +42,21 @@ public sealed class RemovePlayerCommandHandler : ICommandHandler<RemovePlayerCom
             throw new UnauthorizedAccessException("Only the game admin can remove players.");
         }
 
+        // Capture player info before removal
+        var player = game.Players.FirstOrDefault(p => p.PlayerId == command.PlayerIdToRemove);
+        string? displayName = player?.DisplayName;
+
         // Domain model validates that admin cannot be removed
         game.RemovePlayer(command.PlayerIdToRemove);
 
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+
+        // Publish integration event if available and player existed
+        if (player is not null && _publisher is not null)
+        {
+            var @event = new HexMaster.MemeIt.IntegrationEvents.Events.PlayerRemovedEvent(player.PlayerId, displayName!);
+            await _publisher.PublishPlayerRemovedAsync(@event, cancellationToken).ConfigureAwait(false);
+        }
 
         return new RemovePlayerResult();
     }
