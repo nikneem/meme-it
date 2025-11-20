@@ -22,4 +22,12 @@ export class GameService {
   getGame(gameCode: string): Observable<GameResponse> {
     return this.http.get<GameResponse>(`${this.apiUrl}/${gameCode}`);
   }
+
+  setPlayerReady(gameCode: string, isReady: boolean): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${gameCode}/ready?isReady=${isReady}`, {});
+  }
+
+  removePlayer(gameCode: string, playerId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${gameCode}/remove-player/${playerId}`);
+  }
 }

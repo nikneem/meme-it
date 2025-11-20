@@ -84,8 +84,7 @@
 .header-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 1rem;
 }
 
@@ -93,11 +92,11 @@
   margin: 0;
   font-size: 2.5rem;
   font-weight: 800;
+  line-height: normal;
   background: linear-gradient(135deg, #c807af 0%, #7928ca 50%, #ff0080 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 30px rgba(200, 7, 175, 0.3);
 }
 
 .game-status-badge {
@@ -131,6 +130,7 @@
 }
 
 .game-code-section {
+  width: 100%;
   background: rgba(138, 43, 226, 0.1);
   border: 1px solid rgba(200, 7, 175, 0.3);
   border-radius: 1rem;
@@ -369,6 +369,33 @@
     height: 1.5rem;
     color: #4caf50;
     animation: checkmark 0.5s ease;
+  }
+}
+
+.player-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+
+  button {
+    transition: all 0.3s ease;
+
+    mat-icon {
+      transition: all 0.3s ease;
+    }
+
+    &.ready mat-icon {
+      color: #4caf50;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &[color="warn"]:hover mat-icon {
+      color: #f44336;
+    }
   }
 }
 

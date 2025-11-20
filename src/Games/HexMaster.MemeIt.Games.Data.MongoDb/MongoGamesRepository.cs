@@ -59,8 +59,18 @@ public sealed class MongoGamesRepository : IGamesRepository
         ArgumentNullException.ThrowIfNull(game);
         await EnsureIndexesAsync(cancellationToken).ConfigureAwait(false);
 
-        var document = GameDocumentMapper.ToDocument(game);
         var filter = Builders<GameDocument>.Filter.Eq(doc => doc.GameCode, game.GameCode);
+
+        // Retrieve existing document to preserve the Id
+        var existingDocument = await _collection.Find(filter).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        if (existingDocument is null)
+        {
+            throw new InvalidOperationException($"Game with code '{game.GameCode}' not found for update.");
+        }
+
+        var document = GameDocumentMapper.ToDocument(game);
+        document.Id = existingDocument.Id; // Preserve the MongoDB ObjectId
+
         var result = await _collection.ReplaceOneAsync(filter, document, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         if (result.MatchedCount == 0)

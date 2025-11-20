@@ -34,4 +34,17 @@ export class AuthService {
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
+
+  getCurrentUserId(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub || null;
+    } catch (error) {
+      console.error('Failed to decode token:', error);
+      return null;
+    }
+  }
 }

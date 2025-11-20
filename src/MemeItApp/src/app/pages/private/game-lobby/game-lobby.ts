@@ -5,8 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { GameService } from '../../../services/game.service';
+import { GameService } from '@services/game.service';
 import { NotificationService } from '@services/notification.service';
+import { AuthService } from '@services/auth.service';
 import { GameResponse, Player } from '@models/game.model';
 
 @Component({
@@ -33,6 +34,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     private router: Router,
     private gameService: GameService,
     private notificationService: NotificationService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -96,6 +98,49 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   get allPlayersReady(): boolean {
     if (!this.game || this.game.players.length < 2) return false;
     return this.game.players.every(p => p.isReady);
+  }
+
+  get currentUserId(): string | null {
+    return this.authService.getCurrentUserId();
+  }
+
+  isCurrentUser(playerId: string): boolean {
+    return this.currentUserId === playerId;
+  }
+
+  toggleReady(player: any): void {
+    if (!this.isCurrentUser(player.playerId)) return;
+
+    this.gameService.setPlayerReady(this.gameCode, !player.isReady).subscribe({
+      next: () => {
+        console.log('Ready state updated');
+        player.isReady = !player.isReady;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Failed to update ready state:', error);
+        this.notificationService.error('Error', 'Failed to update ready state');
+      }
+    });
+  }
+
+  removePlayer(playerId: string): void {
+    if (!this.isAdmin) return;
+
+    this.gameService.removePlayer(this.gameCode, playerId).subscribe({
+      next: () => {
+        console.log('Player removed');
+        if (this.game) {
+          this.game.players = this.game.players.filter(p => p.playerId !== playerId);
+          this.cdr.detectChanges();
+        }
+        this.notificationService.success('Success', 'Player removed from game');
+      },
+      error: (error) => {
+        console.error('Failed to remove player:', error);
+        this.notificationService.error('Error', 'Failed to remove player');
+      }
+    });
   }
 
   startGame(): void {

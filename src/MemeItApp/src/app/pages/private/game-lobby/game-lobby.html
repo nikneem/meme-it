@@ -63,8 +63,16 @@
               </span>
             </div>
           </div>
-          <div class="player-status">
-            <mat-icon *ngIf="player.isReady" class="ready-icon">verified</mat-icon>
+          <div class="player-actions">
+            <button *ngIf="isCurrentUser(player.playerId) && game.state === 'Lobby'" mat-icon-button
+              [class.ready]="player.isReady" (click)="toggleReady(player)"
+              [title]="player.isReady ? 'Mark as not ready' : 'Mark as ready'">
+              <mat-icon>{{ player.isReady ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </button>
+            <button *ngIf="isAdmin && !isCurrentUser(player.playerId)" mat-icon-button color="warn"
+              (click)="removePlayer(player.playerId)" title="Remove player from game">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
           </div>
         </div>
       </div>
