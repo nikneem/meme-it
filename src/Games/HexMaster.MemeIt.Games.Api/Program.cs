@@ -16,6 +16,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddMongoDBClient("games-db");
 builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .WithExposedHeaders("Authorization")
+              .AllowCredentials();
+    });
+});
 builder.Services.AddGamesMongoData(builder.Configuration);
 builder.Services.AddSingleton<IGameCodeGenerator, RandomGameCodeGenerator>();
 builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
@@ -34,6 +45,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options => options.Title = "Meme-It Games API");
 }
 
+app.UseCors("AllowAngularApp");
 app.MapDefaultEndpoints();
 app.MapGamesEndpoints();
 

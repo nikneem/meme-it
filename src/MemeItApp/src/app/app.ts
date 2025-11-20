@@ -1,9 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NotificationsComponent } from './components/notifications/notifications.component';
 
 @Component({
   selector: 'memeit-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NotificationsComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

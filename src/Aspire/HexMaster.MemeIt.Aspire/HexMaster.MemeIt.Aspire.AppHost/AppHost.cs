@@ -1,5 +1,6 @@
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.MongoDB;
+using Aspire.Hosting.Yarp.Transforms;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -24,7 +25,7 @@ var pubSub = builder
     )
     .WaitFor(redis);
 
-builder.AddProject<Projects.HexMaster_MemeIt_Games_Api>("hexmaster-memeit-games-api")
+var gamesApi = builder.AddProject<Projects.HexMaster_MemeIt_Games_Api>("hexmaster-memeit-games-api")
     .WithReference(gamesDatabase)
     .WithDaprSidecar(sidecar =>
     {
@@ -33,8 +34,41 @@ builder.AddProject<Projects.HexMaster_MemeIt_Games_Api>("hexmaster-memeit-games-
     })
     .WaitFor(gamesDatabase);
 
-builder.AddProject<Projects.HexMaster_MemeIt_Users_Api>("hexmaster-memeit-users-api");
+var usersApi = builder.AddProject<Projects.HexMaster_MemeIt_Users_Api>("hexmaster-memeit-users-api");
 
-builder.AddProject<Projects.HexMaster_MemeIt_Memes_Api>("hexmaster-memeit-memes-api");
+var memesApi = builder.AddProject<Projects.HexMaster_MemeIt_Memes_Api>("hexmaster-memeit-memes-api");
+
+
+// Add YARP gateway
+var gateway = builder.AddYarp("gateway")
+    .WithHostPort(5000)
+    .WithConfiguration(yarp =>
+    {
+        // Proxy /profielen routes to the Profielen API
+        yarp.AddRoute("/games/{**catch-all}", gamesApi)
+            .WithTransformPathRemovePrefix("/games")
+            .WithTransformPathPrefix("/api/games");
+
+        yarp.AddRoute("/users/{**catch-all}", usersApi)
+            .WithTransformPathRemovePrefix("/users")
+            .WithTransformPathPrefix("/api/users");
+
+        yarp.AddRoute("/memes/{**catch-all}", memesApi)
+            .WithTransformPathRemovePrefix("/memes")
+            .WithTransformPathPrefix("/api/memes");
+
+    });
+
+
+var frontEndSourceFolder = Path.GetFullPath(builder.AppHostDirectory + "../../../../MemeItApp");
+if (Directory.Exists(frontEndSourceFolder))
+{
+    var frontend = builder.AddJavaScriptApp("frontend", frontEndSourceFolder)
+        .WaitFor(gateway)
+        .WithRunScript("start")
+        .WithHttpEndpoint(port: 4200, isProxied: false)
+        .WithEnvironment("ASPIRE_GATEWAY_URL", gateway.GetEndpoint("http"));
+}
+
 
 builder.Build().Run();

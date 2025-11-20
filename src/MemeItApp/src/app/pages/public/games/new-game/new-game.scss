@@ -1,0 +1,131 @@
+@use 'variables/fonts' as fonts;
+@use 'variables/colors' as colors;
+
+:host {
+  display: block;
+  position: relative;
+  background: radial-gradient(circle at top left, #1a0a47 0%, colors.$background-color 35%, #000225 70%);
+  min-height: 100vh;
+  padding: 2rem;
+  color: var(--mat-sys-on-surface);
+  overflow: hidden;
+}
+
+.sunray-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300vmax;
+  height: 300vmax;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  background-image: url('/images/sunray-background.svg');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: saturate(0.8) hue-rotate(240deg);
+  opacity: 0.4;
+  animation: sunray-spin 120s linear infinite;
+  pointer-events: none;
+}
+
+.page-container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 4rem);
+}
+
+.form-card {
+  background: rgba(20, 15, 50, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(200, 7, 175, 0.3);
+  border-radius: 1.5rem;
+  padding: 3rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 25px 70px rgba(200, 7, 175, 0.2);
+}
+
+h1 {
+  font-family: fonts.$font-family-heading;
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem;
+  color: var(--mat-sys-on-surface);
+}
+
+.subtitle {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 2rem;
+  font-size: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-message {
+  background: rgba(255, 50, 50, 0.1);
+  border: 1px solid rgba(255, 50, 50, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #ffaaaa;
+  font-size: 0.9rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.submit-btn {
+  flex: 1;
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 600;
+  position: relative;
+}
+
+.cancel-btn {
+  flex: 1;
+  height: 48px;
+  font-size: 1rem;
+}
+
+.spinner {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+@keyframes sunray-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .form-card {
+    padding: 2rem 1.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+}

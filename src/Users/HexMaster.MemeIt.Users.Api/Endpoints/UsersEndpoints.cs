@@ -14,10 +14,10 @@ public static class UsersEndpoints
 {
     public static IEndpointRouteBuilder MapUsersEndpoints(this IEndpointRouteBuilder builder)
     {
-        var group = builder.MapGroup("/users")
+        var group = builder.MapGroup("/api/users")
             .WithTags("Users");
 
-        group.MapPost("/join", HandleJoinUser)
+        group.MapPost("", HandleJoinUser)
             .WithName("JoinUser")
             .Produces<JoinUserResponse>(StatusCodes.Status200OK)
             .ProducesValidationProblem()

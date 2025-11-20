@@ -1,0 +1,240 @@
+@use 'variables/fonts' as fonts;
+@use 'variables/colors' as colors;
+
+:host {
+  display: block;
+  position: relative;
+  background: radial-gradient(circle at top left, #1a0a47 0%, colors.$background-color 35%, #000225 70%);
+  min-height: 100vh;
+  padding: 2rem;
+  color: var(--mat-sys-on-surface);
+  overflow: hidden;
+}
+
+.sunray-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300vmax;
+  height: 300vmax;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  background-image: url('/images/sunray-background.svg');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: saturate(0.8) hue-rotate(240deg);
+  opacity: 0.4;
+  animation: sunray-spin 120s linear infinite;
+  pointer-events: none;
+}
+
+.lobby-container {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.lobby-content {
+  background: rgba(20, 15, 50, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(200, 7, 175, 0.3);
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  box-shadow: 0 25px 70px rgba(200, 7, 175, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  flex: 1;
+}
+
+.lobby-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.game-info {
+  flex: 1;
+}
+
+h1 {
+  font-family: fonts.$font-family-heading;
+  font-size: 2.5rem;
+  margin: 0 0 1rem;
+  color: var(--mat-sys-on-surface);
+}
+
+.game-code-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(124, 136, 212, 0.15);
+  border: 1px solid var(--mat-sys-tertiary);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  width: fit-content;
+}
+
+.label {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.9rem;
+}
+
+.code {
+  font-family: 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--mat-sys-tertiary);
+  letter-spacing: 0.1em;
+}
+
+.status-badge {
+  background: rgba(124, 136, 212, 0.2);
+  border: 1px solid var(--mat-sys-tertiary);
+  color: var(--mat-sys-tertiary);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &.waiting {
+    background: rgba(255, 200, 0, 0.15);
+    border-color: #ffc800;
+    color: #ffc800;
+  }
+}
+
+.players-section {
+  flex: 1;
+}
+
+h2 {
+  font-family: fonts.$font-family-heading;
+  font-size: 1.75rem;
+  margin: 0 0 1.5rem;
+  color: var(--mat-sys-on-surface);
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.player-card {
+  background: rgba(20, 15, 50, 0.6);
+  border: 1px solid rgba(124, 136, 212, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+  mat-card-content {
+    padding: 1rem;
+  }
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.player-icon {
+  color: var(--mat-sys-tertiary);
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.player-details {
+  flex: 1;
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--mat-sys-on-surface);
+  margin-bottom: 0.25rem;
+}
+
+.player-badge {
+  display: inline-block;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.lobby-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(124, 136, 212, 0.2);
+}
+
+.action-btn {
+  flex: 1;
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  min-height: 400px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.error-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  color: #ffaaaa;
+}
+
+@keyframes sunray-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .lobby-content {
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .players-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lobby-header {
+    flex-direction: column;
+  }
+
+  .lobby-actions {
+    flex-direction: column;
+  }
+}

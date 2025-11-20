@@ -1,40 +1,45 @@
 @use 'sass:color';
+@use 'variables/fonts' as fonts;
 
 :host {
     display: block;
     position: relative;
-    isolation: isolate;
-    background: radial-gradient(circle at top left, #fde2ff 0%, #fff8f0 35%, #ffffff 70%);
+    background: radial-gradient(circle at top left, #1a0a47 0%, #000384 35%, #000225 70%);
     min-height: 100vh;
     padding: 4rem clamp(1.5rem, 4vw, 4rem);
-    color: var(--mat-sys-on-surface, #1f1f1f);
+    color: var(--mat-sys-on-surface);
     overflow: hidden;
 }
 
-:host::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA4MDAgODAwJz4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ncmF5JyB4MT0nMCUnIHkxPScwJScgeDI9JzAlJyB5Mj0nMTAwJSc+CiAgICAgIDxzdG9wIG9mZnNldD0nMCUnIHN0b3AtY29sb3I9JyNmZmU1ZjUnLz4KICAgICAgPHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjZmZjMGViJy8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0nODAwJyBoZWlnaHQ9JzgwMCcgZmlsbD0nI2ZmZjVmYicvPgogIDxnIHRyYW5zZm9ybT0ndHJhbnNsYXRlKDQwMCA0MDApJyBmaWxsPSd1cmwoI3JheSknIG9wYWNpdHk9JzAuNTUnPgogICAgPHBvbHlnb24gcG9pbnRzPScwLDAgMzIsLTQyMCAtMzIsLTQyMCcgdHJhbnNmb3JtPSdyb3RhdGUoMCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDE1KScvPgogICAgPHBvbHlnb24gcG9pbnRzPScwLDAgMzIsLTQyMCAtMzIsLTQyMCcgdHJhbnNmb3JtPSdyb3RhdGUoMzApJy8+CiAgICA8cG9seWdvbiBwb2ludHM9JzAsMCAzMiwtNDIwIC0zMiwtNDIwJyB0cmFuc2Zvcm09J3JvdGF0ZSg0NSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDYwKScvPgogICAgPHBvbHlnb24gcG9pbnRzPScwLDAgMzIsLTQyMCAtMzIsLTQyMCcgdHJhbnNmb3JtPSdyb3RhdGUoNzUpJy8+CiAgICA8cG9seWdvbiBwb2ludHM9JzAsMCAzMiwtNDIwIC0zMiwtNDIwJyB0cmFuc2Zvcm09J3JvdGF0ZSg5MCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDEwNSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDEyMCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDEzNSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDE1MCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDE2NSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDE4MCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDE5NSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDIxMCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDIyNSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDI0MCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDI1NSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDI3MCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDI4NSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDMwMCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDMxNSknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDMzMCknLz4KICAgIDxwb2x5Z29uIHBvaW50cz0nMCwwIDMyLC00MjAgLTMyLC00MjAnIHRyYW5zZm9ybT0ncm90YXRlKDM0NSknLz4KICA8L2c+Cjwvc3ZnPg==');
-    background-size: cover;
+.sunray-container {
+    position: absolute;
+    top: -150vmax;
+    left: -150vmax;
+    width: 300vmax;
+    height: 300vmax;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    background-image: url('/images/sunray-background.svg');
+    background-size: 100% 100%;
     background-position: center;
-    filter: saturate(1.1);
-    opacity: 0.8;
+    background-repeat: no-repeat;
+    filter: saturate(0.8) hue-rotate(240deg);
     animation: sunray-spin 120s linear infinite;
-    transform-origin: center;
     pointer-events: none;
 }
 
 :host::after {
     content: '';
-    position: fixed;
+    position: absolute;
     inset: 0;
-    z-index: -1;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.6) 100%);
+    z-index: 1;
+    background: radial-gradient(circle, rgba(0, 3, 132, 0) 50%, rgba(0, 3, 132, 0.8) 100%);
+    pointer-events: none;
 }
 
 .landing {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     gap: 3.5rem;
@@ -47,15 +52,17 @@
     letter-spacing: 0.2em;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #ff2bd2;
+    color: var(--mat-sys-primary);
     margin-bottom: 0.75rem;
 }
 
 .hero {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(20, 15, 50, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200, 7, 175, 0.3);
     border-radius: 1.75rem;
     padding: clamp(2rem, 6vw, 4rem);
-    box-shadow: 0 25px 70px rgba(29, 0, 59, 0.12);
+    box-shadow: 0 25px 70px rgba(200, 7, 175, 0.2);
     text-align: center;
 }
 
@@ -65,15 +72,15 @@
     gap: 0.5rem;
     padding: 0.35rem 0.85rem;
     border-radius: 999px;
-    background: #ffe5f5;
-    color: #bc0082;
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
     font-weight: 600;
     font-size: 0.85rem;
     margin-bottom: 1rem;
 }
 
 .hero h1 {
-    font-family: 'Ranchers', 'Kulim Park', cursive;
+    font-family: fonts.$font-family-heading;
     font-size: clamp(2.5rem, 6vw, 4.5rem);
     line-height: 1.1;
     margin: 0 0 1rem;
@@ -83,7 +90,7 @@
     font-size: 1.1rem;
     max-width: 720px;
     margin: 0 auto 2rem;
-    color: color.adjust(#1f1f1f, $lightness: 10%);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .hero__actions {
@@ -107,7 +114,7 @@
 }
 
 .hero__stats small {
-    color: color.adjust(#1f1f1f, $lightness: 25%);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .btn {
@@ -125,21 +132,21 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #ff2bd2, #ff6b97);
-    color: #fff;
-    box-shadow: 0 15px 30px rgba(255, 43, 210, 0.35);
+    background: linear-gradient(135deg, var(--mat-sys-primary), #da44c4);
+    color: var(--mat-sys-on-primary);
+    box-shadow: 0 15px 30px rgba(200, 7, 175, 0.4);
 }
 
 .btn-ghost {
-    background: rgba(255, 255, 255, 0.7);
-    color: #ff2bd2;
-    border: 1px solid rgba(255, 43, 210, 0.35);
+    background: rgba(124, 136, 212, 0.15);
+    color: var(--mat-sys-tertiary);
+    border: 1px solid var(--mat-sys-tertiary);
 }
 
 .btn-outline {
     background: transparent;
-    border: 2px solid #ff2bd2;
-    color: #ff2bd2;
+    border: 2px solid var(--mat-sys-primary);
+    color: var(--mat-sys-primary);
 }
 
 .feature-grid {
@@ -154,11 +161,13 @@
 }
 
 .feature {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(20, 15, 50, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(124, 136, 212, 0.2);
     border-radius: 1.25rem;
     padding: 1.5rem;
     text-align: left;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 .feature h3 {
@@ -167,19 +176,20 @@
 
 .feature p {
     margin: 0;
-    color: color.adjust(#1f1f1f, $lightness: 15%);
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .steps {
-    background: #130027;
-    color: #fff;
+    background: linear-gradient(135deg, rgba(20, 10, 60, 0.9), rgba(0, 3, 132, 0.8));
+    border: 1px solid rgba(124, 136, 212, 0.3);
+    color: var(--mat-sys-on-surface);
     border-radius: 1.75rem;
     padding: clamp(2rem, 5vw, 3.5rem);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 .steps h2 {
-    font-family: 'Ranchers', 'Kulim Park', cursive;
+    font-family: fonts.$font-family-heading;
     margin-top: 0;
 }
 
@@ -200,7 +210,7 @@
 .step-label {
     font-weight: 700;
     font-size: 1.25rem;
-    color: #ffb8eb;
+    color: var(--mat-sys-tertiary);
     min-width: 2.5rem;
 }
 
@@ -211,10 +221,12 @@
 }
 
 .testimonial {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(20, 15, 50, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(200, 7, 175, 0.2);
     border-radius: 1.25rem;
     padding: 1.5rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
 
 .quote {
@@ -226,15 +238,17 @@
 .author {
     margin: 0;
     font-weight: 600;
-    color: #8a248a;
+    color: var(--mat-sys-primary);
 }
 
 .cta {
-    background: #ff2bd2;
-    color: #fff;
+    background: linear-gradient(135deg, var(--mat-sys-primary), #800072);
+    color: var(--mat-sys-on-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1.75rem;
     padding: clamp(2rem, 5vw, 3.5rem);
     text-align: center;
+    box-shadow: 0 25px 60px rgba(200, 7, 175, 0.3);
 }
 
 .cta p {

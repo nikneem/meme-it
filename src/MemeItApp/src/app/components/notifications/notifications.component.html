@@ -1,0 +1,23 @@
+<div class="notifications-container">
+    @for (notification of notifications$ | async; track notification.id) {
+    <div class="notification notification-{{ notification.type }}" [@slideIn] role="alert">
+        <div class="notification-content">
+            <div class="notification-icon">
+                <span class="material-icons">{{ getIcon(notification.type) }}</span>
+            </div>
+            <div class="notification-body">
+                <h4 class="notification-title">{{ notification.title }}</h4>
+                <p class="notification-description">{{ notification.description }}</p>
+                @if (notification.link) {
+                <a [href]="notification.link" target="_blank" class="notification-link">
+                    Details
+                </a>
+                }
+            </div>
+            <button class="notification-close" (click)="onClose(notification.id)" aria-label="Close notification">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+    </div>
+    }
+</div>

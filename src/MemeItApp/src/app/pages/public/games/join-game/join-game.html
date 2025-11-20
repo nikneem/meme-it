@@ -1,0 +1,55 @@
+<div class="sunray-container"></div>
+<div class="page-container">
+  <div class="form-card">
+    <h1>Join a Game</h1>
+    <p class="subtitle">Enter the game code and your player name to join an existing game.</p>
+
+    <form [formGroup]="gameForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Player Name</mat-label>
+        <input matInput formControlName="displayName" placeholder="Enter your name" maxlength="20" />
+        <mat-error *ngIf="gameForm.get('displayName')?.hasError('required')">
+          Player name is required
+        </mat-error>
+        <mat-error *ngIf="gameForm.get('displayName')?.hasError('minlength')">
+          Name must be at least 2 characters
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Game Code</mat-label>
+        <input matInput formControlName="gameCode" placeholder="Enter game code" maxlength="10"
+          style="text-transform: uppercase;" />
+        <mat-error *ngIf="gameForm.get('gameCode')?.hasError('required')">
+          Game code is required
+        </mat-error>
+        <mat-error *ngIf="gameForm.get('gameCode')?.hasError('minlength')">
+          Game code must be at least 4 characters
+        </mat-error>
+        <mat-hint>Ask the host for the game code</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Game Password (Optional)</mat-label>
+        <input matInput type="password" formControlName="password" placeholder="Enter password if required"
+          maxlength="50" />
+        <mat-hint>Only required for private games</mat-hint>
+      </mat-form-field>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="button-group">
+        <button mat-raised-button color="primary" type="submit" [disabled]="gameForm.invalid || isLoading"
+          class="submit-btn">
+          <mat-spinner *ngIf="isLoading" diameter="20" class="spinner"></mat-spinner>
+          <span *ngIf="!isLoading">Join Game</span>
+        </button>
+        <button mat-stroked-button type="button" routerLink="/" [disabled]="isLoading" class="cancel-btn">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

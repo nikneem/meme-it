@@ -1,0 +1,60 @@
+<div class="sunray-container"></div>
+<div class="lobby-container">
+  <div class="lobby-content" *ngIf="!isLoading && game">
+    <header class="lobby-header">
+      <div class="game-info">
+        <h1>Game Lobby</h1>
+        <div class="game-code-display">
+          <span class="label">Game Code:</span>
+          <span class="code">{{ gameCode }}</span>
+          <button mat-icon-button (click)="copyGameCode()" title="Copy game code">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div class="status-badge" [class.waiting]="game.status === 'waiting'">
+        {{ game.status === 'waiting' ? 'Waiting for players' : game.status }}
+      </div>
+    </header>
+
+    <section class="players-section">
+      <h2>Players ({{ game.players.length }})</h2>
+      <div class="players-grid">
+        <mat-card *ngFor="let player of game.players" class="player-card">
+          <mat-card-content>
+            <div class="player-info">
+              <mat-icon class="player-icon">person</mat-icon>
+              <div class="player-details">
+                <div class="player-name">{{ player.name }}</div>
+                <div class="player-badge" *ngIf="player.isHost">Host</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </section>
+
+    <footer class="lobby-actions">
+      <button mat-raised-button color="primary" *ngIf="isHost" (click)="startGame()"
+        [disabled]="game.players.length < 2" class="action-btn">
+        Start Game
+      </button>
+      <button mat-stroked-button (click)="leaveGame()" class="action-btn">
+        Leave Game
+      </button>
+    </footer>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Loading game...</p>
+  </div>
+
+  <div class="error-state" *ngIf="!isLoading && errorMessage">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <p>{{ errorMessage }}</p>
+    <button mat-raised-button color="primary" routerLink="/">
+      Return to Home
+    </button>
+  </div>
+</div>
