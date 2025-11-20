@@ -64,9 +64,9 @@ var gateway = builder.AddYarp("gateway")
             .WithTransformPathRemovePrefix("/memes")
             .WithTransformPathPrefix("/api/memes");
 
-        yarp.AddRoute("/realtime/{**catch-all}", realtimeApi)
-            .WithTransformPathRemovePrefix("/realtime")
-            .WithTransformPathPrefix("/api/realtime");
+        // Route for SignalR hub - pass through without transformation
+        // SignalR clients will connect to http://gateway:5000/hubs/games
+        yarp.AddRoute("/hubs/games/{**catch-all}", realtimeApi);
     });
 
 

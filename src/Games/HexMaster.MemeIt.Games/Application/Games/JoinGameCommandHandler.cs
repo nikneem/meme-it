@@ -12,10 +12,12 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 public sealed class JoinGameCommandHandler : ICommandHandler<JoinGameCommand, JoinGameResult>
 {
     private readonly IGamesRepository _repository;
+    private readonly HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? _publisher;
 
-    public JoinGameCommandHandler(IGamesRepository repository)
+    public JoinGameCommandHandler(IGamesRepository repository, HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? publisher = null)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _publisher = publisher;
     }
 
     public async Task<JoinGameResult> HandleAsync(JoinGameCommand command, CancellationToken cancellationToken = default)
@@ -42,6 +44,16 @@ public sealed class JoinGameCommandHandler : ICommandHandler<JoinGameCommand, Jo
         game.AddPlayer(command.PlayerId, command.PlayerName, command.Password);
 
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+
+        // Publish integration event
+        if (_publisher is not null)
+        {
+            var @event = new HexMaster.MemeIt.IntegrationEvents.Events.PlayerJoinedEvent(
+                command.PlayerId,
+                command.PlayerName,
+                game.GameCode);
+            await _publisher.PublishPlayerJoinedAsync(@event, cancellationToken).ConfigureAwait(false);
+        }
 
         return new JoinGameResult(game.GameCode, command.PlayerId, game.State);
     }

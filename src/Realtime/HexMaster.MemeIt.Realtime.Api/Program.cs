@@ -8,18 +8,26 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddOpenApi();
 
-// Add SignalR for real-time communication
-builder.Services.AddSignalR();
+// Add SignalR for real-time communication with camelCase JSON serialization
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 // Add Dapr services for pubsub integration
-builder.Services.AddControllers().AddDapr();
+builder.Services.AddControllers();
 
-// Configure CORS to allow SignalR connections from frontend
+builder.Services.AddDaprClient();
+
+// Configure CORS to allow SignalR connections from frontend and gateway
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:4200") // Angular dev server
+        policy.WithOrigins(
+                "http://localhost:4200",  // Angular dev server
+                "http://localhost:5000")  // Aspire gateway
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();

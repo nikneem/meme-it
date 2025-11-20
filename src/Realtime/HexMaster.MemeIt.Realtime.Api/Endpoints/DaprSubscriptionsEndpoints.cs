@@ -34,6 +34,13 @@ public static class DaprSubscriptionsEndpoints
             .WithSummary("Handles player removed events from Dapr pubsub")
             .ExcludeFromDescription();
 
+        // Subscribe to player joined events
+        group.MapPost("/playerjoined", OnPlayerJoinedAsync)
+            .WithTopic(PubSubName, "playerjoined")
+            .WithName("PlayerJoinedSubscription")
+            .WithSummary("Handles player joined events from Dapr pubsub")
+            .ExcludeFromDescription();
+
         return endpoints;
     }
 
@@ -104,6 +111,42 @@ public static class DaprSubscriptionsEndpoints
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing PlayerRemoved event");
+            // Return 200 OK to prevent Dapr from retrying
+            return Results.Ok();
+        }
+    }
+
+    /// <summary>
+    /// Handles PlayerJoinedEvent from Dapr pubsub and broadcasts to SignalR clients.
+    /// </summary>
+    private static async Task<IResult> OnPlayerJoinedAsync(
+        [FromBody] PlayerJoinedEvent @event,
+        IHubContext<GamesHub> hubContext,
+        ILogger<GamesHub> logger,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Received PlayerJoined event: PlayerId={PlayerId}, DisplayName={DisplayName}, GameCode={GameCode}",
+                @event.PlayerId, @event.DisplayName, @event.GameCode);
+
+            // Broadcast to all connected clients
+            await hubContext.Clients.All.SendAsync(
+                "PlayerJoined",
+                new
+                {
+                    @event.PlayerId,
+                    @event.DisplayName,
+                    @event.GameCode
+                },
+                cancellationToken);
+
+            return Results.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing PlayerJoined event");
             // Return 200 OK to prevent Dapr from retrying
             return Results.Ok();
         }

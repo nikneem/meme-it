@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { GameService } from '@services/game.service';
 import { NotificationService } from '@services/notification.service';
 import { AuthService } from '@services/auth.service';
+import { RealtimeService } from '@services/realtime.service';
 import { GameResponse, Player } from '@models/game.model';
 
 @Component({
@@ -32,6 +33,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   isLoading = true;
   errorMessage = '';
   private gameStateSubscription?: Subscription;
+  private realtimeSubscriptions: Subscription[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -39,6 +41,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     private gameService: GameService,
     private notificationService: NotificationService,
     private authService: AuthService,
+    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -58,6 +61,9 @@ export class GameLobbyPage implements OnInit, OnDestroy {
           this.game = game;
           this.isLoading = false;
           this.cdr.detectChanges();
+
+          // Connect to SignalR and join game group after successfully loading game
+          this.connectToRealtime();
         }
       },
       error: (error) => {
@@ -76,10 +82,103 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Cleanup subscription
+    // Cleanup subscriptions
     if (this.gameStateSubscription) {
       this.gameStateSubscription.unsubscribe();
     }
+
+    this.realtimeSubscriptions.forEach(sub => sub.unsubscribe());
+
+    // Disconnect from SignalR
+    this.disconnectFromRealtime();
+  }
+
+  private async connectToRealtime(): Promise<void> {
+    try {
+      // Connect to SignalR hub
+      await this.realtimeService.connect();
+
+      // Join the game group
+      await this.realtimeService.joinGameGroup(this.gameCode);
+
+      // Subscribe to real-time events
+      this.setupRealtimeEventHandlers();
+
+      console.log('Connected to realtime service for game:', this.gameCode);
+    } catch (error) {
+      console.error('Failed to connect to realtime service:', error);
+      this.notificationService.error(
+        'Connection Error',
+        'Failed to connect to real-time updates. Some features may not work.',
+        undefined,
+        5000
+      );
+    }
+  }
+
+  private async disconnectFromRealtime(): Promise<void> {
+    try {
+      await this.realtimeService.leaveGameGroup(this.gameCode);
+      await this.realtimeService.disconnect();
+    } catch (error) {
+      console.error('Error disconnecting from realtime service:', error);
+    }
+  }
+
+  private setupRealtimeEventHandlers(): void {
+    // Handle player joined events
+    const playerJoinedSub = this.realtimeService.playerJoined$.subscribe(event => {
+      console.log('Player joined:', event);
+      this.notificationService.success(
+        'Player Joined',
+        `${event.displayName} joined the game`,
+        undefined,
+        3000
+      );
+      // Refresh game state
+      this.loadGame();
+    });
+    this.realtimeSubscriptions.push(playerJoinedSub);
+
+    // Handle player state changed events
+    const playerStateChangedSub = this.realtimeService.playerStateChanged$.subscribe(event => {
+      console.log('Player state changed:', event);
+
+      if (this.game) {
+        const player = this.game.players.find(p => p.playerId === event.playerId);
+        if (player) {
+          player.isReady = event.isReady;
+          this.cdr.detectChanges();
+        }
+      }
+
+      const status = event.isReady ? 'ready' : 'not ready';
+      this.notificationService.success(
+        'Player Status',
+        `${event.displayName} is ${status}`,
+        undefined,
+        2000
+      );
+    });
+    this.realtimeSubscriptions.push(playerStateChangedSub);
+
+    // Handle player removed events
+    const playerRemovedSub = this.realtimeService.playerRemoved$.subscribe(event => {
+      console.log('Player removed:', event);
+
+      if (this.game) {
+        this.game.players = this.game.players.filter(p => p.playerId !== event.playerId);
+        this.cdr.detectChanges();
+      }
+
+      this.notificationService.success(
+        'Player Left',
+        `${event.displayName} left the game`,
+        undefined,
+        3000
+      );
+    });
+    this.realtimeSubscriptions.push(playerRemovedSub);
   }
 
   loadGame(): void {
@@ -192,6 +291,9 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   leaveGame(): void {
+    // Disconnect from realtime before leaving
+    this.disconnectFromRealtime();
+
     // Clear the cached game state when leaving
     this.gameService.clearGameState(this.gameCode);
     this.router.navigate(['/']);
