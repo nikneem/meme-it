@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
+using HexMaster.MemeIt.IntegrationEvents.Publishers;
 
 namespace HexMaster.MemeIt.Games.Application.Games;
 
@@ -13,9 +14,9 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 public sealed class RemovePlayerCommandHandler : ICommandHandler<RemovePlayerCommand, RemovePlayerResult>
 {
     private readonly IGamesRepository _repository;
-    private readonly HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? _publisher;
+    private readonly IIntegrationEventPublisher? _publisher;
 
-    public RemovePlayerCommandHandler(IGamesRepository repository, HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? publisher = null)
+    public RemovePlayerCommandHandler(IGamesRepository repository, IIntegrationEventPublisher? publisher = null)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _publisher = publisher;

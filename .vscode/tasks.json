@@ -1,33 +1,33 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "build",
-      "command": "dotnet",
-      "type": "process",
-      "args": [
-        "build",
-        "${workspaceFolder}/src/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost/HexMaster.MemeIt.Aspire.AppHost.csproj",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary;ForceNoAlign"
-      ],
-      "problemMatcher": "$msCompile",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    },
-    {
-      "label": "watch",
-      "command": "dotnet",
-      "type": "process",
-      "args": [
-        "watch",
-        "run",
-        "--project",
-        "${workspaceFolder}/src/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost/HexMaster.MemeIt.Aspire.AppHost.csproj"
-      ],
-      "problemMatcher": "$msCompile"
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost/HexMaster.MemeIt.Aspire.AppHost.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/src/Aspire/HexMaster.MemeIt.Aspire/HexMaster.MemeIt.Aspire.AppHost/HexMaster.MemeIt.Aspire.AppHost.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
 }

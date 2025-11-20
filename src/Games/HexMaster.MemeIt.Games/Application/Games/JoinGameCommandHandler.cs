@@ -1,8 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
+using HexMaster.MemeIt.IntegrationEvents.Publishers;
 
 namespace HexMaster.MemeIt.Games.Application.Games;
 
@@ -12,9 +10,9 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 public sealed class JoinGameCommandHandler : ICommandHandler<JoinGameCommand, JoinGameResult>
 {
     private readonly IGamesRepository _repository;
-    private readonly HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? _publisher;
+    private readonly IIntegrationEventPublisher? _publisher;
 
-    public JoinGameCommandHandler(IGamesRepository repository, HexMaster.MemeIt.Games.Application.Integration.IIntegrationEventPublisher? publisher = null)
+    public JoinGameCommandHandler(IGamesRepository repository, IIntegrationEventPublisher? publisher = null)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _publisher = publisher;
