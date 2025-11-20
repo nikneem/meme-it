@@ -1,5 +1,4 @@
 using Bogus;
-using FluentAssertions;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Repositories;
@@ -46,8 +45,8 @@ public class CreateMemeTemplateCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Id.Should().Be(expectedId);
+        Assert.NotNull(result);
+        Assert.Equal(expectedId, result.Id);
         _repositoryMock.Verify(r => r.AddAsync(It.IsAny<MemeTemplate>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 

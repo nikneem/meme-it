@@ -1,5 +1,4 @@
 using Bogus;
-using FluentAssertions;
 using HexMaster.MemeIt.Memes.Domains;
 using HexMaster.MemeIt.Memes.Domains.ValueObjects;
 
@@ -24,12 +23,12 @@ public class MemeTemplateTests
         var template = MemeTemplate.Create(title, imageUrl, textAreas);
 
         // Assert
-        template.Should().NotBeNull();
-        template.Id.Should().NotBeEmpty();
-        template.Title.Should().Be(title);
-        template.ImageUrl.Should().Be(imageUrl);
-        template.TextAreas.Should().HaveCount(1);
-        template.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+        Assert.NotNull(template);
+        Assert.NotEqual(Guid.Empty, template.Id);
+        Assert.Equal(title, template.Title);
+        Assert.Equal(imageUrl, template.ImageUrl);
+        Assert.Single(template.TextAreas);
+        Assert.True((DateTimeOffset.UtcNow - template.CreatedAt).Duration() < TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -59,7 +58,7 @@ public class MemeTemplateTests
         // Act & Assert
         var exception = Assert.Throws<DomainException>(() =>
             MemeTemplate.Create(title, "not-a-valid-url", textAreas));
-        exception.Message.Should().Contain("valid absolute URI");
+        Assert.Contains("valid absolute URI", exception.Message);
     }
 
     [Fact]
@@ -73,7 +72,7 @@ public class MemeTemplateTests
         // Act & Assert
         var exception = Assert.Throws<DomainException>(() =>
             MemeTemplate.Create(title, imageUrl, textAreas));
-        exception.Message.Should().Contain("At least one text area");
+        Assert.Contains("At least one text area", exception.Message);
     }
 
     [Fact]
@@ -92,11 +91,11 @@ public class MemeTemplateTests
         template.Update(newTitle, newImageUrl, newTextAreas);
 
         // Assert
-        template.Title.Should().Be(newTitle);
-        template.ImageUrl.Should().Be(newImageUrl);
-        template.TextAreas.Should().HaveCount(1);
-        template.UpdatedAt.Should().NotBeNull();
-        template.UpdatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+        Assert.Equal(newTitle, template.Title);
+        Assert.Equal(newImageUrl, template.ImageUrl);
+        Assert.Single(template.TextAreas);
+        Assert.NotNull(template.UpdatedAt);
+        Assert.True((DateTimeOffset.UtcNow - template.UpdatedAt.Value).Duration() < TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -110,8 +109,8 @@ public class MemeTemplateTests
         template.AddTextArea(newTextArea);
 
         // Assert
-        template.TextAreas.Should().HaveCount(2);
-        template.UpdatedAt.Should().NotBeNull();
+        Assert.Equal(2, template.TextAreas.Count);
+        Assert.NotNull(template.UpdatedAt);
     }
 
     [Fact]
@@ -125,7 +124,7 @@ public class MemeTemplateTests
         template.RemoveTextArea(0);
 
         // Assert
-        template.TextAreas.Should().HaveCount(1);
+        Assert.Single(template.TextAreas);
     }
 
     [Fact]
@@ -136,7 +135,7 @@ public class MemeTemplateTests
 
         // Act & Assert
         var exception = Assert.Throws<DomainException>(() => template.RemoveTextArea(0));
-        exception.Message.Should().Contain("Cannot remove the last text area");
+        Assert.Contains("Cannot remove the last text area", exception.Message);
     }
 
     [Fact]
@@ -147,7 +146,7 @@ public class MemeTemplateTests
 
         // Act & Assert
         var exception = Assert.Throws<DomainException>(() => template.RemoveTextArea(10));
-        exception.Message.Should().Contain("Invalid text area index");
+        Assert.Contains("Invalid text area index", exception.Message);
     }
 
     private MemeTemplate CreateValidTemplate()
