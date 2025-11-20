@@ -89,7 +89,7 @@
     <p>Loading game...</p>
   </div>
 
-  <div class="error-state" *ngIf="!isLoading && errorMessage">
+  <div class="error-state" *ngIf="!isLoading && !game && errorMessage">
     <mat-icon class="error-icon">error_outline</mat-icon>
     <p>{{ errorMessage }}</p>
     <button mat-raised-button color="primary" routerLink="/">

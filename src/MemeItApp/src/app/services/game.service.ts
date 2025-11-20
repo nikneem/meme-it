@@ -7,7 +7,7 @@ import { CreateGameRequest, JoinGameRequest, GameResponse } from '../models/game
   providedIn: 'root'
 })
 export class GameService {
-  private readonly apiUrl = 'http://localhost:5000/games';
+  private readonly apiUrl = 'http://localhost:5163/api/games';
 
   constructor(private http: HttpClient) { }
 

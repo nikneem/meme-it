@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,13 +27,13 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   game: GameResponse | null = null;
   isLoading = true;
   errorMessage = '';
-  private pollSubscription?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private gameService: GameService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -52,12 +52,17 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   loadGame(): void {
+    console.log('Loading game with code:', this.gameCode);
     this.gameService.getGame(this.gameCode).subscribe({
       next: (game) => {
+        console.log('Game loaded successfully:', game);
         this.game = game;
         this.isLoading = false;
+        console.log('Component state - isLoading:', this.isLoading, 'game:', this.game);
+        this.cdr.detectChanges();
       },
       error: (error) => {
+        console.error('Game load error:', error);
         this.isLoading = false;
         this.errorMessage = 'Failed to load game. The game may not exist or you may not have access.';
         this.notificationService.error(
@@ -66,7 +71,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
           undefined,
           8000
         );
-        console.error('Game load error:', error);
+        this.cdr.detectChanges();
       }
     });
   }
