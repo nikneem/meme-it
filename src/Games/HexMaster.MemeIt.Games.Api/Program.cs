@@ -4,6 +4,7 @@ using HexMaster.MemeIt.Games.Abstractions.Application.Games;
 using HexMaster.MemeIt.Games.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Api.Endpoints;
+using HexMaster.MemeIt.Games.Api.Infrastructure;
 using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
 using HexMaster.MemeIt.Games.Application.Games;
 using HexMaster.MemeIt.Games.Application.Services;
@@ -28,6 +29,7 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddGamesMongoData(builder.Configuration);
+builder.Services.AddScheduledTaskService();
 builder.Services.AddSingleton<IGameCodeGenerator, RandomGameCodeGenerator>();
 builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
 builder.Services.Configure<UsersJwtOptions>(builder.Configuration.GetSection(UsersJwtOptions.SectionName));
@@ -54,6 +56,7 @@ app.UseCloudEvents();
 app.UseCors("AllowAngularApp");
 app.MapDefaultEndpoints();
 app.MapGamesEndpoints();
+app.MapSchedulingEndpoints();
 
 app.MapGet("/", () => Results.Ok("Meme-It Games API"))
    .WithTags("Diagnostics")
