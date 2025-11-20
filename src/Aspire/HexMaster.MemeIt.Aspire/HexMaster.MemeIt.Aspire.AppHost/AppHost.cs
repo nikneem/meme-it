@@ -10,6 +10,12 @@ var mongo = builder.AddMongoDB("games-mongo")
     .WithLifetime(ContainerLifetime.Persistent);
 var gamesDatabase = mongo.AddDatabase("games-db");
 
+// Add PostgreSQL for Memes service
+var postgres = builder.AddPostgres("memes-postgres")
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithPgAdmin();
+var memesDatabase = postgres.AddDatabase("memes-db");
+
 // # Dapr State Store and PubSub using Redis #
 var stateStore = builder.AddDaprStateStore("memeit-statestore")
     .WaitFor(redis);
@@ -36,7 +42,9 @@ var gamesApi = builder.AddProject<Projects.HexMaster_MemeIt_Games_Api>("hexmaste
 
 var usersApi = builder.AddProject<Projects.HexMaster_MemeIt_Users_Api>("hexmaster-memeit-users-api");
 
-var memesApi = builder.AddProject<Projects.HexMaster_MemeIt_Memes_Api>("hexmaster-memeit-memes-api");
+var memesApi = builder.AddProject<Projects.HexMaster_MemeIt_Memes_Api>("hexmaster-memeit-memes-api")
+    .WithReference(memesDatabase)
+    .WaitFor(memesDatabase);
 
 var realtimeApi = builder.AddProject<Projects.HexMaster_MemeIt_Realtime_Api>("hexmaster-memeit-realtime-api")
     .WithDaprSidecar(sidecar =>

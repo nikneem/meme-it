@@ -6,4 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="HexMaster.MemeIt.Memes.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HexMaster.MemeIt.Memes.Abstractions\HexMaster.MemeIt.Memes.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>

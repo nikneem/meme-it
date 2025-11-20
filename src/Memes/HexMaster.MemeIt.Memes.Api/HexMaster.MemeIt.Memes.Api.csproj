@@ -13,6 +13,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Aspire\HexMaster.MemeIt.Aspire\HexMaster.MemeIt.Aspire.ServiceDefaults\HexMaster.MemeIt.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Memes\HexMaster.MemeIt.Memes.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Memes.Abstractions\HexMaster.MemeIt.Memes.Abstractions.csproj" />
+    <ProjectReference Include="..\HexMaster.MemeIt.Memes.Data.Postgres\HexMaster.MemeIt.Memes.Data.Postgres.csproj" />
   </ItemGroup>
 
 </Project>
