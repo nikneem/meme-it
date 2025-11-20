@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { CreateGameRequest, JoinGameRequest, GameResponse } from '../models/game.model';
 
 @Injectable({
@@ -8,6 +9,7 @@ import { CreateGameRequest, JoinGameRequest, GameResponse } from '../models/game
 })
 export class GameService {
   private readonly apiUrl = 'http://localhost:5163/api/games';
+  private gameStateCache = new Map<string, BehaviorSubject<GameResponse | null>>();
 
   constructor(private http: HttpClient) { }
 
@@ -20,7 +22,77 @@ export class GameService {
   }
 
   getGame(gameCode: string): Observable<GameResponse> {
-    return this.http.get<GameResponse>(`${this.apiUrl}/${gameCode}`);
+    // Check if we have a cached state for this game
+    if (!this.gameStateCache.has(gameCode)) {
+      this.gameStateCache.set(gameCode, new BehaviorSubject<GameResponse | null>(null));
+    }
+
+    const cachedState = this.gameStateCache.get(gameCode)!;
+
+    // If we have a cached value, return it immediately
+    if (cachedState.value) {
+      return of(cachedState.value);
+    }
+
+    // Otherwise, fetch from server and cache the result
+    return this.http.get<GameResponse>(`${this.apiUrl}/${gameCode}`).pipe(
+      tap(game => {
+        cachedState.next(game);
+      }),
+      catchError(error => {
+        // Clear cache on error
+        this.gameStateCache.delete(gameCode);
+        throw error;
+      })
+    );
+  }
+
+  /**
+   * Forces a refresh of the game state from the server
+   */
+  refreshGame(gameCode: string): Observable<GameResponse> {
+    return this.http.get<GameResponse>(`${this.apiUrl}/${gameCode}`).pipe(
+      tap(game => {
+        if (this.gameStateCache.has(gameCode)) {
+          this.gameStateCache.get(gameCode)!.next(game);
+        } else {
+          this.gameStateCache.set(gameCode, new BehaviorSubject<GameResponse | null>(game));
+        }
+      })
+    );
+  }
+
+  /**
+   * Updates the local game state (useful for real-time updates via SignalR)
+   */
+  updateLocalGameState(gameCode: string, game: GameResponse): void {
+    if (this.gameStateCache.has(gameCode)) {
+      this.gameStateCache.get(gameCode)!.next(game);
+    } else {
+      this.gameStateCache.set(gameCode, new BehaviorSubject<GameResponse | null>(game));
+    }
+  }
+
+  /**
+   * Gets the current cached game state as an observable
+   */
+  getGameState$(gameCode: string): Observable<GameResponse | null> {
+    if (!this.gameStateCache.has(gameCode)) {
+      this.gameStateCache.set(gameCode, new BehaviorSubject<GameResponse | null>(null));
+      // Trigger initial load
+      this.refreshGame(gameCode).subscribe();
+    }
+    return this.gameStateCache.get(gameCode)!.asObservable();
+  }
+
+  /**
+   * Clears the cached state for a game
+   */
+  clearGameState(gameCode: string): void {
+    if (this.gameStateCache.has(gameCode)) {
+      this.gameStateCache.get(gameCode)!.next(null);
+      this.gameStateCache.delete(gameCode);
+    }
   }
 
   setPlayerReady(gameCode: string, isReady: boolean): Observable<any> {

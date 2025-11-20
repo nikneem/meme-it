@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { Subscription } from 'rxjs';
 import { GameService } from '@services/game.service';
 import { NotificationService } from '@services/notification.service';
 import { AuthService } from '@services/auth.service';
@@ -30,6 +31,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   game: GameResponse | null = null;
   isLoading = true;
   errorMessage = '';
+  private gameStateSubscription?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -48,25 +50,47 @@ export class GameLobbyPage implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadGame();
+    // Subscribe to the game state observable
+    this.gameStateSubscription = this.gameService.getGameState$(this.gameCode).subscribe({
+      next: (game) => {
+        if (game) {
+          console.log('Game state updated:', game);
+          this.game = game;
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
+      },
+      error: (error) => {
+        console.error('Game state error:', error);
+        this.isLoading = false;
+        this.errorMessage = 'Failed to load game. The game may not exist or you may not have access.';
+        this.notificationService.error(
+          'Game Not Found',
+          'Failed to load game. The game may not exist or you may not have access.',
+          undefined,
+          8000
+        );
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   ngOnDestroy(): void {
-    // No cleanup needed
+    // Cleanup subscription
+    if (this.gameStateSubscription) {
+      this.gameStateSubscription.unsubscribe();
+    }
   }
 
   loadGame(): void {
-    console.log('Loading game with code:', this.gameCode);
-    this.gameService.getGame(this.gameCode).subscribe({
+    console.log('Refreshing game with code:', this.gameCode);
+    this.gameService.refreshGame(this.gameCode).subscribe({
       next: (game) => {
-        console.log('Game loaded successfully:', game);
-        this.game = game;
-        this.isLoading = false;
-        console.log('Component state - isLoading:', this.isLoading, 'game:', this.game);
-        this.cdr.detectChanges();
+        console.log('Game refreshed successfully:', game);
+        // State is automatically updated via the subscription
       },
       error: (error) => {
-        console.error('Game load error:', error);
+        console.error('Game refresh error:', error);
         this.isLoading = false;
         this.errorMessage = 'Failed to load game. The game may not exist or you may not have access.';
         this.notificationService.error(
@@ -168,6 +192,8 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   leaveGame(): void {
+    // Clear the cached game state when leaving
+    this.gameService.clearGameState(this.gameCode);
     this.router.navigate(['/']);
   }
 }
