@@ -110,6 +110,23 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     return this.currentUserId === playerId;
   }
 
+  isPlayerAdmin(playerId: string): boolean {
+    return this.game?.players[0]?.playerId === playerId;
+  }
+
+  setPlayerReady(): void {
+    this.gameService.setPlayerReady(this.gameCode, true).subscribe({
+      next: () => {
+        console.log('Player set to ready');
+        this.loadGame();
+      },
+      error: (error) => {
+        console.error('Failed to set player ready:', error);
+        this.notificationService.error('Error', 'Failed to set player ready');
+      }
+    });
+  }
+
   toggleReady(player: any): void {
     if (!this.isCurrentUser(player.playerId)) return;
 

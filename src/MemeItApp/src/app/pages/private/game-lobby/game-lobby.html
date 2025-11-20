@@ -45,52 +45,50 @@
       </div>
 
       <div class="players-grid">
-        <div *ngFor="let player of game.players" class="player-card" [class.ready]="player.isReady"
-          [class.admin]="game.isAdmin && player.playerId === game.players[0].playerId">
-          <!-- Column 1: Avatar -->
-          <div class="player-avatar">
-            <mat-icon>{{ player.isReady ? 'person' : 'person_outline' }}</mat-icon>
-          </div>
+        <mat-card *ngFor="let player of game.players" class="player-card" [class.ready]="player.isReady">
+          <mat-card-header>
+            <mat-card-title>{{ player.displayName }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="card-body">
+              <!-- Player Icon -->
+              <div class="player-avatar">
+                <mat-icon>{{ player.isReady ? 'person' : 'person_outline' }}</mat-icon>
+              </div>
 
-          <!-- Column 2: Name and Admin Badge -->
-          <div class="player-info">
-            <div class="player-name">{{ player.displayName }}</div>
-          </div>
+              <!-- Badges Stack -->
+              <div class="badges-container">
+                <!-- Ready Badge -->
+                <div class="badge-item ready-badge" [class.not-ready]="!player.isReady">
+                  <mat-icon>{{ player.isReady ? 'check' : 'close' }}</mat-icon>
+                  <span>Ready</span>
+                </div>
 
-          <!-- Column 3: Controls (Delete button above Ready indication) -->
-          <div class="player-controls">
-            <!-- Delete button (admin only, for other players) -->
-            <div class="player-badges">
-              <span class="badge admin-badge" *ngIf="game.isAdmin && player.playerId === game.players[0].playerId">
-                <mat-icon>stars</mat-icon>
-                Admin
-              </span>
+                <!-- Delete Badge (only for admin, not for current user or admin player) -->
+                <div class="badge-item delete-badge"
+                  *ngIf="isAdmin && !isCurrentUser(player.playerId) && !isPlayerAdmin(player.playerId)"
+                  (click)="removePlayer(player.playerId)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </div>
+
+                <!-- Admin Badge (only for game admin player) -->
+                <div class="badge-item admin-badge" *ngIf="isPlayerAdmin(player.playerId)">
+                  <mat-icon>workspace_premium</mat-icon>
+                  <span>Admin</span>
+                </div>
+
+
+                <button matButton="tonal" *ngIf="!player.isReady && isCurrentUser(player.playerId)"
+                  (click)="setPlayerReady()" class="set-ready-button" title="Set player ready">
+                  <mat-icon>check</mat-icon>
+                  <span>Set Ready</span>
+                </button>
+              </div>
             </div>
-            <button *ngIf="isAdmin && !isCurrentUser(player.playerId)" mat-icon-button color="warn"
-              (click)="removePlayer(player.playerId)" title="Remove player from game" class="delete-button">
-              <mat-icon>delete_outline</mat-icon>
-            </button>
 
-            <!-- Ready toggle for current user -->
-            <div class="ready-toggle-container" *ngIf="isCurrentUser(player.playerId) && game.state === 'Lobby'">
-              <mat-slide-toggle [checked]="player.isReady" (change)="toggleReady(player)" color="primary">
-                {{ player.isReady ? 'Ready' : 'Not Ready' }}
-              </mat-slide-toggle>
-            </div>
-
-            <!-- Ready status for other players -->
-            <div class="ready-status" *ngIf="!isCurrentUser(player.playerId)">
-              <span class="badge ready-badge" *ngIf="player.isReady">
-                <mat-icon>check_circle</mat-icon>
-                Ready
-              </span>
-              <span class="badge not-ready-badge" *ngIf="!player.isReady">
-                <mat-icon>schedule</mat-icon>
-                Not Ready
-              </span>
-            </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
       </div>
     </section>
 
