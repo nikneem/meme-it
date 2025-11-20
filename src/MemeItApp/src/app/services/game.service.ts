@@ -16,7 +16,7 @@ export class GameService {
   }
 
   joinGame(request: JoinGameRequest): Observable<GameResponse> {
-    return this.http.post<GameResponse>(`${this.apiUrl}/join`, request);
+    return this.http.post<GameResponse>(`${this.apiUrl}/${request.gameCode}/join`, { password: request.password });
   }
 
   getGame(gameCode: string): Observable<GameResponse> {

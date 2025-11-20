@@ -232,8 +232,7 @@
 }
 
 .players-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
   gap: 1rem;
 }
 
@@ -244,10 +243,11 @@
   padding: 1.25rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-width: 0;
 
   &::before {
     content: '';
@@ -295,6 +295,7 @@
   justify-content: center;
   border: 2px solid rgba(200, 7, 175, 0.5);
   flex-shrink: 0;
+  align-self: center;
 
   mat-icon {
     font-size: 28px;
@@ -310,18 +311,21 @@
 }
 
 .player-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   min-width: 0;
+  align-self: center;
 }
 
 .player-name {
   font-size: 1.1rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.95);
-  margin-bottom: 0.5rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin-bottom: 0.25rem;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .player-badges {
@@ -360,43 +364,46 @@
   }
 }
 
-.player-status {
-  flex-shrink: 0;
-
-  .ready-icon {
-    font-size: 1.5rem;
-    width: 1.5rem;
-    height: 1.5rem;
-    color: #4caf50;
-    animation: checkmark 0.5s ease;
-  }
-}
-
-.player-actions {
+.player-controls {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  flex-shrink: 0;
+  justify-content: center;
+  align-self: center;
+}
 
-  button {
-    transition: all 0.3s ease;
+.delete-button {
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  margin: 0;
+
+  &:hover {
+    transform: scale(1.1);
 
     mat-icon {
-      transition: all 0.3s ease;
-    }
-
-    &.ready mat-icon {
-      color: #4caf50;
-    }
-
-    &:hover {
-      transform: scale(1.1);
-    }
-
-    &[color="warn"]:hover mat-icon {
       color: #f44336;
     }
   }
+}
+
+.ready-toggle-container {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+
+  mat-slide-toggle {
+    ::ng-deep .mdc-label {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.ready-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes checkmark {

@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { GameService } from '@services/game.service';
 import { NotificationService } from '@services/notification.service';
 import { AuthService } from '@services/auth.service';
@@ -18,7 +19,8 @@ import { GameResponse, Player } from '@models/game.model';
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSlideToggleModule
   ],
   templateUrl: './game-lobby.html',
   styleUrl: './game-lobby.scss',

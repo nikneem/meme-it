@@ -31,7 +31,7 @@ public sealed class Game : IGame
         {
             foreach (var player in initialPlayers)
             {
-                AddPlayer(player.PlayerId, player.DisplayName, passwordAttempt: Password);
+                _players.Add(new GamePlayer(player.PlayerId, player.DisplayName, player.IsReady));
             }
         }
     }
