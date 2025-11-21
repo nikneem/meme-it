@@ -40,6 +40,11 @@ public interface IGame
     GameState State { get; }
 
     /// <summary>
+    /// The current round number (0 when no round is active).
+    /// </summary>
+    int CurrentRound { get; }
+
+    /// <summary>
     /// Timestamp for when the game was created.
     /// </summary>
     DateTimeOffset CreatedAt { get; }

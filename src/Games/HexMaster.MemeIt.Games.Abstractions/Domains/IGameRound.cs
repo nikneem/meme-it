@@ -13,6 +13,11 @@ public interface IGameRound
     int RoundNumber { get; }
 
     /// <summary>
+    /// The date and time when this round started.
+    /// </summary>
+    DateTimeOffset StartedAt { get; }
+
+    /// <summary>
     /// Per-player meme submissions collected for this round.
     /// </summary>
     IReadOnlyCollection<IMemeSubmission> Submissions { get; }

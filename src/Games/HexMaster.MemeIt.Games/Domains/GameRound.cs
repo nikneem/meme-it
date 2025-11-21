@@ -12,7 +12,7 @@ public sealed class GameRound : IGameRound
 {
     private readonly List<IMemeSubmission> _submissions = new();
 
-    public GameRound(int roundNumber)
+    public GameRound(int roundNumber, DateTimeOffset? startedAt = null)
     {
         if (roundNumber <= 0)
         {
@@ -20,9 +20,12 @@ public sealed class GameRound : IGameRound
         }
 
         RoundNumber = roundNumber;
+        StartedAt = startedAt ?? DateTimeOffset.UtcNow;
     }
 
     public int RoundNumber { get; }
+
+    public DateTimeOffset StartedAt { get; }
 
     public IReadOnlyCollection<IMemeSubmission> Submissions => _submissions.AsReadOnly();
 

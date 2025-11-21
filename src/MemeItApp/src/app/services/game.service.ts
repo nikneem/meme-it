@@ -111,4 +111,20 @@ export class GameService {
   selectMemeTemplate(gameCode: string, roundNumber: number, memeTemplateId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${gameCode}/rounds/${roundNumber}/select-meme`, { memeTemplateId });
   }
+
+  getPlayerRoundState(gameCode: string): Observable<{
+    gameCode: string;
+    playerId: string;
+    roundNumber: number;
+    roundStartedAt: string;
+    selectedMemeTemplateId?: string;
+  }> {
+    return this.http.get<{
+      gameCode: string;
+      playerId: string;
+      roundNumber: number;
+      roundStartedAt: string;
+      selectedMemeTemplateId?: string;
+    }>(`${this.apiUrl}/${gameCode}/select-meme`);
+  }
 }

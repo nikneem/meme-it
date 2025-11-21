@@ -78,6 +78,14 @@ public static class GamesEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
+        group.MapGet("/{gameCode}/select-meme", GetPlayerRoundStateAsync)
+            .WithName("GetPlayerRoundState")
+            .WithSummary("Gets the current player's round state including selected meme.")
+            .Produces<GetPlayerRoundStateResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
         return endpoints;
     }
 
@@ -458,12 +466,71 @@ public static class GamesEndpoints
             });
         }
 
-        var command = new SelectMemeTemplateCommand(gameCode, playerIdentity.UserId, roundNumber, request.MemeTemplateId);
+        var command = new SelectMemeTemplateCommand(gameCode, playerIdentity.UserId, roundNumber, request!.MemeTemplateId);
         try
         {
             var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
             var response = new SelectMemeTemplateResponse(result.GameCode, result.PlayerId, result.RoundNumber, result.MemeTemplateId);
             return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["game"] = new[] { ex.Message }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [ex.ParamName ?? "payload"] = new[] { ex.Message }
+            });
+        }
+    }
+
+    private static async Task<IResult> GetPlayerRoundStateAsync(
+        HttpContext httpContext,
+        string gameCode,
+        IQueryHandler<GetPlayerRoundStateQuery, GetPlayerRoundStateResult> handler,
+        IPlayerIdentityProvider identityProvider,
+        CancellationToken cancellationToken)
+    {
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity) is { } identityError)
+        {
+            return identityError;
+        }
+
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(gameCode)] = new[] { "Game code is required." }
+            });
+        }
+
+        var query = new GetPlayerRoundStateQuery(gameCode, playerIdentity.UserId);
+        try
+        {
+            var result = await handler.HandleAsync(query, cancellationToken).ConfigureAwait(false);
+            var response = new GetPlayerRoundStateResponse(
+                result.GameCode,
+                result.PlayerId,
+                result.RoundNumber,
+                result.RoundStartedAt,
+                result.SelectedMemeTemplateId);
+            return Results.Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Unauthorized",
+                detail: ex.Message);
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
         {
