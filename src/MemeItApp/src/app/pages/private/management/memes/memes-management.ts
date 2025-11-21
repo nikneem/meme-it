@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -50,7 +50,8 @@ export class MemesManagementPage implements OnInit, OnDestroy {
     constructor(
         private memeService: MemeService,
         private notificationService: NotificationService,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -72,6 +73,7 @@ export class MemesManagementPage implements OnInit, OnDestroy {
                     this.templates = templates;
                     this.applyFilters();
                     this.isLoading = false;
+                    this.cdr.detectChanges();
                 },
                 error: (error) => {
                     console.error('Failed to load meme templates:', error);
@@ -82,6 +84,7 @@ export class MemesManagementPage implements OnInit, OnDestroy {
                         5000
                     );
                     this.isLoading = false;
+                    this.cdr.detectChanges();
                 }
             });
     }
