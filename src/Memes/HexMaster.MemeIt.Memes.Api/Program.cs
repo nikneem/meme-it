@@ -24,6 +24,7 @@ builder.Services.AddScoped<ICommandHandler<DeleteMemeTemplateCommand, DeleteMeme
 builder.Services.AddScoped<IQueryHandler<GetRandomMemeTemplateQuery, GetRandomMemeTemplateResult>, GetRandomMemeTemplateQueryHandler>();
 builder.Services.AddScoped<IQueryHandler<ListMemeTemplatesQuery, ListMemeTemplatesResult>, ListMemeTemplatesQueryHandler>();
 builder.Services.AddScoped<IQueryHandler<GetMemeTemplateByIdQuery, GetMemeTemplateByIdResult>, GetMemeTemplateByIdQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<GenerateUploadSasTokenQuery, GenerateUploadSasTokenResult>, GenerateUploadSasTokenQueryHandler>();
 
 var app = builder.Build();
 

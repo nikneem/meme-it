@@ -4,6 +4,8 @@ import { LandingPage } from './pages/public/landing-page/landing-page';
 import { NewGamePage } from '@pages/public/games/new-game/new-game';
 import { JoinGamePage } from '@pages/public/games/join-game/join-game';
 import { GameLobbyPage } from '@pages/private/game-lobby/game-lobby';
+import { MemesManagementPage } from '@pages/private/management/memes/memes-management';
+import { CreateMemePage } from '@pages/private/management/memes/create/create-meme';
 
 export const routes: Routes = [
     {
@@ -30,5 +32,15 @@ export const routes: Routes = [
         path: 'app/games/:code',
         component: GameLobbyPage,
         title: 'Game Lobby — Meme-It'
+    },
+    {
+        path: 'management/memes',
+        component: MemesManagementPage,
+        title: 'Manage Meme Templates — Meme-It'
+    },
+    {
+        path: 'management/memes/create',
+        component: CreateMemePage,
+        title: 'Create Meme Template — Meme-It'
     }
 ];

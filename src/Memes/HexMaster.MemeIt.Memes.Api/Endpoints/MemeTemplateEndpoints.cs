@@ -137,6 +137,18 @@ public static class MemeTemplateEndpoints
         .Produces(200)
         .Produces(404);
 
+        group.MapPost("/upload-token", async (
+            IQueryHandler<GenerateUploadSasTokenQuery, GenerateUploadSasTokenResult> handler,
+            CancellationToken ct) =>
+        {
+            var query = new GenerateUploadSasTokenQuery();
+            var result = await handler.HandleAsync(query, ct);
+            return Results.Ok(result);
+        })
+        .WithName("GenerateUploadSasToken")
+        .WithSummary("Generate a SAS token for uploading meme template images")
+        .Produces(200);
+
         return app;
     }
 }

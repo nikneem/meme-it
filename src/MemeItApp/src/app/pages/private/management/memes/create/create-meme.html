@@ -1,0 +1,176 @@
+<div class="create-meme">
+    <header class="page-header">
+        <div class="header-content">
+            <button mat-icon-button routerLink="/management/memes" class="back-button">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div>
+                <h1>Create Meme Template</h1>
+                <p class="subtitle">Upload an image and define text areas</p>
+            </div>
+        </div>
+    </header>
+
+    <form [formGroup]="templateForm" (ngSubmit)="onSubmit()" class="form-container">
+        <div class="form-layout">
+            <!-- Left side - Upload and Editor -->
+            <div class="editor-section">
+                @if (!uploadedImageUrl) {
+                <div class="upload-area" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)">
+                    <mat-icon class="upload-icon">cloud_upload</mat-icon>
+                    <h3>Drop your meme image here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" accept="image/*" (change)="onFileSelected($event)" #fileInput hidden>
+                    <button type="button" mat-raised-button color="primary" (click)="fileInput.click()"
+                        [disabled]="isUploading">
+                        @if (isUploading) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                        Uploading...
+                        } @else {
+                        <ng-container>
+                            <mat-icon>add_photo_alternate</mat-icon>
+                            Select Image
+                        </ng-container>
+                        }
+                    </button>
+                </div>
+                } @else {
+                <div class="editor-container">
+                    <div #imageCanvas class="image-canvas" (click)="onCanvasClick($event)">
+                        <img [src]="uploadedImageUrl" alt="Meme template" class="meme-image">
+
+                        @for (textArea of textAreas; track textArea.id) {
+                        <div class="text-area-box" [class.selected]="textArea.isSelected" [style.left.px]="textArea.x"
+                            [style.top.px]="textArea.y" [style.width.px]="textArea.width"
+                            [style.height.px]="textArea.height" [style.border-width.px]="textArea.borderSize"
+                            [style.border-color]="textArea.borderColor" [style.color]="textArea.fontColor"
+                            [style.font-size.px]="textArea.fontSize"
+                            [style.font-weight]="textArea.isBold ? 'bold' : 'normal'"
+                            (mousedown)="onTextAreaMouseDown($event, textArea)">
+                            <span class="text-area-label">Text Area</span>
+                            @if (textArea.isSelected) {
+                            <div class="resize-handle" (mousedown)="onResizeHandleMouseDown($event, textArea)">
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="editor-actions">
+                        <input type="file" accept="image/*" (change)="onFileSelected($event)" #fileInput hidden>
+                        <button type="button" mat-raised-button (click)="fileInput.click()">
+                            <mat-icon>image</mat-icon>
+                            Change Image
+                        </button>
+                        <button type="button" mat-raised-button color="warn" (click)="deleteSelectedTextArea()"
+                            [disabled]="!selectedTextArea">
+                            <mat-icon>delete</mat-icon>
+                            Delete Selected
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Right side - Form and Configuration -->
+            <div class="config-section">
+                <mat-card>
+                    <mat-card-content>
+                        <h3>Template Details</h3>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Template Name</mat-label>
+                            <input matInput formControlName="title" placeholder="Enter a name for this template">
+                            @if (templateForm.get('title')?.hasError('required')) {
+                            <mat-error>Template name is required</mat-error>
+                            }
+                            @if (templateForm.get('title')?.hasError('minlength')) {
+                            <mat-error>Name must be at least 3 characters</mat-error>
+                            }
+                        </mat-form-field>
+
+                        <div class="info-item">
+                            <mat-icon>photo</mat-icon>
+                            <span>Image: {{ uploadedImageUrl ? 'Uploaded' : 'Not uploaded' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <mat-icon>text_fields</mat-icon>
+                            <span>Text Areas: {{ textAreas.length }}</span>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                @if (selectedTextArea) {
+                <mat-card class="config-panel">
+                    <mat-card-content>
+                        <div class="config-header">
+                            <h3>Text Area Configuration</h3>
+                            <button type="button" mat-icon-button (click)="deselectAll($event)">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+
+                        <div class="config-group">
+                            <label>Font Size: {{ selectedTextArea.fontSize }}px</label>
+                            <mat-slider min="12" max="72" step="1" discrete [displayWith]="formatLabel">
+                                <input matSliderThumb [(ngModel)]="selectedTextArea.fontSize"
+                                    [ngModelOptions]="{standalone: true}">
+                            </mat-slider>
+                        </div>
+
+                        <div class="config-group">
+                            <label>Border Size: {{ selectedTextArea.borderSize }}px</label>
+                            <mat-slider min="0" max="10" step="1" discrete [displayWith]="formatLabel">
+                                <input matSliderThumb [(ngModel)]="selectedTextArea.borderSize"
+                                    [ngModelOptions]="{standalone: true}">
+                            </mat-slider>
+                        </div>
+
+                        <div class="config-group">
+                            <mat-slide-toggle [(ngModel)]="selectedTextArea.isBold"
+                                [ngModelOptions]="{standalone: true}">
+                                Bold Text
+                            </mat-slide-toggle>
+                        </div>
+
+                        <div class="config-group">
+                            <label>Text Color</label>
+                            <input type="color" [(ngModel)]="selectedTextArea.fontColor"
+                                [ngModelOptions]="{standalone: true}" class="color-picker">
+                        </div>
+
+                        <div class="config-group">
+                            <label>Border Color</label>
+                            <input type="color" [(ngModel)]="selectedTextArea.borderColor"
+                                [ngModelOptions]="{standalone: true}" class="color-picker">
+                        </div>
+
+                        <div class="config-info">
+                            <small>Position: ({{ selectedTextArea.x }}, {{ selectedTextArea.y }})</small>
+                            <small>Size: {{ selectedTextArea.width }} × {{ selectedTextArea.height }}</small>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+                }
+
+                <div class="form-actions">
+                    <button type="button" mat-button routerLink="/management/memes">
+                        Cancel
+                    </button>
+                    <button type="submit" mat-raised-button color="primary"
+                        [disabled]="!templateForm.valid || !uploadedImageUrl || textAreas.length === 0 || isSaving">
+                        @if (isSaving) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                        Saving...
+                        } @else {
+                        <ng-container>
+                            <mat-icon>save</mat-icon>
+                            Create Template
+                        </ng-container>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
