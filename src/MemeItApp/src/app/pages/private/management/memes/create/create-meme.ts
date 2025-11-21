@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
@@ -67,7 +67,8 @@ export class CreateMemePage implements OnInit, OnDestroy {
     constructor(
         private memeService: MemeService,
         private notificationService: NotificationService,
-        private router: Router
+        private router: Router,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -152,23 +153,24 @@ export class CreateMemePage implements OnInit, OnDestroy {
     onCanvasClick(event: MouseEvent): void {
         if (!this.imageCanvas) return;
 
+        // Don't create text area if we just finished dragging
+        if (this.isDragging) {
+            return;
+        }
+
+        // Don't create text area if clicking on an existing one
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('text-area-box') || target.closest('.text-area-box')) {
+            return;
+        }
+
         const canvas = this.imageCanvas.nativeElement;
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // Check if clicking on an existing text area
-        const clickedTextArea = this.textAreas.find(ta =>
-            x >= ta.x && x <= ta.x + ta.width &&
-            y >= ta.y && y <= ta.y + ta.height
-        );
-
-        if (clickedTextArea) {
-            this.selectTextArea(clickedTextArea);
-        } else {
-            // Create new text area
-            this.createTextArea(x, y);
-        }
+        // Create new text area
+        this.createTextArea(x, y);
     }
 
     createTextArea(x: number, y: number): void {
@@ -209,15 +211,26 @@ export class CreateMemePage implements OnInit, OnDestroy {
 
     onTextAreaMouseDown(event: MouseEvent, textArea: TextAreaEditable): void {
         event.stopPropagation();
+        event.preventDefault();
         this.selectTextArea(textArea);
 
+        if (!this.imageCanvas) return;
+
+        const canvas = this.imageCanvas.nativeElement;
+        const rect = canvas.getBoundingClientRect();
+
+        // Calculate offset from mouse to text area top-left corner
+        const canvasX = event.clientX - rect.left;
+        const canvasY = event.clientY - rect.top;
+
         this.isDragging = true;
-        this.dragStartX = event.clientX - textArea.x;
-        this.dragStartY = event.clientY - textArea.y;
+        this.dragStartX = canvasX - textArea.x;
+        this.dragStartY = canvasY - textArea.y;
     }
 
     onResizeHandleMouseDown(event: MouseEvent, textArea: TextAreaEditable): void {
         event.stopPropagation();
+        event.preventDefault();
         this.selectTextArea(textArea);
 
         this.isResizing = true;
@@ -241,6 +254,7 @@ export class CreateMemePage implements OnInit, OnDestroy {
 
             this.selectedTextArea.x = Math.round(newX);
             this.selectedTextArea.y = Math.round(newY);
+            this.cdr.detectChanges();
         } else if (this.isResizing) {
             const deltaX = event.clientX - this.resizeStartX;
             const deltaY = event.clientY - this.resizeStartY;
@@ -257,12 +271,21 @@ export class CreateMemePage implements OnInit, OnDestroy {
 
             this.resizeStartX = event.clientX;
             this.resizeStartY = event.clientY;
+            this.cdr.detectChanges();
         }
     }
 
     onMouseUp(): void {
-        this.isDragging = false;
-        this.isResizing = false;
+        if (this.isDragging || this.isResizing) {
+            // Delay resetting to prevent click event from firing
+            setTimeout(() => {
+                this.isDragging = false;
+                this.isResizing = false;
+            }, 10);
+        } else {
+            this.isDragging = false;
+            this.isResizing = false;
+        }
     }
 
     deleteSelectedTextArea(): void {

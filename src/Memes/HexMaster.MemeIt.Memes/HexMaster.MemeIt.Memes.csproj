@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\HexMaster.MemeIt.Memes.Abstractions\HexMaster.MemeIt.Memes.Abstractions.csproj" />
   </ItemGroup>
 

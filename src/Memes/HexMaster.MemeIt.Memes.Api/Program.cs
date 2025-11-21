@@ -1,15 +1,18 @@
 using HexMaster.MemeIt.Memes.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
+using HexMaster.MemeIt.Memes.Abstractions.Services;
 using HexMaster.MemeIt.Memes.Api.Endpoints;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Data.Postgres;
+using HexMaster.MemeIt.Memes.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<MemesDbContext>("memes-db");
+builder.AddAzureBlobClient("memes-blobs");
 
 // Add services to the container
 builder.Services.AddOpenApi();
@@ -27,6 +30,9 @@ builder.Services.AddCors(options =>
 
 // Register repositories (DbContext is already registered by Aspire)
 builder.Services.AddScoped<HexMaster.MemeIt.Memes.Repositories.IMemeTemplateRepository, PostgresMemeTemplateRepository>();
+
+// Register services
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
 // Register command handlers
 builder.Services.AddScoped<ICommandHandler<CreateMemeTemplateCommand, CreateMemeTemplateResult>, CreateMemeTemplateCommandHandler>();

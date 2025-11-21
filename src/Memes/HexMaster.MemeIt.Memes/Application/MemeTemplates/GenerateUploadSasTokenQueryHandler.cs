@@ -1,34 +1,32 @@
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
+using HexMaster.MemeIt.Memes.Abstractions.Services;
 
 namespace HexMaster.MemeIt.Memes.Application.MemeTemplates;
 
 /// <summary>
 /// Handler for generating SAS tokens for blob storage upload.
 /// </summary>
-public class GenerateUploadSasTokenQueryHandler : IQueryHandler<GenerateUploadSasTokenQuery, GenerateUploadSasTokenResult>
+public class GenerateUploadSasTokenQueryHandler(IBlobStorageService blobStorageService)
+    : IQueryHandler<GenerateUploadSasTokenQuery, GenerateUploadSasTokenResult>
 {
-    public Task<GenerateUploadSasTokenResult> HandleAsync(
+
+    public async Task<GenerateUploadSasTokenResult> HandleAsync(
         GenerateUploadSasTokenQuery query,
         CancellationToken cancellationToken = default)
     {
-        // Generate a unique blob name
-        var blobName = $"meme-templates/{Guid.NewGuid()}.png";
+        // Generate a unique blob name with timestamp to avoid collisions
+        var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss");
+        var blobName = $"{timestamp}-{Guid.NewGuid()}.png";
 
-        // Get storage configuration (hardcoded for now, should come from configuration)
-        var storageAccountName = "memeitstoragedev";
-        var containerName = "meme-templates";
+        // Generate SAS token using the blob storage service
+        var (blobUrl, sasToken, expiresAt) = await blobStorageService.GenerateUploadSasTokenAsync(
+            blobName,
+            expirationMinutes: 60,
+            cancellationToken);
 
-        // Generate SAS token (expires in 1 hour)
-        var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
-
-        // In a real implementation, this would use Azure.Storage.Blobs to generate actual SAS tokens
-        var containerUrl = $"https://{storageAccountName}.blob.core.windows.net/{containerName}";
-        var blobUrl = $"{containerUrl}/{blobName}";
-
-        // TODO: Generate actual SAS token using Azure.Storage.Blobs SDK
-        // Example: Use BlobServiceClient and GenerateSasUri
-        var sasToken = GeneratePlaceholderSasToken(expiresAt);
+        // Get container URL (remove the blob name from the full URL)
+        var containerUrl = blobUrl.Substring(0, blobUrl.LastIndexOf('/'));
 
         var result = new GenerateUploadSasTokenResult(
             blobUrl,
@@ -37,13 +35,6 @@ public class GenerateUploadSasTokenQueryHandler : IQueryHandler<GenerateUploadSa
             expiresAt
         );
 
-        return Task.FromResult(result);
-    }
-
-    private static string GeneratePlaceholderSasToken(DateTimeOffset expiresAt)
-    {
-        // This is a placeholder. In production, use Azure.Storage.Blobs to generate real SAS tokens
-        var expiryString = expiresAt.ToString("yyyy-MM-ddTHH:mm:ssZ");
-        return $"sv=2021-06-08&ss=b&srt=o&sp=w&se={expiryString}&st={DateTimeOffset.UtcNow:yyyy-MM-ddTHH:mm:ssZ}&spr=https&sig=PLACEHOLDER_SIGNATURE";
+        return result;
     }
 }

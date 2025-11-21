@@ -42,12 +42,12 @@
                         @for (textArea of textAreas; track textArea.id) {
                         <div class="text-area-box" [class.selected]="textArea.isSelected" [style.left.px]="textArea.x"
                             [style.top.px]="textArea.y" [style.width.px]="textArea.width"
-                            [style.height.px]="textArea.height" [style.border-width.px]="textArea.borderSize"
-                            [style.border-color]="textArea.borderColor" [style.color]="textArea.fontColor"
-                            [style.font-size.px]="textArea.fontSize"
-                            [style.font-weight]="textArea.isBold ? 'bold' : 'normal'"
-                            (mousedown)="onTextAreaMouseDown($event, textArea)">
-                            <span class="text-area-label">Text Area</span>
+                            [style.height.px]="textArea.height" (mousedown)="onTextAreaMouseDown($event, textArea)">
+                            <span class="text-area-label" [style.color]="textArea.fontColor"
+                                [style.font-size.px]="textArea.fontSize"
+                                [style.font-weight]="textArea.isBold ? 'bold' : 'normal'"
+                                [style.-webkit-text-stroke-width.px]="textArea.borderSize"
+                                [style.-webkit-text-stroke-color]="textArea.borderColor">Text Area</span>
                             @if (textArea.isSelected) {
                             <div class="resize-handle" (mousedown)="onResizeHandleMouseDown($event, textArea)">
                             </div>

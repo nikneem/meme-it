@@ -16,6 +16,14 @@ var postgres = builder.AddPostgres("memes-postgres")
     .WithPgAdmin();
 var memesDatabase = postgres.AddDatabase("memes-db");
 
+// Add Azure Storage with Azurite emulator for Memes images
+var storage = builder.AddAzureStorage("memes-storage")
+    .RunAsEmulator(azurite =>
+    {
+        azurite.WithLifetime(ContainerLifetime.Persistent);
+    });
+var memesBlobs = storage.AddBlobs("memes-blobs");
+
 // # Dapr State Store and PubSub using Redis #
 var stateStore = builder.AddDaprStateStore("memeit-statestore")
     .WaitFor(redis);
@@ -44,7 +52,9 @@ var usersApi = builder.AddProject<Projects.HexMaster_MemeIt_Users_Api>("hexmaste
 
 var memesApi = builder.AddProject<Projects.HexMaster_MemeIt_Memes_Api>("hexmaster-memeit-memes-api")
     .WithReference(memesDatabase)
-    .WaitFor(memesDatabase);
+    .WithReference(memesBlobs)
+    .WaitFor(memesDatabase)
+    .WaitFor(memesBlobs);
 
 var realtimeApi = builder.AddProject<Projects.HexMaster_MemeIt_Realtime_Api>("hexmaster-memeit-realtime-api")
     .WithDaprSidecar(sidecar =>
