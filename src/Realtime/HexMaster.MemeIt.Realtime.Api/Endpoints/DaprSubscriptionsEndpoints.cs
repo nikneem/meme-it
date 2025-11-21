@@ -41,6 +41,13 @@ public static class DaprSubscriptionsEndpoints
             .WithSummary("Handles player joined events from Dapr pubsub")
             .ExcludeFromDescription();
 
+        // Subscribe to game started events
+        group.MapPost("/gamestarted", OnGameStartedAsync)
+            .WithTopic(PubSubName, "gamestarted")
+            .WithName("GameStartedSubscription")
+            .WithSummary("Handles game started events from Dapr pubsub")
+            .ExcludeFromDescription();
+
         return endpoints;
     }
 
@@ -151,6 +158,41 @@ public static class DaprSubscriptionsEndpoints
             logger.LogError(ex, "Error processing PlayerJoined event");
             // Return 200 OK to prevent Dapr from retrying
             // (already logged for monitoring)
+            return Results.Ok();
+        }
+    }
+
+    /// <summary>
+    /// Handles GameStartedEvent from Dapr pubsub and broadcasts to SignalR clients.
+    /// </summary>
+    private static async Task<IResult> OnGameStartedAsync(
+        [FromBody] GameStartedEvent @event,
+        IHubContext<GamesHub> hubContext,
+        ILogger<GamesHub> logger,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Received GameStarted event: GameCode={GameCode}, RoundNumber={RoundNumber}",
+                @event.GameCode, @event.RoundNumber);
+
+            // Broadcast to all connected clients in the game group
+            await hubContext.Clients.Group(@event.GameCode).SendAsync(
+                "GameStarted",
+                new
+                {
+                    @event.GameCode,
+                    @event.RoundNumber
+                },
+                cancellationToken);
+
+            return Results.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing GameStarted event");
+            // Return 200 OK to prevent Dapr from retrying
             return Results.Ok();
         }
     }

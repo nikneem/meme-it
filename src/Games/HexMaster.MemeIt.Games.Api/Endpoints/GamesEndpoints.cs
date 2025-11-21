@@ -61,6 +61,23 @@ public static class GamesEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
+        group.MapPost("/{gameCode}/start", StartGameAsync)
+            .WithName("StartGame")
+            .WithSummary("Starts the game and begins the first round. Only the admin can start the game.")
+            .Produces<StartGameResponse>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        group.MapPost("/{gameCode}/rounds/{roundNumber:int}/select-meme", SelectMemeTemplateAsync)
+            .WithName("SelectMemeTemplate")
+            .WithSummary("Selects a meme template for the current round.")
+            .Produces<SelectMemeTemplateResponse>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
         return endpoints;
     }
 
@@ -347,6 +364,117 @@ public static class GamesEndpoints
                 statusCode: StatusCodes.Status401Unauthorized,
                 title: "Unauthorized",
                 detail: ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [ex.ParamName ?? "payload"] = new[] { ex.Message }
+            });
+        }
+    }
+
+    private static async Task<IResult> StartGameAsync(
+        HttpContext httpContext,
+        string gameCode,
+        ICommandHandler<StartGameCommand, StartGameResult> handler,
+        IPlayerIdentityProvider identityProvider,
+        CancellationToken cancellationToken)
+    {
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity) is { } identityError)
+        {
+            return identityError;
+        }
+
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(gameCode)] = new[] { "Game code is required." }
+            });
+        }
+
+        var command = new StartGameCommand(gameCode, playerIdentity.UserId);
+        try
+        {
+            var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+            var response = new StartGameResponse(result.GameCode, result.RoundNumber);
+            return Results.Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Unauthorized",
+                detail: ex.Message);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["game"] = new[] { ex.Message }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [ex.ParamName ?? "payload"] = new[] { ex.Message }
+            });
+        }
+    }
+
+    private static async Task<IResult> SelectMemeTemplateAsync(
+        HttpContext httpContext,
+        string gameCode,
+        int roundNumber,
+        SelectMemeTemplateRequest request,
+        ICommandHandler<SelectMemeTemplateCommand, SelectMemeTemplateResult> handler,
+        IPlayerIdentityProvider identityProvider,
+        CancellationToken cancellationToken)
+    {
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity) is { } identityError)
+        {
+            return identityError;
+        }
+
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(gameCode)] = new[] { "Game code is required." }
+            });
+        }
+
+        if (request?.MemeTemplateId == Guid.Empty)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(request.MemeTemplateId)] = new[] { "Meme template ID is required." }
+            });
+        }
+
+        var command = new SelectMemeTemplateCommand(gameCode, playerIdentity.UserId, roundNumber, request.MemeTemplateId);
+        try
+        {
+            var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+            var response = new SelectMemeTemplateResponse(result.GameCode, result.PlayerId, result.RoundNumber, result.MemeTemplateId);
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["game"] = new[] { ex.Message }
+            });
         }
         catch (ArgumentException ex)
         {

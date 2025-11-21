@@ -1,0 +1,52 @@
+<div class="game-play-container">
+    <div class="game-header">
+        <h1>Round {{ roundNumber }}</h1>
+        <p>Game Code: {{ gameCode }}</p>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Loading meme template...</p>
+    </div>
+
+    <div *ngIf="!isLoading && memeTemplate" class="game-content">
+        <div class="meme-preview">
+            <h2>{{ memeTemplate.title }}</h2>
+            <div class="meme-image-container">
+                <img [src]="memeTemplate.imageUrl" [alt]="memeTemplate.title" class="meme-image" />
+                <div *ngFor="let textArea of memeTemplate.textAreas; let i = index" class="text-overlay"
+                    [style.left.px]="textArea.x" [style.top.px]="textArea.y" [style.width.px]="textArea.width"
+                    [style.height.px]="textArea.height" [style.fontSize.px]="textArea.fontSize"
+                    [style.color]="textArea.fontColor" [style.fontWeight]="textArea.isBold ? 'bold' : 'normal'">
+                    {{ textInputs[i] }}
+                </div>
+            </div>
+        </div>
+
+        <mat-card class="input-panel">
+            <mat-card-header>
+                <mat-card-title>Enter Your Text</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div *ngFor="let textArea of memeTemplate.textAreas; let i = index" class="text-input-group">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Text {{ i + 1 }}</mat-label>
+                        <input matInput [(ngModel)]="textInputs[i]" placeholder="Enter your text here..." />
+                    </mat-form-field>
+                </div>
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-raised-button color="warn" (click)="selectNewMeme()" [disabled]="!canSelectNewMeme">
+                    Select Different Meme ({{ memeChangesRemaining }} left)
+                </button>
+                <button mat-raised-button color="primary" (click)="submitMeme()" [disabled]="!memeTemplate">
+                    Submit Meme
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+    </div>
+</div>

@@ -38,6 +38,8 @@ builder.Services.AddScoped<ICommandHandler<CreateGameCommand, CreateGameResult>,
 builder.Services.AddScoped<ICommandHandler<JoinGameCommand, JoinGameResult>, JoinGameCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<RemovePlayerCommand, RemovePlayerResult>, RemovePlayerCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<SetPlayerReadyCommand, SetPlayerReadyResult>, SetPlayerReadyCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<StartGameCommand, StartGameResult>, StartGameCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<SelectMemeTemplateCommand, SelectMemeTemplateResult>, SelectMemeTemplateCommandHandler>();
 builder.Services.AddScoped<IQueryHandler<GetGameDetailsQuery, GetGameDetailsResult>, GetGameDetailsQueryHandler>();
 
 // Add Dapr client and register IntegrationEvents publisher implementation

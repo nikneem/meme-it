@@ -6,6 +6,7 @@ import { JoinGamePage } from '@pages/public/games/join-game/join-game';
 import { GameLobbyPage } from '@pages/private/game-lobby/game-lobby';
 import { MemesManagementPage } from '@pages/private/management/memes/memes-management';
 import { CreateMemePage } from '@pages/private/management/memes/create/create-meme';
+import { GamePlayPage } from '@pages/private/game-play/game-play';
 
 export const routes: Routes = [
     {
@@ -32,6 +33,11 @@ export const routes: Routes = [
         path: 'app/games/:code',
         component: GameLobbyPage,
         title: 'Game Lobby — Meme-It'
+    },
+    {
+        path: 'app/games/:code/play',
+        component: GamePlayPage,
+        title: 'Play Game — Meme-It'
     },
     {
         path: 'management',

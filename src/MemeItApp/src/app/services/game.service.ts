@@ -103,4 +103,12 @@ export class GameService {
   removePlayer(gameCode: string, playerId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${gameCode}/remove-player/${playerId}`);
   }
+
+  startGame(gameCode: string): Observable<{ gameCode: string; roundNumber: number }> {
+    return this.http.post<{ gameCode: string; roundNumber: number }>(`${this.apiUrl}/${gameCode}/start`, {});
+  }
+
+  selectMemeTemplate(gameCode: string, roundNumber: number, memeTemplateId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${gameCode}/rounds/${roundNumber}/select-meme`, { memeTemplateId });
+  }
 }

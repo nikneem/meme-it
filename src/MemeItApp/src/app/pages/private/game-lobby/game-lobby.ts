@@ -203,6 +203,20 @@ export class GameLobbyPage implements OnInit, OnDestroy {
       );
     });
     this.realtimeSubscriptions.push(playerRemovedSub);
+
+    // Handle game started events
+    const gameStartedSub = this.realtimeService.gameStarted$.subscribe(event => {
+      console.log('Game started:', event);
+      this.notificationService.success(
+        'Game Started!',
+        'The game has begun. Good luck!',
+        undefined,
+        3000
+      );
+      // Navigate to the play page
+      this.router.navigate([`/app/games/${event.gameCode}/play`]);
+    });
+    this.realtimeSubscriptions.push(gameStartedSub);
   }
 
   loadGame(): void {
@@ -311,8 +325,21 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   startGame(): void {
-    // TODO: Implement start game logic
-    console.log('Starting game...');
+    if (!this.isAdmin) {
+      this.notificationService.error('Error', 'Only the game admin can start the game');
+      return;
+    }
+
+    this.gameService.startGame(this.gameCode).subscribe({
+      next: (result) => {
+        console.log('Game started successfully:', result);
+        // The navigation will happen via the GameStarted event from SignalR
+      },
+      error: (error) => {
+        console.error('Failed to start game:', error);
+        this.notificationService.error('Error', 'Failed to start game. Please try again.');
+      }
+    });
   }
 
   leaveGame(): void {

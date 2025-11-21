@@ -48,6 +48,8 @@ public sealed class Game : IGame
 
     public GameState State { get; private set; }
 
+    public int CurrentRound { get; private set; }
+
     public DateTimeOffset CreatedAt { get; }
 
     public void AddPlayer(Guid playerId, string displayName, string? passwordAttempt = null)
@@ -146,6 +148,7 @@ public sealed class Game : IGame
         var round = new GameRound(nextNumber);
         _rounds.Add(round);
         State = GameState.InProgress;
+        CurrentRound = nextNumber;
         return round;
     }
 
