@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using Bogus;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
@@ -12,13 +13,16 @@ namespace HexMaster.MemeIt.Memes.Tests.Application;
 public class GetRandomMemeTemplateQueryHandlerTests
 {
     private readonly Mock<IMemeTemplateRepository> _repositoryMock;
+    private readonly Mock<BlobServiceClient> _blobServiceClientMock;
     private readonly IQueryHandler<GetRandomMemeTemplateQuery, GetRandomMemeTemplateResult> _handler;
     private readonly Faker _faker;
 
     public GetRandomMemeTemplateQueryHandlerTests()
     {
         _repositoryMock = new Mock<IMemeTemplateRepository>();
-        _handler = new GetRandomMemeTemplateQueryHandler(_repositoryMock.Object);
+        _blobServiceClientMock = new Mock<BlobServiceClient>();
+        _blobServiceClientMock.Setup(x => x.Uri).Returns(new Uri("https://storageaccount.blob.core.windows.net"));
+        _handler = new GetRandomMemeTemplateQueryHandler(_repositoryMock.Object, _blobServiceClientMock.Object);
         _faker = new Faker();
     }
 
@@ -28,7 +32,7 @@ public class GetRandomMemeTemplateQueryHandlerTests
         // Arrange
         var template = MemeTemplate.Create(
             _faker.Lorem.Sentence(),
-            _faker.Internet.UrlWithPath(),
+            "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
             new List<TextAreaDefinition>
             {
                 TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)

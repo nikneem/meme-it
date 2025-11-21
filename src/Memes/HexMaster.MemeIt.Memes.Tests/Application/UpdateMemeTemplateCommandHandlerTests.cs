@@ -30,7 +30,7 @@ public class UpdateMemeTemplateCommandHandlerTests
         var templateId = Guid.NewGuid();
         var existingTemplate = MemeTemplate.Create(
             _faker.Lorem.Sentence(),
-            _faker.Internet.UrlWithPath(),
+            "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
             new List<TextAreaDefinition>
             {
                 TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
@@ -44,7 +44,7 @@ public class UpdateMemeTemplateCommandHandlerTests
         var command = new UpdateMemeTemplateCommand(
             templateId,
             _faker.Lorem.Sentence(),
-            _faker.Internet.UrlWithPath(),
+            "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
             new List<TextAreaDefinitionDto>
             {
                 new(20, 20, 300, 60, 32, "#FF0000", 3, "#FFFFFF", false)
@@ -73,7 +73,7 @@ public class UpdateMemeTemplateCommandHandlerTests
         var command = new UpdateMemeTemplateCommand(
             templateId,
             _faker.Lorem.Sentence(),
-            _faker.Internet.UrlWithPath(),
+            "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
             new List<TextAreaDefinitionDto>
             {
                 new(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)

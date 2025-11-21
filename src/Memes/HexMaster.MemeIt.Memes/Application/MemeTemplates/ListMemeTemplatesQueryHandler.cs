@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Memes.Abstractions.Domains;
@@ -13,10 +14,14 @@ namespace HexMaster.MemeIt.Memes.Application.MemeTemplates;
 public class ListMemeTemplatesQueryHandler : IQueryHandler<ListMemeTemplatesQuery, ListMemeTemplatesResult>
 {
     private readonly IMemeTemplateRepository _repository;
+    private readonly BlobServiceClient _blobServiceClient;
 
-    public ListMemeTemplatesQueryHandler(IMemeTemplateRepository repository)
+    public ListMemeTemplatesQueryHandler(
+        IMemeTemplateRepository repository,
+        BlobServiceClient blobServiceClient)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _blobServiceClient = blobServiceClient ?? throw new ArgumentNullException(nameof(blobServiceClient));
     }
 
     public async Task<ListMemeTemplatesResult> HandleAsync(
@@ -29,12 +34,15 @@ public class ListMemeTemplatesQueryHandler : IQueryHandler<ListMemeTemplatesQuer
         return new ListMemeTemplatesResult(dtos);
     }
 
-    private static MemeTemplateDto MapToDto(MemeTemplate template)
+    private MemeTemplateDto MapToDto(MemeTemplate template)
     {
+        var baseUrl = _blobServiceClient.Uri.GetLeftPart(UriPartial.Authority);
+        var fullImageUrl = $"{baseUrl}{template.ImageUrl}";
+
         return new MemeTemplateDto(
             template.Id,
             template.Title,
-            template.ImageUrl,
+            fullImageUrl,
             template.TextAreas.Select(ta => new TextAreaDefinitionDto(
                 ta.X,
                 ta.Y,

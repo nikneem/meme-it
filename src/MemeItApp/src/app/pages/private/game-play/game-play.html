@@ -27,7 +27,8 @@
                 <div *ngFor="let textArea of memeTemplate.textAreas; let i = index" class="text-overlay"
                     [style.left.px]="textArea.x" [style.top.px]="textArea.y" [style.width.px]="textArea.width"
                     [style.height.px]="textArea.height" [style.fontSize.px]="textArea.fontSize"
-                    [style.color]="textArea.fontColor" [style.fontWeight]="textArea.isBold ? 'bold' : 'normal'">
+                    [style.color]="textArea.fontColor" [style.fontWeight]="textArea.isBold ? 'bold' : 'normal'"
+                    [style.-webkit-text-stroke]="textArea.borderSize + 'px ' + textArea.borderColor">
                     {{ textInputs[i] }}
                 </div>
             </div>

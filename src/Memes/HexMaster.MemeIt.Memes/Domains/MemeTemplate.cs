@@ -33,8 +33,8 @@ public class MemeTemplate
         if (textAreasList.Count == 0)
             throw new DomainException("At least one text area must be defined");
 
-        if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out _))
-            throw new DomainException("Image URL must be a valid absolute URI");
+        if (!imageUrl.StartsWith('/'))
+            throw new DomainException("Image URL must be a relative path starting with /");
 
         var template = new MemeTemplate
         {
@@ -65,8 +65,8 @@ public class MemeTemplate
         if (textAreasList.Count == 0)
             throw new DomainException("At least one text area must be defined");
 
-        if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out _))
-            throw new DomainException("Image URL must be a valid absolute URI");
+        if (!imageUrl.StartsWith('/'))
+            throw new DomainException("Image URL must be a relative path starting with /");
 
         Title = title;
         ImageUrl = imageUrl;

@@ -34,7 +34,7 @@ public class CreateMemeTemplateCommandHandlerTests
 
         var command = new CreateMemeTemplateCommand(
             _faker.Lorem.Sentence(),
-            _faker.Internet.UrlWithPath(),
+            "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
             new List<TextAreaDefinitionDto>
             {
                 new(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
@@ -64,7 +64,7 @@ public class CreateMemeTemplateCommandHandlerTests
         // Arrange
         var command = new CreateMemeTemplateCommand(
             "", // Invalid title
-            _faker.Internet.UrlWithPath(),
+            "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
             new List<TextAreaDefinitionDto>
             {
                 new(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)

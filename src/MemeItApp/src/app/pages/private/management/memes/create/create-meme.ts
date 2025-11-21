@@ -45,6 +45,7 @@ export class CreateMemePage implements OnInit, OnDestroy {
     isUploading = false;
     isSaving = false;
     uploadedImageUrl: string | null = null;
+    uploadedImageFullUrl: string | null = null;
     imageNaturalWidth = 0;
     imageNaturalHeight = 0;
 
@@ -123,17 +124,24 @@ export class CreateMemePage implements OnInit, OnDestroy {
                         .pipe(takeUntil(this.destroy$))
                         .subscribe({
                             next: () => {
-                                this.uploadedImageUrl = tokenResponse.blobUrl;
+                                // Store full URL for display
+                                this.uploadedImageFullUrl = tokenResponse.blobUrl;
+
+                                // Extract relative path for API request
+                                // e.g., "https://storage.blob.core.windows.net/meme-templates/image.jpg" -> "/meme-templates/image.jpg"
+                                const url = new URL(tokenResponse.blobUrl);
+                                this.uploadedImageUrl = url.pathname;
+
                                 this.isUploading = false;
                                 this.notificationService.success('Uploaded', 'Image uploaded successfully', undefined, 2000);
 
-                                // Load image to get dimensions
+                                // Load image to get dimensions (use full URL for image src)
                                 const img = new Image();
                                 img.onload = () => {
                                     this.imageNaturalWidth = img.naturalWidth;
                                     this.imageNaturalHeight = img.naturalHeight;
                                 };
-                                img.src = this.uploadedImageUrl;
+                                img.src = this.uploadedImageFullUrl;
                             },
                             error: (error) => {
                                 console.error('Upload failed:', error);

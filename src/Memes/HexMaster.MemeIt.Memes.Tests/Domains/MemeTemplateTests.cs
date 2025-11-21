@@ -13,7 +13,7 @@ public class MemeTemplateTests
     {
         // Arrange
         var title = _faker.Lorem.Sentence();
-        var imageUrl = _faker.Internet.UrlWithPath();
+        var imageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
         var textAreas = new List<TextAreaDefinition>
         {
             TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
@@ -35,7 +35,7 @@ public class MemeTemplateTests
     public void Create_WithEmptyTitle_ShouldThrowException()
     {
         // Arrange
-        var imageUrl = _faker.Internet.UrlWithPath();
+        var imageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
         var textAreas = new List<TextAreaDefinition>
         {
             TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
@@ -58,7 +58,7 @@ public class MemeTemplateTests
         // Act & Assert
         var exception = Assert.Throws<DomainException>(() =>
             MemeTemplate.Create(title, "not-a-valid-url", textAreas));
-        Assert.Contains("valid absolute URI", exception.Message);
+        Assert.Contains("relative path starting with /", exception.Message);
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class MemeTemplateTests
     {
         // Arrange
         var title = _faker.Lorem.Sentence();
-        var imageUrl = _faker.Internet.UrlWithPath();
+        var imageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
         var textAreas = new List<TextAreaDefinition>();
 
         // Act & Assert
@@ -81,7 +81,7 @@ public class MemeTemplateTests
         // Arrange
         var template = CreateValidTemplate();
         var newTitle = _faker.Lorem.Sentence();
-        var newImageUrl = _faker.Internet.UrlWithPath();
+        var newImageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
         var newTextAreas = new List<TextAreaDefinition>
         {
             TextAreaDefinition.Create(20, 20, 300, 60, 32, "#FF0000", 3, "#FFFFFF", false)
@@ -152,7 +152,7 @@ public class MemeTemplateTests
     private MemeTemplate CreateValidTemplate()
     {
         var title = _faker.Lorem.Sentence();
-        var imageUrl = _faker.Internet.UrlWithPath();
+        var imageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
         var textAreas = new List<TextAreaDefinition>
         {
             TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)

@@ -17,7 +17,7 @@ var postgres = builder.AddPostgres("memes-postgres")
 var memesDatabase = postgres.AddDatabase("memes-db");
 
 // Add Azure Storage with Azurite emulator for Memes images
-var storage = builder.AddAzureStorage("memes-storage")
+var storage = builder.AddAzureStorage("memes-templates")
     .RunAsEmulator(azurite =>
     {
         azurite.WithLifetime(ContainerLifetime.Persistent);

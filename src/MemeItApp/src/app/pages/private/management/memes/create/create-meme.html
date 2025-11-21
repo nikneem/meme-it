@@ -37,7 +37,7 @@
                 } @else {
                 <div class="editor-container">
                     <div #imageCanvas class="image-canvas" (click)="onCanvasClick($event)">
-                        <img [src]="uploadedImageUrl" alt="Meme template" class="meme-image">
+                        <img [src]="uploadedImageFullUrl" alt="Meme template" class="meme-image">
 
                         @for (textArea of textAreas; track textArea.id) {
                         <div class="text-area-box" [class.selected]="textArea.isSelected" [style.left.px]="textArea.x"
