@@ -13,7 +13,20 @@ builder.AddNpgsqlDbContext<MemesDbContext>("memes-db");
 
 // Add services to the container
 builder.Services.AddOpenApi();
-builder.Services.AddMemesPostgresData(builder.Configuration);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .WithExposedHeaders("Authorization")
+              .AllowCredentials();
+    });
+});
+
+// Register repositories (DbContext is already registered by Aspire)
+builder.Services.AddScoped<HexMaster.MemeIt.Memes.Repositories.IMemeTemplateRepository, PostgresMemeTemplateRepository>();
 
 // Register command handlers
 builder.Services.AddScoped<ICommandHandler<CreateMemeTemplateCommand, CreateMemeTemplateResult>, CreateMemeTemplateCommandHandler>();
@@ -37,6 +50,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options => options.Title = "Meme-It Memes API");
 }
 
+app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
 
 // Map meme template endpoints

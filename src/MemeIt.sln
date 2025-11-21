@@ -45,13 +45,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Memes", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Memes.Abstractions", "Memes\HexMaster.MemeIt.Memes.Abstractions\HexMaster.MemeIt.Memes.Abstractions.csproj", "{B52F9C52-2097-4249-9A36-E22409D805CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Memes.Data.MongoDb", "Memes\HexMaster.MemeIt.Memes.Data.MongoDb\HexMaster.MemeIt.Memes.Data.MongoDb.csproj", "{F2457185-FEAC-4FCC-80F1-4DA5517064F1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Memes.Tests", "Memes\HexMaster.MemeIt.Memes.Tests\HexMaster.MemeIt.Memes.Tests.csproj", "{EEE990B2-F00B-44F4-91F5-0026557891CB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Realtime", "Realtime", "{FF763134-566E-4449-A8B2-818A6E6E8328}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Realtime.Api", "Realtime\HexMaster.MemeIt.Realtime.Api\HexMaster.MemeIt.Realtime.Api.csproj", "{72020A88-30E9-8511-1C23-854D91B9BD52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.MemeIt.Memes.Data.Postgres", "Memes\HexMaster.MemeIt.Memes.Data.Postgres\HexMaster.MemeIt.Memes.Data.Postgres.csproj", "{56AB662E-3C09-BE30-FEF2-34AF1400D720}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -123,10 +123,6 @@ Global
 		{B52F9C52-2097-4249-9A36-E22409D805CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B52F9C52-2097-4249-9A36-E22409D805CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B52F9C52-2097-4249-9A36-E22409D805CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F2457185-FEAC-4FCC-80F1-4DA5517064F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F2457185-FEAC-4FCC-80F1-4DA5517064F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F2457185-FEAC-4FCC-80F1-4DA5517064F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F2457185-FEAC-4FCC-80F1-4DA5517064F1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EEE990B2-F00B-44F4-91F5-0026557891CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EEE990B2-F00B-44F4-91F5-0026557891CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEE990B2-F00B-44F4-91F5-0026557891CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -135,6 +131,10 @@ Global
 		{72020A88-30E9-8511-1C23-854D91B9BD52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72020A88-30E9-8511-1C23-854D91B9BD52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72020A88-30E9-8511-1C23-854D91B9BD52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56AB662E-3C09-BE30-FEF2-34AF1400D720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56AB662E-3C09-BE30-FEF2-34AF1400D720}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56AB662E-3C09-BE30-FEF2-34AF1400D720}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56AB662E-3C09-BE30-FEF2-34AF1400D720}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -156,9 +156,9 @@ Global
 		{54CB65B7-40DA-181E-9563-64EDB6C5FC67} = {0048770F-EB9E-4056-ACBA-53AB4898CD0A}
 		{4F08E0BF-65EE-4120-8674-539C0F8D94F5} = {0048770F-EB9E-4056-ACBA-53AB4898CD0A}
 		{B52F9C52-2097-4249-9A36-E22409D805CF} = {0048770F-EB9E-4056-ACBA-53AB4898CD0A}
-		{F2457185-FEAC-4FCC-80F1-4DA5517064F1} = {0048770F-EB9E-4056-ACBA-53AB4898CD0A}
 		{EEE990B2-F00B-44F4-91F5-0026557891CB} = {0048770F-EB9E-4056-ACBA-53AB4898CD0A}
 		{72020A88-30E9-8511-1C23-854D91B9BD52} = {FF763134-566E-4449-A8B2-818A6E6E8328}
+		{56AB662E-3C09-BE30-FEF2-34AF1400D720} = {0048770F-EB9E-4056-ACBA-53AB4898CD0A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0E8B39DF-4768-4F7A-88E5-447EE100829A}

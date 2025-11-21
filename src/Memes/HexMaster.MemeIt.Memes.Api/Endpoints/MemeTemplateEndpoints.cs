@@ -13,8 +13,7 @@ public static class MemeTemplateEndpoints
     public static IEndpointRouteBuilder MapMemeTemplateEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/memes")
-            .WithTags("Meme Templates")
-            .WithOpenApi();
+            .WithTags("Meme Templates");
 
         // Admin endpoints for managing templates
         group.MapPost("/templates", async (

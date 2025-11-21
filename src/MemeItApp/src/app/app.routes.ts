@@ -34,13 +34,18 @@ export const routes: Routes = [
         title: 'Game Lobby — Meme-It'
     },
     {
-        path: 'management/memes',
-        component: MemesManagementPage,
-        title: 'Manage Meme Templates — Meme-It'
-    },
-    {
-        path: 'management/memes/create',
-        component: CreateMemePage,
-        title: 'Create Meme Template — Meme-It'
+        path: 'management',
+        children: [
+            {
+                path: 'memes',
+                component: MemesManagementPage,
+                title: 'Manage Meme Templates — Meme-It'
+            },
+            {
+                path: 'memes/create',
+                component: CreateMemePage,
+                title: 'Create Meme Template — Meme-It'
+            }
+        ]
     }
 ];

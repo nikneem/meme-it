@@ -3,13 +3,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MemeTemplate, CreateMemeTemplateRequest, UpdateMemeTemplateRequest, UploadSasTokenResponse } from '../models/meme.model';
-import { API_BASE_URLS } from '../constants/api.constants';
+import { API_BASE_URL } from '../constants/api.constants';
 
 @Injectable({
     providedIn: 'root'
 })
 export class MemeService {
-    private readonly apiUrl = `${API_BASE_URLS.MEMES}/templates`;
+    private readonly apiUrl = `${API_BASE_URL}/memes/templates`;
 
     constructor(private http: HttpClient) { }
 
@@ -31,7 +31,7 @@ export class MemeService {
      * Get a random meme template
      */
     getRandomTemplate(): Observable<MemeTemplate> {
-        return this.http.get<MemeTemplate>(`${API_BASE_URLS.MEMES}/random`);
+        return this.http.get<MemeTemplate>(`${API_BASE_URL}/memes/random`);
     }
 
     /**
@@ -72,7 +72,7 @@ export class MemeService {
      * Generate a SAS token for uploading images
      */
     generateUploadToken(): Observable<UploadSasTokenResponse> {
-        return this.http.post<UploadSasTokenResponse>(`${API_BASE_URLS.MEMES}/upload-token`, {});
+        return this.http.post<UploadSasTokenResponse>(`${API_BASE_URL}/memes/upload-token`, {});
     }
 
     /**

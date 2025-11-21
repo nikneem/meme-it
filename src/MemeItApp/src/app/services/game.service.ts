@@ -3,13 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { CreateGameRequest, JoinGameRequest, GameResponse } from '../models/game.model';
-import { API_BASE_URLS } from '../constants/api.constants';
+import { API_BASE_URL } from '../constants/api.constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
-  private readonly apiUrl = API_BASE_URLS.GAMES;
+  private readonly apiUrl = `${API_BASE_URL}/games`;
   private gameStateCache = new Map<string, BehaviorSubject<GameResponse | null>>();
 
   constructor(private http: HttpClient) { }
