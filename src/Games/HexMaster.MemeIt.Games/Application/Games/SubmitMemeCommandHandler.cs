@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Domains;
+using Microsoft.Extensions.Logging;
 
 namespace HexMaster.MemeIt.Games.Application.Games;
 
@@ -14,10 +15,17 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 public sealed class SubmitMemeCommandHandler : ICommandHandler<SubmitMemeCommand, SubmitMemeResult>
 {
     private readonly IGamesRepository _repository;
+    private readonly ICommandHandler<EndCreativePhaseCommand, EndCreativePhaseResult> _endCreativePhaseHandler;
+    private readonly ILogger<SubmitMemeCommandHandler> _logger;
 
-    public SubmitMemeCommandHandler(IGamesRepository repository)
+    public SubmitMemeCommandHandler(
+        IGamesRepository repository,
+        ICommandHandler<EndCreativePhaseCommand, EndCreativePhaseResult> endCreativePhaseHandler,
+        ILogger<SubmitMemeCommandHandler> logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _endCreativePhaseHandler = endCreativePhaseHandler ?? throw new ArgumentNullException(nameof(endCreativePhaseHandler));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<SubmitMemeResult> HandleAsync(
@@ -52,6 +60,25 @@ public sealed class SubmitMemeCommandHandler : ICommandHandler<SubmitMemeCommand
         game.AddMemeSubmission(command.RoundNumber, submission);
 
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+
+        // Check if all players have submitted their memes
+        var round = game.GetRound(command.RoundNumber);
+        if (round != null && !round.CreativePhaseEnded)
+        {
+            var totalPlayers = game.Players.Count;
+            var totalValidSubmissions = round.Submissions.Count(s => s.TextEntries.Any());
+
+            if (totalValidSubmissions >= totalPlayers)
+            {
+                _logger.LogInformation(
+                    "All {TotalPlayers} players have submitted valid memes for round {RoundNumber} in game {GameCode}. Ending creative phase.",
+                    totalPlayers, command.RoundNumber, game.GameCode);
+
+                // Automatically end the creative phase
+                var endCreativePhaseCommand = new EndCreativePhaseCommand(game.GameCode, command.RoundNumber);
+                await _endCreativePhaseHandler.HandleAsync(endCreativePhaseCommand, cancellationToken).ConfigureAwait(false);
+            }
+        }
 
         return new SubmitMemeResult(
             game.GameCode,

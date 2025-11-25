@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
@@ -13,13 +14,16 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 public sealed class RateMemeCommandHandler : ICommandHandler<RateMemeCommand, RateMemeResult>
 {
     private readonly IGamesRepository _repository;
+    private readonly ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult> _endScorePhaseHandler;
     private readonly ILogger<RateMemeCommandHandler> _logger;
 
     public RateMemeCommandHandler(
         IGamesRepository repository,
+        ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult> endScorePhaseHandler,
         ILogger<RateMemeCommandHandler> logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _endScorePhaseHandler = endScorePhaseHandler ?? throw new ArgumentNullException(nameof(endScorePhaseHandler));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -61,6 +65,23 @@ public sealed class RateMemeCommandHandler : ICommandHandler<RateMemeCommand, Ra
             _logger.LogInformation(
                 "Player {PlayerId} rated meme {MemeId} with score {Rating} in round {RoundNumber} of game {GameCode}.",
                 command.PlayerId, command.MemeId, command.Rating, command.RoundNumber, command.GameCode);
+
+            // Check if all eligible players have rated this meme
+            var updatedScores = round.GetScoresForMeme(command.MemeId);
+            var memeOwner = round.Submissions.FirstOrDefault(s => s.MemeTemplateId == command.MemeId)?.PlayerId;
+            var eligibleVoters = game.Players.Count(p => p.PlayerId != memeOwner); // All players except the meme creator
+            var totalRatings = updatedScores.Count;
+
+            if (totalRatings >= eligibleVoters)
+            {
+                _logger.LogInformation(
+                    "All {EligibleVoters} eligible players have rated meme {MemeId} in round {RoundNumber} of game {GameCode}. Ending score phase.",
+                    eligibleVoters, command.MemeId, command.RoundNumber, command.GameCode);
+
+                // Automatically end the score phase for this meme
+                var endScorePhaseCommand = new EndScorePhaseCommand(command.GameCode, command.RoundNumber, command.MemeId);
+                await _endScorePhaseHandler.HandleAsync(endScorePhaseCommand, cancellationToken).ConfigureAwait(false);
+            }
 
             return new RateMemeResult(command.GameCode, command.RoundNumber, true);
         }
