@@ -61,7 +61,7 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
             _logger.LogInformation(
                 "Round {RoundNumber} of game {GameCode} has already ended. Ignoring duplicate request.",
                 command.RoundNumber, game.GameCode);
-            
+
             return new EndRoundResult(game.GameCode, command.RoundNumber, false, isLastRound, false);
         }
 
