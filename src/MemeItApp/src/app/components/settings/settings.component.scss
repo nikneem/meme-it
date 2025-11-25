@@ -14,15 +14,18 @@
         .fab-button {
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #c807af 0%, #a80095 100%);
 
             &:hover {
                 transform: scale(1.1);
-                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 8px 20px rgba(200, 7, 175, 0.5);
+                background: linear-gradient(135deg, #da44c4 0%, #c807af 100%);
             }
 
             &.active {
-                background-color: #1976d2;
-                box-shadow: 0 6px 12px rgba(25, 118, 210, 0.4);
+                background: linear-gradient(135deg, #7c88d4 0%, #5c6085 100%);
+                box-shadow: 0 6px 16px rgba(124, 136, 212, 0.6);
+                transform: scale(1.05);
             }
 
             mat-icon {
@@ -42,7 +45,7 @@
         max-width: 400px;
         z-index: 1002;
         overflow-y: auto;
-        box-shadow: -4px 0 8px rgba(0, 0, 0, 0.2);
+        box-shadow: -8px 0 24px rgba(0, 0, 0, 0.5);
 
         @media (max-width: 600px) {
             max-width: 100%;
@@ -53,15 +56,18 @@
             border-radius: 0;
             display: flex;
             flex-direction: column;
+            background: linear-gradient(135deg, #000384 0%, #1a0870 50%, #2d0d5c 100%);
+            border-left: 2px solid rgba(200, 7, 175, 0.3);
 
             mat-card-header {
-                background-color: #3f51b5;
+                background: linear-gradient(135deg, #c807af 0%, #a80095 50%, #7c88d4 100%);
                 color: white;
                 padding: 1.5rem;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 border-radius: 0;
+                box-shadow: 0 4px 12px rgba(200, 7, 175, 0.3);
 
                 mat-card-title {
                     display: flex;
@@ -92,14 +98,25 @@
                 flex: 1;
                 padding: 2rem;
                 overflow-y: auto;
+                background: rgba(0, 3, 132, 0.4);
 
                 .setting-group {
                     margin-bottom: 2rem;
+                    padding: 1.5rem;
                     padding-bottom: 1.5rem;
-                    border-bottom: 1px solid #e0e0e0;
+                    border-radius: 12px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(200, 7, 175, 0.2);
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.08);
+                        border-color: rgba(200, 7, 175, 0.4);
+                        box-shadow: 0 4px 12px rgba(200, 7, 175, 0.15);
+                    }
 
                     &:last-child {
-                        border-bottom: none;
+                        margin-bottom: 0;
                     }
 
                     .setting-header {
@@ -108,6 +125,15 @@
                         mat-checkbox {
                             font-size: 1rem;
                             font-weight: 500;
+
+                            ::ng-deep .mdc-checkbox__background {
+                                border-color: rgba(200, 7, 175, 0.5);
+                            }
+
+                            ::ng-deep .mdc-checkbox--selected .mdc-checkbox__background {
+                                background-color: #c807af;
+                                border-color: #c807af;
+                            }
                         }
                     }
 
@@ -123,7 +149,7 @@
                         }
 
                         .volume-icon {
-                            color: #666;
+                            color: #c8c5d0;
                             font-size: 24px;
                             width: 24px;
                             height: 24px;
@@ -137,20 +163,48 @@
                         .volume-value {
                             min-width: 3rem;
                             text-align: right;
-                            font-weight: 500;
-                            color: #333;
+                            font-weight: 600;
+                            color: #c807af;
+                            background: rgba(200, 7, 175, 0.1);
+                            padding: 0.25rem 0.5rem;
+                            border-radius: 6px;
                         }
                     }
 
                     .full-width {
                         width: 100%;
+
+                        ::ng-deep .mat-mdc-form-field {
+                            .mat-mdc-text-field-wrapper {
+                                background-color: rgba(255, 255, 255, 0.05);
+                            }
+
+                            .mdc-text-field--outlined .mdc-notched-outline__leading,
+                            .mdc-text-field--outlined .mdc-notched-outline__notch,
+                            .mdc-text-field--outlined .mdc-notched-outline__trailing {
+                                border-color: rgba(200, 7, 175, 0.3);
+                            }
+
+                            .mdc-text-field--outlined:hover .mdc-notched-outline__leading,
+                            .mdc-text-field--outlined:hover .mdc-notched-outline__notch,
+                            .mdc-text-field--outlined:hover .mdc-notched-outline__trailing {
+                                border-color: rgba(200, 7, 175, 0.5);
+                            }
+
+                            .mdc-text-field--focused .mdc-notched-outline__leading,
+                            .mdc-text-field--focused .mdc-notched-outline__notch,
+                            .mdc-text-field--focused .mdc-notched-outline__trailing {
+                                border-color: #c807af;
+                            }
+                        }
                     }
 
                     .setting-description {
                         margin: 0.5rem 0 0 2rem;
                         font-size: 0.875rem;
-                        color: #666;
+                        color: #c8c5d0;
                         line-height: 1.4;
+                        font-style: italic;
                     }
                 }
             }
@@ -163,7 +217,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background: linear-gradient(135deg, rgba(0, 3, 132, 0.7) 0%, rgba(26, 8, 112, 0.8) 50%, rgba(45, 13, 92, 0.9) 100%);
+        backdrop-filter: blur(8px);
         z-index: 1000;
         cursor: pointer;
     }
@@ -173,12 +228,21 @@
 ::ng-deep {
     .volume-slider {
         .mdc-slider__track--active_fill {
-            border-color: #3f51b5;
+            border-color: #c807af;
         }
 
         .mdc-slider__thumb-knob {
-            background-color: #3f51b5;
-            border-color: #3f51b5;
+            background-color: #c807af;
+            border-color: #c807af;
+        }
+
+        .mdc-slider__track--inactive {
+            background-color: rgba(200, 7, 175, 0.2);
+        }
+
+        .mdc-slider__thumb:hover .mdc-slider__thumb-knob {
+            background-color: #da44c4;
+            border-color: #da44c4;
         }
     }
 }
