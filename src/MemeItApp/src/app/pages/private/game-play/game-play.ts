@@ -24,6 +24,7 @@ export class GamePlayPage implements OnInit, OnDestroy {
     gameCode: string = '';
     roundNumber: number = 1;
     roundStartedAt: Date | null = null;
+    creativePhaseEndTime: Date | null = null;
     timerDuration = 0;
     currentPhase: 'creative' | 'score' = 'creative';
     currentMemeToRate: MemeSubmission | null = null;
@@ -66,6 +67,7 @@ export class GamePlayPage implements OnInit, OnDestroy {
             next: (state) => {
                 this.roundNumber = state.roundNumber;
                 this.roundStartedAt = new Date(state.roundStartedAt);
+                this.creativePhaseEndTime = new Date(state.creativePhaseEndTime);
                 this.currentPhase = 'creative';
                 this.calculateTimerDuration();
             },

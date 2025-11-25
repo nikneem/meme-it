@@ -1,6 +1,6 @@
 <div class="game-play-container">
     <!-- Game Timer -->
-    <memeit-game-timer [duration]="timerDuration" (timeExpired)="onTimeExpired()">
+    <memeit-game-timer [duration]="timerDuration" [endTime]="creativePhaseEndTime" (timeExpired)="onTimeExpired()">
     </memeit-game-timer>
 
     <div class="game-header">

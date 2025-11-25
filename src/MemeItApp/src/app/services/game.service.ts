@@ -117,6 +117,7 @@ export class GameService {
     playerId: string;
     roundNumber: number;
     roundStartedAt: string;
+    creativePhaseEndTime: string;
     selectedMemeTemplateId?: string;
   }> {
     return this.http.get<{
@@ -124,6 +125,7 @@ export class GameService {
       playerId: string;
       roundNumber: number;
       roundStartedAt: string;
+      creativePhaseEndTime: string;
       selectedMemeTemplateId?: string;
     }>(`${this.apiUrl}/${gameCode}/select-meme`);
   }

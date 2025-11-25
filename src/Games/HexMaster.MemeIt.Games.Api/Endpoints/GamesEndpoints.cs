@@ -541,6 +541,7 @@ public static class GamesEndpoints
                 result.PlayerId,
                 result.RoundNumber,
                 result.RoundStartedAt,
+                result.CreativePhaseEndTime,
                 result.SelectedMemeTemplateId);
             return Results.Ok(response);
         }

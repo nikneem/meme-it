@@ -45,11 +45,15 @@ public sealed class GetPlayerRoundStateQueryHandler : IQueryHandler<GetPlayerRou
         // Get the player's submission for this round (if any)
         var playerSubmission = currentRound.Submissions.FirstOrDefault(s => s.PlayerId == query.PlayerId);
 
+        // Calculate creative phase end time (round start + 30 seconds)
+        var creativePhaseEndTime = currentRound.StartedAt.AddSeconds(30);
+
         return new GetPlayerRoundStateResult(
             game.GameCode,
             query.PlayerId,
             currentRound.RoundNumber,
             currentRound.StartedAt,
+            creativePhaseEndTime,
             playerSubmission?.MemeTemplateId);
     }
 }
