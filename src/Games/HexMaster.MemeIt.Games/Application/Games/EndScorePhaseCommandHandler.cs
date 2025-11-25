@@ -19,27 +19,19 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 /// <summary>
 /// Handles ending the score phase for a specific meme and starting the next meme's score phase or ending the round.
 /// </summary>
-public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult>
+public sealed class EndScorePhaseCommandHandler(
+    IGamesRepository repository,
+    DaprClient daprClient,
+    IScheduledTaskService scheduledTaskService,
+    IServiceProvider serviceProvider,
+    ILogger<EndScorePhaseCommandHandler> logger)
+    : ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult>
 {
-    private readonly IGamesRepository _repository;
-    private readonly DaprClient _daprClient;
-    private readonly IScheduledTaskService _scheduledTaskService;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<EndScorePhaseCommandHandler> _logger;
-
-    public EndScorePhaseCommandHandler(
-        IGamesRepository repository,
-        DaprClient daprClient,
-        IScheduledTaskService scheduledTaskService,
-        IServiceProvider serviceProvider,
-        ILogger<EndScorePhaseCommandHandler> logger)
-    {
-        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
-        _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly IGamesRepository _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+    private readonly DaprClient _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
+    private readonly IScheduledTaskService _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly ILogger<EndScorePhaseCommandHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public async Task<EndScorePhaseResult> HandleAsync(
         EndScorePhaseCommand command,

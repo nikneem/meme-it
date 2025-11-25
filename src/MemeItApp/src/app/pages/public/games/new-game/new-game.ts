@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '@services/auth.service';
 import { GameService } from '@services/game.service';
+import { SettingsService } from '@services/settings.service';
 
 @Component({
   selector: 'memeit-new-game',
@@ -27,12 +28,12 @@ export class NewGamePage implements OnInit {
   gameForm: FormGroup;
   isLoading = false;
   errorMessage = '';
-  private readonly DISPLAY_NAME_KEY = 'memeit_displayName';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private gameService: GameService,
+    private settingsService: SettingsService,
     private router: Router
   ) {
     this.gameForm = this.fb.group({
@@ -42,10 +43,10 @@ export class NewGamePage implements OnInit {
   }
 
   ngOnInit(): void {
-    const savedDisplayName = localStorage.getItem(this.DISPLAY_NAME_KEY);
-    if (savedDisplayName) {
+    const settings = this.settingsService.getCurrentSettings();
+    if (settings.user.displayName) {
       this.gameForm.patchValue({
-        displayName: savedDisplayName
+        displayName: settings.user.displayName
       });
     }
   }
@@ -64,8 +65,8 @@ export class NewGamePage implements OnInit {
     // First, request JWT token
     this.authService.requestToken({ displayName }).subscribe({
       next: () => {
-        // Save display name to local storage
-        localStorage.setItem(this.DISPLAY_NAME_KEY, displayName);
+        // Save display name to settings
+        this.settingsService.updateUserSettings({ displayName });
         // Then create the game
         this.gameService.createGame({ password }).subscribe({
           next: (game) => {

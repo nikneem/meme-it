@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '@services/auth.service';
 import { GameService } from '@services/game.service';
+import { SettingsService } from '@services/settings.service';
 
 @Component({
   selector: 'memeit-join-game',
@@ -27,12 +28,12 @@ export class JoinGamePage implements OnInit {
   gameForm: FormGroup;
   isLoading = false;
   errorMessage = '';
-  private readonly DISPLAY_NAME_KEY = 'memeit_displayName';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private gameService: GameService,
+    private settingsService: SettingsService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -45,11 +46,11 @@ export class JoinGamePage implements OnInit {
 
   ngOnInit(): void {
     const gamecode = this.route.snapshot.paramMap.get('gamecode');
-    const savedDisplayName = localStorage.getItem(this.DISPLAY_NAME_KEY);
+    const settings = this.settingsService.getCurrentSettings();
 
     this.gameForm.patchValue({
       ...(gamecode && { gameCode: gamecode.toUpperCase() }),
-      ...(savedDisplayName && { displayName: savedDisplayName })
+      ...(settings.user.displayName && { displayName: settings.user.displayName })
     });
   }
 
@@ -68,8 +69,8 @@ export class JoinGamePage implements OnInit {
     // First, request JWT token
     this.authService.requestToken({ displayName, gameCode }).subscribe({
       next: () => {
-        // Save display name to local storage
-        localStorage.setItem(this.DISPLAY_NAME_KEY, displayName);
+        // Save display name to settings
+        this.settingsService.updateUserSettings({ displayName });
         // Then join the game
         this.gameService.joinGame({ gameCode, password }).subscribe({
           next: (game) => {
