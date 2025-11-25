@@ -143,11 +143,15 @@ public sealed class ScheduledTaskWorker : BackgroundService
 
         try
         {
-            // TODO: Implement StartNewRoundCommand/Handler to create next round and start creative phase
-            // For now, just log that the task fired
+            using var scope = _scopeFactory.CreateScope();
+            var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<StartNewRoundCommand, StartNewRoundResult>>();
+
+            var command = new StartNewRoundCommand(task.GameCode, task.RoundNumber);
+            var result = await handler.HandleAsync(command);
+
             _logger.LogInformation(
-                "StartNewRound task fired for Game={GameCode}, NextRound={Round}. Handler not yet implemented.",
-                task.GameCode, task.RoundNumber);
+                "Successfully started round {Round} for game {GameCode}",
+                result.RoundNumber, result.GameCode);
         }
         catch (Exception ex)
         {

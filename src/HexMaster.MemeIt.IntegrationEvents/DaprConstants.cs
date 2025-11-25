@@ -19,6 +19,7 @@ public static class DaprConstants
         public const string PlayerRemoved = "playerremoved";
         public const string PlayerJoined = "playerjoined";
         public const string GameStarted = "gamestarted";
+        public const string RoundStarted = "roundstarted";
         public const string CreativePhaseEnded = "creativephaseended";
         public const string ScorePhaseStarted = "scorephasestarted";
         public const string RoundEnded = "roundended";

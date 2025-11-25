@@ -48,6 +48,13 @@ public static class DaprSubscriptionsEndpoints
             .WithSummary("Handles game started events from Dapr pubsub")
             .ExcludeFromDescription();
 
+        // Subscribe to round started events
+        group.MapPost("/roundstarted", OnRoundStartedAsync)
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.RoundStarted)
+            .WithName("RoundStartedSubscription")
+            .WithSummary("Handles round started events from Dapr pubsub")
+            .ExcludeFromDescription();
+
         // Subscribe to creative phase ended events
         group.MapPost("/creativephaseended", OnCreativePhaseEndedAsync)
             .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.CreativePhaseEnded)
@@ -60,6 +67,13 @@ public static class DaprSubscriptionsEndpoints
             .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.ScorePhaseStarted)
             .WithName("ScorePhaseStartedSubscription")
             .WithSummary("Handles score phase started events from Dapr pubsub")
+            .ExcludeFromDescription();
+
+        // Subscribe to round ended events
+        group.MapPost("/roundended", OnRoundEndedAsync)
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.RoundEnded)
+            .WithName("RoundEndedSubscription")
+            .WithSummary("Handles round ended events from Dapr pubsub")
             .ExcludeFromDescription();
 
         return endpoints;
@@ -212,6 +226,41 @@ public static class DaprSubscriptionsEndpoints
     }
 
     /// <summary>
+    /// Handles RoundStartedEvent from Dapr pubsub and broadcasts to SignalR clients.
+    /// </summary>
+    private static async Task<IResult> OnRoundStartedAsync(
+        [FromBody] RoundStartedEvent @event,
+        IHubContext<GamesHub> hubContext,
+        ILogger<GamesHub> logger,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Received RoundStarted event: GameCode={GameCode}, RoundNumber={RoundNumber}",
+                @event.GameCode, @event.RoundNumber);
+
+            // Broadcast to all connected clients in the game group
+            await hubContext.Clients.Group(@event.GameCode).SendAsync(
+                "RoundStarted",
+                new
+                {
+                    @event.GameCode,
+                    @event.RoundNumber
+                },
+                cancellationToken);
+
+            return Results.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing RoundStarted event");
+            // Return 200 OK to prevent Dapr from retrying
+            return Results.Ok();
+        }
+    }
+
+    /// <summary>
     /// Handles CreativePhaseEndedEvent from Dapr pubsub and broadcasts to SignalR clients with the first meme to score.
     /// </summary>
     private static async Task<IResult> OnCreativePhaseEndedAsync(
@@ -282,6 +331,43 @@ public static class DaprSubscriptionsEndpoints
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing ScorePhaseStarted event");
+            // Return 200 OK to prevent Dapr from retrying
+            return Results.Ok();
+        }
+    }
+
+    /// <summary>
+    /// Handles RoundEndedEvent from Dapr pubsub and broadcasts to SignalR clients with the scoreboard.
+    /// </summary>
+    private static async Task<IResult> OnRoundEndedAsync(
+        [FromBody] RoundEndedEvent @event,
+        IHubContext<GamesHub> hubContext,
+        ILogger<GamesHub> logger,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Received RoundEnded event: GameCode={GameCode}, RoundNumber={RoundNumber}, TotalRounds={TotalRounds}",
+                @event.GameCode, @event.RoundNumber, @event.TotalRounds);
+
+            // Broadcast to all connected clients in the game group
+            await hubContext.Clients.Group(@event.GameCode).SendAsync(
+                "RoundEnded",
+                new
+                {
+                    @event.GameCode,
+                    @event.RoundNumber,
+                    @event.TotalRounds,
+                    @event.Scoreboard
+                },
+                cancellationToken);
+
+            return Results.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing RoundEnded event");
             // Return 200 OK to prevent Dapr from retrying
             return Results.Ok();
         }
