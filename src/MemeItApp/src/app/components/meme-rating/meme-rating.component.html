@@ -14,9 +14,10 @@
                         <text *ngFor="let textEntry of memeSubmission.textEntries"
                             [attr.x]="textEntry.x + textEntry.width / 2" [attr.y]="textEntry.y + textEntry.height / 2"
                             [attr.font-size]="textEntry.fontSize" [attr.fill]="textEntry.fontColor"
-                            [attr.font-weight]="textEntry.isBold ? 'bold' : 'normal'" [attr.stroke]="textEntry.borderColor"
-                            [attr.stroke-width]="textEntry.borderSize" [attr.paint-order]="'stroke'" text-anchor="middle"
-                            dominant-baseline="middle" class="meme-text">
+                            [attr.font-weight]="textEntry.isBold ? 'bold' : 'normal'"
+                            [attr.stroke]="textEntry.borderColor" [attr.stroke-width]="textEntry.borderSize"
+                            [attr.paint-order]="'stroke'" text-anchor="middle" dominant-baseline="middle"
+                            class="meme-text">
                             {{ textEntry.text }}
                         </text>
                     </svg>
@@ -37,7 +38,8 @@
             </div>
         </mat-card-content>
         <mat-card-actions>
-            <button mat-raised-button color="primary" (click)="submitRating()" [disabled]="rating === 0 || isSubmitting">
+            <button mat-raised-button color="primary" (click)="submitRating()"
+                [disabled]="rating === 0 || isSubmitting">
                 {{ isSubmitting ? 'Submitting...' : 'Submit Rating' }}
             </button>
         </mat-card-actions>

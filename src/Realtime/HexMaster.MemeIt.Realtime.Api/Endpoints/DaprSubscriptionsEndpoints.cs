@@ -48,6 +48,13 @@ public static class DaprSubscriptionsEndpoints
             .WithSummary("Handles game started events from Dapr pubsub")
             .ExcludeFromDescription();
 
+        // Subscribe to creative phase ended events
+        group.MapPost("/creativephaseended", OnCreativePhaseEndedAsync)
+            .WithTopic(PubSubName, "creativephaseended")
+            .WithName("CreativePhaseEndedSubscription")
+            .WithSummary("Handles creative phase ended events from Dapr pubsub")
+            .ExcludeFromDescription();
+
         return endpoints;
     }
 
@@ -192,6 +199,42 @@ public static class DaprSubscriptionsEndpoints
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing GameStarted event");
+            // Return 200 OK to prevent Dapr from retrying
+            return Results.Ok();
+        }
+    }
+
+    /// <summary>
+    /// Handles CreativePhaseEndedEvent from Dapr pubsub and broadcasts to SignalR clients with the first meme to score.
+    /// </summary>
+    private static async Task<IResult> OnCreativePhaseEndedAsync(
+        [FromBody] CreativePhaseEndedEvent @event,
+        IHubContext<GamesHub> hubContext,
+        ILogger<GamesHub> logger,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Received CreativePhaseEnded event: GameCode={GameCode}, RoundNumber={RoundNumber}",
+                @event.GameCode, @event.RoundNumber);
+
+            // Broadcast to all connected clients in the game group
+            // The frontend will request the first meme to score from the Games API
+            await hubContext.Clients.Group(@event.GameCode).SendAsync(
+                "CreativePhaseEnded",
+                new
+                {
+                    @event.GameCode,
+                    @event.RoundNumber
+                },
+                cancellationToken);
+
+            return Results.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing CreativePhaseEnded event");
             // Return 200 OK to prevent Dapr from retrying
             return Results.Ok();
         }

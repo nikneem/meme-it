@@ -28,12 +28,16 @@ export interface MemeTemplatesListResponse {
 export interface CreateMemeTemplateRequest {
     title: string;
     imageUrl: string;
+    width: number;
+    height: number;
     textAreas: TextAreaDefinition[];
 }
 
 export interface UpdateMemeTemplateRequest {
     title: string;
     imageUrl: string;
+    width: number;
+    height: number;
     textAreas: TextAreaDefinition[];
 }
 

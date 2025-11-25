@@ -339,6 +339,8 @@ export class CreateMemePage implements OnInit, OnDestroy {
         const request = {
             title: this.templateForm.value.title!,
             imageUrl: this.uploadedImageUrl,
+            width: this.imageNaturalWidth,
+            height: this.imageNaturalHeight,
             textAreas
         };
 
