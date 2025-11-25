@@ -44,6 +44,24 @@ export interface ScorePhaseStartedEvent {
     ratingDurationSeconds: number;
 }
 
+export interface RoundStartedEvent {
+    gameCode: string;
+    roundNumber: number;
+}
+
+export interface ScoreboardEntryDto {
+    playerId: string;
+    playerName: string;
+    totalScore: number;
+}
+
+export interface RoundEndedEvent {
+    gameCode: string;
+    roundNumber: number;
+    totalRounds: number;
+    scoreboard: ScoreboardEntryDto[];
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -56,15 +74,19 @@ export class RealtimeService {
     private playerStateChangedSubject = new Subject<PlayerStateChangedEvent>();
     private playerRemovedSubject = new Subject<PlayerRemovedEvent>();
     private gameStartedSubject = new Subject<GameStartedEvent>();
+    private roundStartedSubject = new Subject<RoundStartedEvent>();
     private creativePhaseEndedSubject = new Subject<CreativePhaseEndedEvent>();
     private scorePhaseStartedSubject = new Subject<ScorePhaseStartedEvent>();
+    private roundEndedSubject = new Subject<RoundEndedEvent>();
 
     public playerJoined$: Observable<PlayerJoinedEvent> = this.playerJoinedSubject.asObservable();
     public playerStateChanged$: Observable<PlayerStateChangedEvent> = this.playerStateChangedSubject.asObservable();
     public playerRemoved$: Observable<PlayerRemovedEvent> = this.playerRemovedSubject.asObservable();
     public gameStarted$: Observable<GameStartedEvent> = this.gameStartedSubject.asObservable();
+    public roundStarted$: Observable<RoundStartedEvent> = this.roundStartedSubject.asObservable();
     public creativePhaseEnded$: Observable<CreativePhaseEndedEvent> = this.creativePhaseEndedSubject.asObservable();
     public scorePhaseStarted$: Observable<ScorePhaseStartedEvent> = this.scorePhaseStartedSubject.asObservable();
+    public roundEnded$: Observable<RoundEndedEvent> = this.roundEndedSubject.asObservable();
 
     constructor() { }
 
@@ -169,6 +191,11 @@ export class RealtimeService {
             this.gameStartedSubject.next(event);
         });
 
+        this.hubConnection.on('RoundStarted', (event: RoundStartedEvent) => {
+            console.log('RoundStarted event received:', event);
+            this.roundStartedSubject.next(event);
+        });
+
         this.hubConnection.on('CreativePhaseEnded', (event: CreativePhaseEndedEvent) => {
             console.log('CreativePhaseEnded event received:', event);
             this.creativePhaseEndedSubject.next(event);
@@ -177,6 +204,11 @@ export class RealtimeService {
         this.hubConnection.on('ScorePhaseStarted', (event: ScorePhaseStartedEvent) => {
             console.log('ScorePhaseStarted event received:', event);
             this.scorePhaseStartedSubject.next(event);
+        });
+
+        this.hubConnection.on('RoundEnded', (event: RoundEndedEvent) => {
+            console.log('RoundEnded event received:', event);
+            this.roundEndedSubject.next(event);
         });
 
         this.hubConnection.onreconnecting((error) => {

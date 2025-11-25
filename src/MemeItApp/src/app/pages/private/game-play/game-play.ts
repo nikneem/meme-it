@@ -57,6 +57,15 @@ export class GamePlayPage implements OnInit, OnDestroy {
             this.notificationService.error('Connection Error', 'Failed to connect to real-time updates');
         }
 
+        const roundStartedSub = this.realtimeService.roundStarted$.subscribe({
+            next: (event) => {
+                if (event.gameCode === this.gameCode) {
+                    this.onRoundStarted(event.roundNumber);
+                }
+            }
+        });
+        this.subscriptions.push(roundStartedSub);
+
         const creativePhaseEndedSub = this.realtimeService.creativePhaseEnded$.subscribe({
             next: (event) => {
                 if (event.gameCode === this.gameCode) {
@@ -74,6 +83,15 @@ export class GamePlayPage implements OnInit, OnDestroy {
             }
         });
         this.subscriptions.push(scorePhaseStartedSub);
+
+        const roundEndedSub = this.realtimeService.roundEnded$.subscribe({
+            next: (event) => {
+                if (event.gameCode === this.gameCode) {
+                    this.onRoundEnded(event);
+                }
+            }
+        });
+        this.subscriptions.push(roundEndedSub);
 
         this.loadPlayerRoundState();
     }
@@ -126,9 +144,54 @@ export class GamePlayPage implements OnInit, OnDestroy {
         console.log('Meme submitted from creative component');
     }
 
+    onRoundStarted(roundNumber: number): void {
+        console.log('New round started:', roundNumber);
+        this.notificationService.success(
+            'New Round Started',
+            `Round ${roundNumber} has begun!`,
+            undefined,
+            3000
+        );
+
+        // Reset to creative phase for the new round
+        this.roundNumber = roundNumber;
+        this.currentPhase = 'creative';
+        this.currentMemeToRate = null;
+        this.roundStartedAt = new Date();
+
+        // Set timer for creative phase (30 seconds)
+        this.timerDuration = 30;
+
+        // Reload player round state to get updated information
+        this.loadPlayerRoundState();
+    }
+
     onCreativePhaseEnded(roundNumber: number): void {
         console.log('Creative phase ended, waiting for score phase to start');
         this.currentPhase = 'score';
+    }
+
+    onRoundEnded(event: any): void {
+        console.log('Round ended, showing scoreboard:', event);
+        this.notificationService.info(
+            'Round Complete',
+            `Round ${event.roundNumber} has ended. Next round starting soon!`,
+            undefined,
+            5000
+        );
+
+        // Display scoreboard (could be expanded to show a modal/overlay)
+        console.log('Current scoreboard:', event.scoreboard);
+
+        // If it's the last round, notify differently
+        if (event.roundNumber >= event.totalRounds) {
+            this.notificationService.success(
+                'Game Complete!',
+                'All rounds finished. Check out the final scores!',
+                undefined,
+                8000
+            );
+        }
     }
 
     onScorePhaseStarted(event: any): void {
