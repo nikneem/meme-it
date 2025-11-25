@@ -5,22 +5,21 @@ namespace HexMaster.MemeIt.IntegrationEvents.Publishers;
 
 public sealed class DaprIntegrationEventPublisher(DaprClient daprClient) : IIntegrationEventPublisher
 {
-    private readonly string _pubsubName = "chatservice-pubsub";
 
 
     public Task PublishPlayerStateChangedAsync(PlayerStateChangedEvent @event, CancellationToken cancellationToken = default)
     {
         // Publish using Dapr client
-        return daprClient.PublishEventAsync(_pubsubName, "playerstatechanged", @event, cancellationToken: cancellationToken);
+        return daprClient.PublishEventAsync(DaprConstants.PubSubName, DaprConstants.Topics.PlayerStateChanged, @event, cancellationToken: cancellationToken);
     }
 
     public Task PublishPlayerRemovedAsync(PlayerRemovedEvent @event, CancellationToken cancellationToken = default)
     {
-        return daprClient.PublishEventAsync(_pubsubName, "playerremoved", @event, cancellationToken: cancellationToken);
+        return daprClient.PublishEventAsync(DaprConstants.PubSubName, DaprConstants.Topics.PlayerRemoved, @event, cancellationToken: cancellationToken);
     }
 
     public Task PublishPlayerJoinedAsync(PlayerJoinedEvent @event, CancellationToken cancellationToken = default)
     {
-        return daprClient.PublishEventAsync(_pubsubName, "playerjoined", @event, cancellationToken: cancellationToken);
+        return daprClient.PublishEventAsync(DaprConstants.PubSubName, DaprConstants.Topics.PlayerJoined, @event, cancellationToken: cancellationToken);
     }
 }

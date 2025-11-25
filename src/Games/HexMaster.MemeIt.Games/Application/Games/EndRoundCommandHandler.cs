@@ -8,6 +8,7 @@ using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Domains;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 using Microsoft.Extensions.Logging;
 
@@ -64,8 +65,8 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
             scoreboard);
 
         await _daprClient.PublishEventAsync(
-            "chatservice-pubsub",
-            "roundended",
+            DaprConstants.PubSubName,
+            DaprConstants.Topics.RoundEnded,
             roundEndedEvent,
             cancellationToken).ConfigureAwait(false);
 

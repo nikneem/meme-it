@@ -1,4 +1,5 @@
 using Dapr;
+using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 using HexMaster.MemeIt.Realtime.Api.Hubs;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,6 @@ namespace HexMaster.MemeIt.Realtime.Api.Endpoints;
 /// </summary>
 public static class DaprSubscriptionsEndpoints
 {
-    private const string PubSubName = "chatservice-pubsub";
 
     public static IEndpointRouteBuilder MapDaprSubscriptionsEndpoints(this IEndpointRouteBuilder endpoints)
     {
@@ -22,35 +22,35 @@ public static class DaprSubscriptionsEndpoints
 
         // Subscribe to player state changed events
         group.MapPost("/playerstatechanged", OnPlayerStateChangedAsync)
-            .WithTopic(PubSubName, "playerstatechanged")
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.PlayerStateChanged)
             .WithName("PlayerStateChangedSubscription")
             .WithSummary("Handles player state changed events from Dapr pubsub")
             .ExcludeFromDescription(); // Hide from OpenAPI as this is for Dapr only
 
         // Subscribe to player removed events
         group.MapPost("/playerremoved", OnPlayerRemovedAsync)
-            .WithTopic(PubSubName, "playerremoved")
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.PlayerRemoved)
             .WithName("PlayerRemovedSubscription")
             .WithSummary("Handles player removed events from Dapr pubsub")
             .ExcludeFromDescription();
 
         // Subscribe to player joined events
         group.MapPost("/playerjoined", OnPlayerJoinedAsync)
-            .WithTopic(PubSubName, "playerjoined")
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.PlayerJoined)
             .WithName("PlayerJoinedSubscription")
             .WithSummary("Handles player joined events from Dapr pubsub")
             .ExcludeFromDescription();
 
         // Subscribe to game started events
         group.MapPost("/gamestarted", OnGameStartedAsync)
-            .WithTopic(PubSubName, "gamestarted")
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.GameStarted)
             .WithName("GameStartedSubscription")
             .WithSummary("Handles game started events from Dapr pubsub")
             .ExcludeFromDescription();
 
         // Subscribe to creative phase ended events
         group.MapPost("/creativephaseended", OnCreativePhaseEndedAsync)
-            .WithTopic(PubSubName, "creativephaseended")
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.CreativePhaseEnded)
             .WithName("CreativePhaseEndedSubscription")
             .WithSummary("Handles creative phase ended events from Dapr pubsub")
             .ExcludeFromDescription();

@@ -6,6 +6,7 @@ using Dapr.Client;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 using Microsoft.Extensions.Logging;
 
@@ -68,8 +69,8 @@ public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreative
         // Publish CreativePhaseEnded event
         var creativePhaseEndedEvent = new CreativePhaseEndedEvent(game.GameCode, command.RoundNumber);
         await _daprClient.PublishEventAsync(
-            "chatservice-pubsub",
-            "creativephaseended",
+            DaprConstants.PubSubName,
+            DaprConstants.Topics.CreativePhaseEnded,
             creativePhaseEndedEvent,
             cancellationToken).ConfigureAwait(false);
 
@@ -90,8 +91,8 @@ public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreative
                 textEntries);
 
             await _daprClient.PublishEventAsync(
-                "chatservice-pubsub",
-                "scorephasestarted",
+                DaprConstants.PubSubName,
+                DaprConstants.Topics.ScorePhaseStarted,
                 scorePhaseStartedEvent,
                 cancellationToken).ConfigureAwait(false);
 

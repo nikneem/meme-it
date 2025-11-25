@@ -1,6 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.MongoDB;
 using Aspire.Hosting.Yarp.Transforms;
+using HexMaster.MemeIt.IntegrationEvents;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -32,7 +33,7 @@ var redisHost = redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host);
 var redisPort = redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Port);
 
 var pubSub = builder
-    .AddDaprPubSub("chatservice-pubsub")
+    .AddDaprPubSub(DaprConstants.PubSubName)
     .WithMetadata(
         "redisHost",
         ReferenceExpression.Create($"{redisHost}:{redisPort}")

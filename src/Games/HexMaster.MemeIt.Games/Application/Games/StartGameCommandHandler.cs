@@ -6,6 +6,7 @@ using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Domains;
+using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 
 namespace HexMaster.MemeIt.Games.Application.Games;
@@ -57,8 +58,8 @@ public sealed class StartGameCommandHandler : ICommandHandler<StartGameCommand, 
         // Publish GameStarted event
         var gameStartedEvent = new GameStartedEvent(game.GameCode, round.RoundNumber);
         await _daprClient.PublishEventAsync(
-            "chatservice-pubsub",
-            "gamestarted",
+            DaprConstants.PubSubName,
+            DaprConstants.Topics.GameStarted,
             gameStartedEvent,
             cancellationToken).ConfigureAwait(false);
 

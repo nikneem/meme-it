@@ -9,6 +9,7 @@ using HexMaster.MemeIt.Games.Abstractions.Domains;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Domains;
+using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 using Microsoft.Extensions.Logging;
 
@@ -103,8 +104,8 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
                 textEntries);
 
             await _daprClient.PublishEventAsync(
-                "chatservice-pubsub",
-                "scorephasestarted",
+                DaprConstants.PubSubName,
+                DaprConstants.Topics.ScorePhaseStarted,
                 scorePhaseStartedEvent,
                 cancellationToken).ConfigureAwait(false);
 
