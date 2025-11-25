@@ -28,19 +28,24 @@
                 <h3>Your Rating</h3>
                 <div class="star-rating" (mouseleave)="clearHoverRating()">
                     <button *ngFor="let star of [1, 2, 3, 4, 5]" mat-icon-button class="star-button"
-                        (click)="setRating(star)" (mouseenter)="setHoverRating(star)" [disabled]="isSubmitting">
+                        (click)="setRating(star)" (mouseenter)="setHoverRating(star)" [disabled]="!canRate">
                         <mat-icon [class.filled]="star <= (hoverRating || rating)">
                             {{ getStarIcon(star) }}
                         </mat-icon>
                     </button>
                 </div>
-                <p class="rating-text">{{ rating > 0 ? rating + ' / 5 stars' : 'Select a rating' }}</p>
+                <p class="rating-text">
+                    <span *ngIf="isOwnMeme">This is your meme - you cannot rate it</span>
+                    <span *ngIf="!isOwnMeme && hasSubmitted">Rating submitted - waiting for next meme</span>
+                    <span *ngIf="!isOwnMeme && !hasSubmitted">{{ rating > 0 ? rating + ' / 5 stars' : 'Select a rating'
+                        }}</span>
+                </p>
             </div>
         </mat-card-content>
         <mat-card-actions>
             <button mat-raised-button color="primary" (click)="submitRating()"
-                [disabled]="rating === 0 || isSubmitting">
-                {{ isSubmitting ? 'Submitting...' : 'Submit Rating' }}
+                [disabled]="!canRate || rating === 0 || isSubmitting">
+                {{ isSubmitting ? 'Submitting...' : hasSubmitted ? 'Rating Submitted' : 'Submit Rating' }}
             </button>
         </mat-card-actions>
     </mat-card>

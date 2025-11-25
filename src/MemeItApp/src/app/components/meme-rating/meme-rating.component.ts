@@ -1,10 +1,11 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { GameService } from '@services/game.service';
 import { NotificationService } from '@services/notification.service';
+import { AuthService } from '@services/auth.service';
 
 export interface MemeSubmission {
     id: string;
@@ -41,7 +42,7 @@ export interface MemeTextEntry {
     templateUrl: './meme-rating.component.html',
     styleUrl: './meme-rating.component.scss',
 })
-export class MemeRatingComponent implements OnInit {
+export class MemeRatingComponent implements OnInit, OnChanges {
     @Input() gameCode: string = '';
     @Input() roundNumber: number = 1;
     @Input() memeSubmission: MemeSubmission | null = null;
@@ -50,21 +51,50 @@ export class MemeRatingComponent implements OnInit {
     rating: number = 0;
     hoverRating: number = 0;
     isSubmitting: boolean = false;
+    hasSubmitted: boolean = false;
+    isOwnMeme: boolean = false;
 
     constructor(
         private gameService: GameService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private authService: AuthService
     ) { }
 
     ngOnInit(): void {
-        // Component initialization
+        this.checkMemeOwnership();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['memeSubmission'] && this.memeSubmission) {
+            // Reset state when a new meme arrives
+            this.rating = 0;
+            this.hoverRating = 0;
+            this.hasSubmitted = false;
+            this.isSubmitting = false;
+            this.checkMemeOwnership();
+        }
+    }
+
+    private checkMemeOwnership(): void {
+        const currentUserId = this.authService.getCurrentUserId();
+        this.isOwnMeme = this.memeSubmission?.createdBy === currentUserId;
+
+        if (this.isOwnMeme) {
+            this.notificationService.info('Your Meme', 'This is your own meme. You cannot rate it.');
+        }
     }
 
     setRating(rating: number): void {
+        if (this.isOwnMeme || this.hasSubmitted) {
+            return;
+        }
         this.rating = rating;
     }
 
     setHoverRating(rating: number): void {
+        if (this.isOwnMeme || this.hasSubmitted) {
+            return;
+        }
         this.hoverRating = rating;
     }
 
@@ -78,6 +108,11 @@ export class MemeRatingComponent implements OnInit {
     }
 
     submitRating(): void {
+        if (this.isOwnMeme) {
+            this.notificationService.info('Cannot Rate', 'You cannot rate your own meme.');
+            return;
+        }
+
         if (!this.memeSubmission || this.rating === 0) {
             this.notificationService.info('Invalid Rating', 'Please select a rating before submitting.');
             return;
@@ -88,9 +123,8 @@ export class MemeRatingComponent implements OnInit {
         this.gameService.rateMeme(this.gameCode, this.roundNumber, this.memeSubmission.id, this.rating).subscribe({
             next: () => {
                 this.notificationService.success('Success', 'Rating submitted successfully!');
-                // Reset rating state and wait for next meme from real-time event
-                this.rating = 0;
-                this.hoverRating = 0;
+                // Mark as submitted and keep the meme visible
+                this.hasSubmitted = true;
                 this.isSubmitting = false;
                 this.ratingSubmitted.emit();
             },
@@ -100,5 +134,9 @@ export class MemeRatingComponent implements OnInit {
                 this.isSubmitting = false;
             }
         });
+    }
+
+    get canRate(): boolean {
+        return !this.isOwnMeme && !this.hasSubmitted;
     }
 }
