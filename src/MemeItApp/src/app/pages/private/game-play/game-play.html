@@ -14,55 +14,7 @@
         <p>Game Code: {{ gameCode }}</p>
     </div>
 
-    <div *ngIf="isLoading" class="loading-container">
-        <mat-spinner></mat-spinner>
-        <p>Loading meme template...</p>
-    </div>
-
-    <div *ngIf="!isLoading && memeTemplate" class="game-content">
-        <div class="meme-preview">
-            <h2>{{ memeTemplate.title }}</h2>
-            <div class="meme-image-container">
-                <svg [attr.viewBox]="'0 0 ' + memeTemplate.width + ' ' + memeTemplate.height"
-                    preserveAspectRatio="xMidYMid meet" class="meme-svg">
-                    <image [attr.href]="memeTemplate.imageUrl" [attr.width]="memeTemplate.width"
-                        [attr.height]="memeTemplate.height" />
-                    <text *ngFor="let textArea of memeTemplate.textAreas; let i = index"
-                        [attr.x]="textArea.x + textArea.width / 2" [attr.y]="textArea.y + textArea.height / 2"
-                        [attr.font-size]="textArea.fontSize" [attr.fill]="textArea.fontColor"
-                        [attr.font-weight]="textArea.isBold ? 'bold' : 'normal'" [attr.stroke]="textArea.borderColor"
-                        [attr.stroke-width]="textArea.borderSize" [attr.paint-order]="'stroke'" text-anchor="middle"
-                        dominant-baseline="middle" class="meme-text">
-                        {{ textInputs[i] || 'Text ' + (i + 1) }}
-                    </text>
-                </svg>
-            </div>
-        </div>
-
-        <mat-card class="input-panel">
-            <mat-card-header>
-                <mat-card-title>Enter Your Text</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <div *ngFor="let textArea of memeTemplate.textAreas; let i = index" class="text-input-group">
-                    <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Text {{ i + 1 }}</mat-label>
-                        <input matInput [(ngModel)]="textInputs[i]" placeholder="Enter your text here..." />
-                    </mat-form-field>
-                </div>
-            </mat-card-content>
-            <mat-card-actions>
-                <button mat-raised-button color="warn" (click)="selectNewMeme()" [disabled]="!canSelectNewMeme">
-                    Select Different Meme ({{ memeChangesRemaining }} left)
-                </button>
-                <button mat-raised-button color="primary" (click)="submitMeme()" [disabled]="!memeTemplate">
-                    Submit Meme
-                </button>
-            </mat-card-actions>
-        </mat-card>
-    </div>
-
-    <div *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
-    </div>
+    <!-- Meme Creative Phase Component -->
+    <memeit-meme-creative [gameCode]="gameCode" [roundNumber]="roundNumber" (memeSubmitted)="onMemeSubmitted()">
+    </memeit-meme-creative>
 </div>
