@@ -64,23 +64,6 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
         return task.Id;
     }
 
-    public Guid ScheduleRoundEnded(string gameCode, int roundNumber, int delaySeconds = DefaultDelaySeconds)
-    {
-        ValidateDelay(ref delaySeconds);
-        var task = new ScheduledGameTask(
-            Guid.NewGuid(),
-            GameTaskType.RoundEnded,
-            gameCode,
-            roundNumber,
-            DateTimeOffset.UtcNow.AddSeconds(delaySeconds));
-
-        ScheduleTask(task);
-        _logger.LogInformation(
-            "Scheduled RoundEnded for Game={GameCode}, Round={Round}, ExecuteAt={ExecuteAt}",
-            gameCode, roundNumber, task.ExecuteAt);
-        return task.Id;
-    }
-
     public Guid ScheduleStartNewRound(string gameCode, int roundNumber, int delaySeconds = DefaultDelaySeconds)
     {
         ValidateDelay(ref delaySeconds);

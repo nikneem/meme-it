@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapr.Client;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
@@ -15,24 +11,17 @@ namespace HexMaster.MemeIt.Games.Application.Games;
 /// <summary>
 /// Handles ending the creative phase and starting the score phase.
 /// </summary>
-public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreativePhaseCommand, EndCreativePhaseResult>
+public sealed class EndCreativePhaseCommandHandler(
+    IGamesRepository repository,
+    DaprClient daprClient,
+    IScheduledTaskService scheduledTaskService,
+    ILogger<EndCreativePhaseCommandHandler> logger)
+    : ICommandHandler<EndCreativePhaseCommand, EndCreativePhaseResult>
 {
-    private readonly IGamesRepository _repository;
-    private readonly DaprClient _daprClient;
-    private readonly IScheduledTaskService _scheduledTaskService;
-    private readonly ILogger<EndCreativePhaseCommandHandler> _logger;
-
-    public EndCreativePhaseCommandHandler(
-        IGamesRepository repository,
-        DaprClient daprClient,
-        IScheduledTaskService scheduledTaskService,
-        ILogger<EndCreativePhaseCommandHandler> logger)
-    {
-        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
-        _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly IGamesRepository _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+    private readonly DaprClient _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
+    private readonly IScheduledTaskService _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
+    private readonly ILogger<EndCreativePhaseCommandHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public async Task<EndCreativePhaseResult> HandleAsync(
         EndCreativePhaseCommand command,

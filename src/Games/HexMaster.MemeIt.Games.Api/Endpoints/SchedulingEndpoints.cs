@@ -43,22 +43,6 @@ public static class SchedulingEndpoints
         .WithName("ScheduleScorePhaseEnded")
         .WithSummary("Schedule a score phase ended task");
 
-        group.MapPost("/round-ended", (
-            string gameCode,
-            int roundNumber,
-            int? delaySeconds,
-            IScheduledTaskService schedulingService) =>
-        {
-            var taskId = schedulingService.ScheduleRoundEnded(
-                gameCode,
-                roundNumber,
-                delaySeconds ?? 30);
-
-            return Results.Ok(new { taskId, message = "Round ended task scheduled" });
-        })
-        .WithName("ScheduleRoundEnded")
-        .WithSummary("Schedule a round ended task");
-
         group.MapDelete("/tasks/{taskId}", (
             Guid taskId,
             IScheduledTaskService schedulingService) =>

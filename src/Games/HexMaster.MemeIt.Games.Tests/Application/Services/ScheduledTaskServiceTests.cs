@@ -46,20 +46,6 @@ public class ScheduledTaskServiceTests : IDisposable
         Assert.NotEqual(Guid.Empty, taskId);
     }
 
-    [Fact]
-    public void ScheduleRoundEnded_ReturnsTaskId()
-    {
-        // Arrange
-        var gameCode = "ABC123";
-        var roundNumber = 1;
-
-        // Act
-        var taskId = _sut.ScheduleRoundEnded(gameCode, roundNumber, 5);
-
-        // Assert
-        Assert.NotEqual(Guid.Empty, taskId);
-    }
-
     [Theory]
     [InlineData(0)]
     [InlineData(-5)]
@@ -126,14 +112,14 @@ public class ScheduledTaskServiceTests : IDisposable
         // Arrange
         var gameCode = "ABC123";
         _sut.ScheduleCreativePhaseEnded(gameCode, 1, 30);
-        _sut.ScheduleRoundEnded(gameCode, 1, 30);
         _sut.ScheduleScorePhaseEnded(gameCode, 1, Guid.NewGuid(), 30);
 
+        // Act
         // Act
         var cancelledCount = _sut.CancelAllTasksForGame(gameCode);
 
         // Assert
-        Assert.Equal(3, cancelledCount);
+        Assert.Equal(2, cancelledCount);
     }
 
     [Fact]

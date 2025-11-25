@@ -22,15 +22,6 @@ public interface IScheduledTaskService
     Guid ScheduleScorePhaseEnded(string gameCode, int roundNumber, Guid memeId, int delaySeconds = 30);
 
     /// <summary>
-    /// Schedules a round ended task.
-    /// </summary>
-    /// <param name="gameCode">The game code.</param>
-    /// <param name="roundNumber">The round number.</param>
-    /// <param name="delaySeconds">Delay in seconds (1-120, default 30).</param>
-    /// <returns>Scheduled task ID.</returns>
-    Guid ScheduleRoundEnded(string gameCode, int roundNumber, int delaySeconds = 30);
-
-    /// <summary>
     /// Schedules a start new round task.
     /// </summary>
     /// <param name="gameCode">The game code.</param>

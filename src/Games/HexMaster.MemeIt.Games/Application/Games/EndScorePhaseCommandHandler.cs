@@ -11,6 +11,7 @@ using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Domains;
 using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace HexMaster.MemeIt.Games.Application.Games;
@@ -23,17 +24,20 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
     private readonly IGamesRepository _repository;
     private readonly DaprClient _daprClient;
     private readonly IScheduledTaskService _scheduledTaskService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<EndScorePhaseCommandHandler> _logger;
 
     public EndScorePhaseCommandHandler(
         IGamesRepository repository,
         DaprClient daprClient,
         IScheduledTaskService scheduledTaskService,
+        IServiceProvider serviceProvider,
         ILogger<EndScorePhaseCommandHandler> logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
         _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -112,23 +116,22 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
         }
         else
         {
-            // Last meme scored or no more memes, mark score phase as ended and schedule round end
+            // Last meme scored or no more memes, mark score phase as ended and invoke EndRoundCommand
             _logger.LogInformation(
-                "Last meme scored in round {RoundNumber} of game {GameCode}. Scheduling round end.",
+                "Last meme scored in round {RoundNumber} of game {GameCode}. Ending round.",
                 command.RoundNumber, command.GameCode);
 
             game.MarkScorePhaseEnded(command.RoundNumber);
-
-            // Schedule RoundEnded task for 10 seconds (scoreboard will be calculated there)
-            _scheduledTaskService.ScheduleRoundEnded(
-                game.GameCode,
-                command.RoundNumber,
-                delaySeconds: 10);
-
             await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
+            // Directly invoke EndRoundCommand to calculate scoreboard and publish event
+            var endRoundCommand = new EndRoundCommand(game.GameCode, command.RoundNumber);
+            using var scope = _serviceProvider.CreateScope();
+            var endRoundHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<EndRoundCommand, EndRoundResult>>();
+            await endRoundHandler.HandleAsync(endRoundCommand, cancellationToken).ConfigureAwait(false);
+
             _logger.LogInformation(
-                "Round {RoundNumber} score phase ended for game {GameCode}. RoundEnded task scheduled.",
+                "Round {RoundNumber} ended for game {GameCode}.",
                 command.RoundNumber, game.GameCode);
 
             return new EndScorePhaseResult(game.GameCode, command.RoundNumber, true, true);

@@ -51,10 +51,6 @@ public sealed class ScheduledTaskWorker : BackgroundService
                     _ = HandleScorePhaseEndedAsync(task);
                     break;
 
-                case GameTaskType.RoundEnded:
-                    _ = HandleRoundEndedAsync(task);
-                    break;
-
                 case GameTaskType.StartNewRound:
                     _ = HandleStartNewRoundAsync(task);
                     break;
@@ -136,41 +132,6 @@ public sealed class ScheduledTaskWorker : BackgroundService
             _logger.LogError(ex,
                 "Failed to end score phase for Game={GameCode}, Round={Round}, Meme={MemeId}",
                 task.GameCode, task.RoundNumber, task.MemeId);
-        }
-    }
-
-    private async Task HandleRoundEndedAsync(ScheduledGameTask task)
-    {
-        _logger.LogInformation(
-            "Round ended for Game={GameCode}, Round={Round}",
-            task.GameCode, task.RoundNumber);
-
-        try
-        {
-            using var scope = _scopeFactory.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<EndRoundCommand, EndRoundResult>>();
-
-            var command = new EndRoundCommand(task.GameCode, task.RoundNumber);
-            var result = await handler.HandleAsync(command);
-
-            if (result.IsLastRound)
-            {
-                _logger.LogInformation(
-                    "Game {GameCode} completed after round {Round}. All rounds finished.",
-                    task.GameCode, task.RoundNumber);
-            }
-            else
-            {
-                _logger.LogInformation(
-                    "Game {GameCode} continuing after round {Round}. StartNewRound task scheduled.",
-                    task.GameCode, task.RoundNumber);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex,
-                "Failed to end round for Game={GameCode}, Round={Round}",
-                task.GameCode, task.RoundNumber);
         }
     }
 
