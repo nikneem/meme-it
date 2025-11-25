@@ -1,0 +1,135 @@
+<div class="settings-container">
+    <!-- Floating Action Buttons -->
+    <div class="fab-container">
+        <button mat-fab color="primary" class="fab-button music-button" (click)="toggleSoundPanel()"
+            [class.active]="showSoundPanel()" aria-label="Sound settings">
+            <mat-icon>music_note</mat-icon>
+        </button>
+
+        <button mat-fab color="primary" class="fab-button settings-button" (click)="toggleSettingsPanel()"
+            [class.active]="showSettingsPanel()" aria-label="Settings">
+            <mat-icon>settings</mat-icon>
+        </button>
+    </div>
+
+    <!-- Sound Settings Panel -->
+    @if (showSoundPanel() && settings()) {
+    <div class="settings-panel" @slidePanel>
+        <mat-card class="panel-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>volume_up</mat-icon>
+                    Sound Settings
+                </mat-card-title>
+                <button mat-icon-button class="close-button" (click)="closePanels()" aria-label="Close panel">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-card-header>
+
+            <mat-card-content>
+                <!-- Background Music -->
+                <div class="setting-group">
+                    <div class="setting-header">
+                        <mat-checkbox [checked]="settings()!.sound.musicEnabled"
+                            (change)="onMusicEnabledChange($event.checked)" color="primary">
+                            Background Music
+                        </mat-checkbox>
+                    </div>
+
+                    <div class="slider-container" [class.disabled]="!settings()!.sound.musicEnabled">
+                        <mat-icon class="volume-icon">volume_down</mat-icon>
+                        <mat-slider [min]="0" [max]="100" [step]="1" [disabled]="!settings()!.sound.musicEnabled"
+                            class="volume-slider">
+                            <input matSliderThumb [value]="settings()!.sound.musicVolume"
+                                (valueChange)="onMusicVolumeChange($event)">
+                        </mat-slider>
+                        <mat-icon class="volume-icon">volume_up</mat-icon>
+                        <span class="volume-value">{{ settings()!.sound.musicVolume }}</span>
+                    </div>
+                </div>
+
+                <!-- Sound Effects -->
+                <div class="setting-group">
+                    <div class="setting-header">
+                        <mat-checkbox [checked]="settings()!.sound.soundEffectsEnabled"
+                            (change)="onSoundEffectsEnabledChange($event.checked)" color="primary">
+                            Sound Effects
+                        </mat-checkbox>
+                    </div>
+
+                    <div class="slider-container" [class.disabled]="!settings()!.sound.soundEffectsEnabled">
+                        <mat-icon class="volume-icon">volume_down</mat-icon>
+                        <mat-slider [min]="0" [max]="100" [step]="1" [disabled]="!settings()!.sound.soundEffectsEnabled"
+                            class="volume-slider">
+                            <input matSliderThumb [value]="settings()!.sound.soundEffectsVolume"
+                                (valueChange)="onSoundEffectsVolumeChange($event)">
+                        </mat-slider>
+                        <mat-icon class="volume-icon">volume_up</mat-icon>
+                        <span class="volume-value">{{ settings()!.sound.soundEffectsVolume }}</span>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    }
+
+    <!-- General Settings Panel -->
+    @if (showSettingsPanel() && settings()) {
+    <div class="settings-panel" @slidePanel>
+        <mat-card class="panel-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>settings</mat-icon>
+                    Settings
+                </mat-card-title>
+                <button mat-icon-button class="close-button" (click)="closePanels()" aria-label="Close panel">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-card-header>
+
+            <mat-card-content>
+                <!-- Display Name -->
+                <div class="setting-group">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Display Name</mat-label>
+                        <input matInput [value]="settings()!.user.displayName"
+                            (input)="onDisplayNameChange($any($event.target).value)"
+                            placeholder="Enter your display name">
+                        <mat-icon matPrefix>person</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <!-- Language Selection -->
+                <div class="setting-group">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Language</mat-label>
+                        <mat-select [value]="settings()!.user.language"
+                            (selectionChange)="onLanguageChange($event.value)">
+                            @for (lang of languages; track lang.code) {
+                            <mat-option [value]="lang.code">{{ lang.name }}</mat-option>
+                            }
+                        </mat-select>
+                        <mat-icon matPrefix>language</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <!-- Auto Ready -->
+                <div class="setting-group">
+                    <mat-checkbox [checked]="settings()!.user.autoReady" (change)="onAutoReadyChange($event.checked)"
+                        color="primary">
+                        Auto-ready when joining games
+                    </mat-checkbox>
+                    <p class="setting-description">
+                        Automatically mark yourself as ready when creating or joining a game
+                    </p>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    }
+
+    <!-- Backdrop -->
+    @if (showSoundPanel() || showSettingsPanel()) {
+    <div class="backdrop" (click)="closePanels()"></div>
+    }
+</div>
