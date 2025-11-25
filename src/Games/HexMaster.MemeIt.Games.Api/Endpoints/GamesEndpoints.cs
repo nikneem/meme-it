@@ -8,6 +8,7 @@ using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
 using HexMaster.MemeIt.Games.Api.Requests;
 using HexMaster.MemeIt.Games.Api.Responses;
 using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.IntegrationEvents.Events;
 
 namespace HexMaster.MemeIt.Games.Api.Endpoints;
 
@@ -91,6 +92,15 @@ public static class GamesEndpoints
             .WithName("RateMeme")
             .WithSummary("Submits a rating for a meme in the current round.")
             .Produces<RateMemeResponse>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        group.MapPost("/{gameCode}/rounds/{roundNumber:int}/submit-meme", SubmitMemeAsync)
+            .Accepts<SubmitMemeRequest>(MediaTypeNames.Application.Json)
+            .WithName("SubmitMeme")
+            .WithSummary("Submits a meme with text entries for the current round.")
+            .Produces<SubmitMemeResponse>(StatusCodes.Status200OK)
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -615,6 +625,87 @@ public static class GamesEndpoints
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
                 ["rating"] = new[] { ex.Message }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [ex.ParamName ?? "payload"] = new[] { ex.Message }
+            });
+        }
+    }
+
+    private static async Task<IResult> SubmitMemeAsync(
+        HttpContext httpContext,
+        string gameCode,
+        int roundNumber,
+        SubmitMemeRequest request,
+        ICommandHandler<SubmitMemeCommand, SubmitMemeResult> handler,
+        IPlayerIdentityProvider identityProvider,
+        CancellationToken cancellationToken)
+    {
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity) is { } identityError)
+        {
+            return identityError;
+        }
+
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(gameCode)] = new[] { "Game code is required." }
+            });
+        }
+
+        if (roundNumber <= 0)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(roundNumber)] = new[] { "Round number must be greater than 0." }
+            });
+        }
+
+        if (request.MemeTemplateId == Guid.Empty)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(request.MemeTemplateId)] = new[] { "Meme template ID is required." }
+            });
+        }
+
+        // Map TextEntryDto to MemeTextEntryDto
+        var textEntries = request.TextEntries
+            .Select(te => new MemeTextEntryDto(te.TextFieldId, te.Value))
+            .ToList();
+
+        var command = new SubmitMemeCommand(
+            gameCode,
+            roundNumber,
+            playerIdentity.UserId,
+            request.MemeTemplateId,
+            textEntries);
+
+        try
+        {
+            var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+            var response = new SubmitMemeResponse(
+                result.GameCode,
+                result.PlayerId,
+                result.RoundNumber,
+                result.MemeTemplateId,
+                result.TextEntryCount);
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["meme"] = new[] { ex.Message }
             });
         }
         catch (ArgumentException ex)
