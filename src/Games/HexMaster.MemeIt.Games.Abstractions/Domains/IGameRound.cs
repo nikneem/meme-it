@@ -31,4 +31,18 @@ public interface IGameRound
     /// Indicates whether the score phase has ended for this round.
     /// </summary>
     bool ScorePhaseEnded { get; }
+
+    /// <summary>
+    /// Gets all scores for a specific meme.
+    /// </summary>
+    /// <param name="memeId">The meme template ID.</param>
+    /// <returns>Dictionary of voter ID to score.</returns>
+    IReadOnlyDictionary<Guid, int> GetScoresForMeme(Guid memeId);
+
+    /// <summary>
+    /// Gets the next unscored meme for a specific voter, or null if all memes have been scored.
+    /// </summary>
+    /// <param name="voterId">The voter's player ID.</param>
+    /// <returns>The next unscored meme submission, or null.</returns>
+    IMemeSubmission? GetNextUnscoredMeme(Guid voterId);
 }

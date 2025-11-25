@@ -41,6 +41,8 @@ builder.Services.AddScoped<ICommandHandler<SetPlayerReadyCommand, SetPlayerReady
 builder.Services.AddScoped<ICommandHandler<StartGameCommand, StartGameResult>, StartGameCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<SelectMemeTemplateCommand, SelectMemeTemplateResult>, SelectMemeTemplateCommandHandler>();
 builder.Services.AddScoped<ICommandHandler<EndCreativePhaseCommand, EndCreativePhaseResult>, EndCreativePhaseCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<RateMemeCommand, RateMemeResult>, RateMemeCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult>, EndScorePhaseCommandHandler>();
 builder.Services.AddScoped<IQueryHandler<GetGameDetailsQuery, GetGameDetailsResult>, GetGameDetailsQueryHandler>();
 builder.Services.AddScoped<IQueryHandler<GetPlayerRoundStateQuery, GetPlayerRoundStateResult>, GetPlayerRoundStateQueryHandler>();
 

@@ -98,9 +98,41 @@ public sealed class ScheduledTaskWorker : BackgroundService
             "Score phase ended for Game={GameCode}, Round={Round}, Meme={MemeId}",
             task.GameCode, task.RoundNumber, task.MemeId);
 
-        // TODO: Publish ScorePhaseEndedIntegrationEvent or send EndScorePhaseCommand
-        // Example:
-        // await _mediator.Send(new EndScorePhaseCommand(task.GameCode, task.RoundNumber, task.MemeId!.Value));
+        if (!task.MemeId.HasValue)
+        {
+            _logger.LogError(
+                "Cannot end score phase: MemeId is missing for Game={GameCode}, Round={Round}",
+                task.GameCode, task.RoundNumber);
+            return;
+        }
+
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult>>();
+
+            var command = new EndScorePhaseCommand(task.GameCode, task.RoundNumber, task.MemeId.Value);
+            var result = await handler.HandleAsync(command);
+
+            if (result.RoundComplete)
+            {
+                _logger.LogInformation(
+                    "All memes scored. Round {Round} complete for Game={GameCode}",
+                    task.RoundNumber, task.GameCode);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "Started scoring next meme in Game={GameCode}, Round={Round}",
+                    task.GameCode, task.RoundNumber);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Failed to end score phase for Game={GameCode}, Round={Round}, Meme={MemeId}",
+                task.GameCode, task.RoundNumber, task.MemeId);
+        }
     }
 
     private void HandleRoundEnded(ScheduledGameTask task)

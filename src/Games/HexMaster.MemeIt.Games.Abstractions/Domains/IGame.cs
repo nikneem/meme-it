@@ -118,4 +118,13 @@ public interface IGame
     /// <param name="roundNumber">The round number to retrieve.</param>
     /// <returns>The round, or null if not found.</returns>
     IGameRound? GetRound(int roundNumber);
+
+    /// <summary>
+    /// Adds a score for a meme in a specific round.
+    /// </summary>
+    /// <param name="roundNumber">The round number.</param>
+    /// <param name="memeId">The meme template ID.</param>
+    /// <param name="voterId">The player ID who is voting.</param>
+    /// <param name="score">The score (0-5).</param>
+    void AddScore(int roundNumber, Guid memeId, Guid voterId, int score);
 }

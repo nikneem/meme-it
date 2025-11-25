@@ -86,6 +86,15 @@ public static class GamesEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
+        group.MapPost("/{gameCode}/rounds/{roundNumber:int}/rate", RateMemeAsync)
+            .Accepts<RateMemeRequest>(MediaTypeNames.Application.Json)
+            .WithName("RateMeme")
+            .WithSummary("Submits a rating for a meme in the current round.")
+            .Produces<RateMemeResponse>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
         return endpoints;
     }
 
@@ -541,6 +550,71 @@ public static class GamesEndpoints
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
                 ["game"] = new[] { ex.Message }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [ex.ParamName ?? "payload"] = new[] { ex.Message }
+            });
+        }
+    }
+
+    private static async Task<IResult> RateMemeAsync(
+        HttpContext httpContext,
+        string gameCode,
+        int roundNumber,
+        RateMemeRequest request,
+        ICommandHandler<RateMemeCommand, RateMemeResult> handler,
+        IPlayerIdentityProvider identityProvider,
+        CancellationToken cancellationToken)
+    {
+        if (TryResolveIdentity(httpContext.Request, identityProvider, out var playerIdentity) is { } identityError)
+        {
+            return identityError;
+        }
+
+        if (string.IsNullOrWhiteSpace(gameCode))
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(gameCode)] = new[] { "Game code is required." }
+            });
+        }
+
+        if (roundNumber <= 0)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(roundNumber)] = new[] { "Round number must be greater than 0." }
+            });
+        }
+
+        if (request.Rating < 0 || request.Rating > 5)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [nameof(request.Rating)] = new[] { "Rating must be between 0 and 5." }
+            });
+        }
+
+        var command = new RateMemeCommand(gameCode, roundNumber, request.MemeId, playerIdentity.UserId, request.Rating);
+        try
+        {
+            var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+            var response = new RateMemeResponse(result.Success);
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["rating"] = new[] { ex.Message }
             });
         }
         catch (ArgumentException ex)

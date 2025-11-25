@@ -183,6 +183,17 @@ public sealed class Game : IGame
         return _rounds.FirstOrDefault(r => r.RoundNumber == roundNumber);
     }
 
+    public void AddScore(int roundNumber, Guid memeId, Guid voterId, int score)
+    {
+        var round = _rounds.FirstOrDefault(r => r.RoundNumber == roundNumber);
+        if (round == null)
+        {
+            throw new InvalidOperationException($"Round {roundNumber} not found.");
+        }
+
+        round.AddScore(memeId, voterId, score);
+    }
+
     private static string ValidateGameCode(string gameCode)
     {
         if (string.IsNullOrWhiteSpace(gameCode))
