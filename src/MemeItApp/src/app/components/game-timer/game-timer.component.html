@@ -1,0 +1,7 @@
+<div class="timer-container">
+    <mat-progress-bar mode="determinate" [value]="progressPercentage" [color]="progressBarColor">
+    </mat-progress-bar>
+    <div class="timer-text">
+        Time Remaining: {{ timeRemaining | number:'1.0-0' }}s
+    </div>
+</div>

@@ -1,13 +1,7 @@
 <div class="game-play-container">
-    <!-- Progress Bar -->
-    <div class="timer-container">
-        <mat-progress-bar mode="determinate" [value]="progressPercentage"
-            [color]="timeRemaining > 10 ? 'primary' : 'warn'">
-        </mat-progress-bar>
-        <div class="timer-text">
-            Time Remaining: {{ timeRemaining | number:'1.0-0' }}s
-        </div>
-    </div>
+    <!-- Game Timer -->
+    <memeit-game-timer [duration]="timerDuration" (timeExpired)="onTimeExpired()">
+    </memeit-game-timer>
 
     <div class="game-header">
         <h1>Round {{ roundNumber }}</h1>

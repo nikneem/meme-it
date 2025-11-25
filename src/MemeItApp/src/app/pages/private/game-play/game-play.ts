@@ -1,21 +1,21 @@
 ﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Subscription, interval } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { GameService } from '@services/game.service';
 import { NotificationService } from '@services/notification.service';
 import { RealtimeService } from '@services/realtime.service';
 import { MemeCreativeComponent } from '@components/meme-creative/meme-creative.component';
 import { MemeRatingComponent, MemeSubmission } from '@components/meme-rating/meme-rating.component';
+import { GameTimerComponent } from '@components/game-timer/game-timer.component';
 
 @Component({
     selector: 'memeit-game-play',
     imports: [
         CommonModule,
-        MatProgressBarModule,
         MemeCreativeComponent,
-        MemeRatingComponent
+        MemeRatingComponent,
+        GameTimerComponent
     ],
     templateUrl: './game-play.html',
     styleUrl: './game-play.scss',
@@ -24,12 +24,10 @@ export class GamePlayPage implements OnInit, OnDestroy {
     gameCode: string = '';
     roundNumber: number = 1;
     roundStartedAt: Date | null = null;
-    timeRemaining = 30;
-    progressPercentage = 100;
+    timerDuration = 0;
     currentPhase: 'creative' | 'score' = 'creative';
     currentMemeToRate: MemeSubmission | null = null;
     private subscriptions: Subscription[] = [];
-    private timerSubscription?: Subscription;
 
     constructor(
         private route: ActivatedRoute,
@@ -61,9 +59,6 @@ export class GamePlayPage implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(sub => sub.unsubscribe());
-        if (this.timerSubscription) {
-            this.timerSubscription.unsubscribe();
-        }
     }
 
     private loadPlayerRoundState(): void {
@@ -72,7 +67,7 @@ export class GamePlayPage implements OnInit, OnDestroy {
                 this.roundNumber = state.roundNumber;
                 this.roundStartedAt = new Date(state.roundStartedAt);
                 this.currentPhase = 'creative';
-                this.startTimer();
+                this.calculateTimerDuration();
             },
             error: (error) => {
                 console.error('Failed to load player round state:', error);
@@ -81,24 +76,18 @@ export class GamePlayPage implements OnInit, OnDestroy {
         });
     }
 
-    private startTimer(): void {
-        if (!this.roundStartedAt) return;
+    private calculateTimerDuration(): void {
+        if (!this.roundStartedAt) {
+            this.timerDuration = 0;
+            return;
+        }
         const roundDuration = 30;
-        this.timerSubscription = interval(100).subscribe(() => {
-            const now = new Date();
-            const elapsed = (now.getTime() - this.roundStartedAt!.getTime()) / 1000;
-            this.timeRemaining = Math.max(0, roundDuration - elapsed);
-            this.progressPercentage = (this.timeRemaining / roundDuration) * 100;
-            if (this.timeRemaining <= 0) {
-                this.onTimeExpired();
-            }
-        });
+        const now = new Date();
+        const elapsed = (now.getTime() - this.roundStartedAt.getTime()) / 1000;
+        this.timerDuration = Math.max(0, roundDuration - elapsed);
     }
 
-    private onTimeExpired(): void {
-        if (this.timerSubscription) {
-            this.timerSubscription.unsubscribe();
-        }
+    onTimeExpired(): void {
         this.notificationService.info('Time is Up!', 'The round has ended.');
     }
 
