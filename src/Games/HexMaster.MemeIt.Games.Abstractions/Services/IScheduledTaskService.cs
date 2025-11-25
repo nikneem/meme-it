@@ -31,6 +31,15 @@ public interface IScheduledTaskService
     Guid ScheduleRoundEnded(string gameCode, int roundNumber, int delaySeconds = 30);
 
     /// <summary>
+    /// Schedules a start new round task.
+    /// </summary>
+    /// <param name="gameCode">The game code.</param>
+    /// <param name="roundNumber">The next round number to start.</param>
+    /// <param name="delaySeconds">Delay in seconds (1-120, default 30).</param>
+    /// <returns>Scheduled task ID.</returns>
+    Guid ScheduleStartNewRound(string gameCode, int roundNumber, int delaySeconds = 30);
+
+    /// <summary>
     /// Cancels a scheduled task.
     /// </summary>
     /// <param name="taskId">The task ID to cancel.</param>

@@ -50,6 +50,11 @@ public interface IGame
     DateTimeOffset CreatedAt { get; }
 
     /// <summary>
+    /// The target number of rounds for this game.
+    /// </summary>
+    int RoundTarget { get; }
+
+    /// <summary>
     /// Adds a player to the game lobby, enforcing password rules when required.
     /// </summary>
     /// <param name="playerId">Unique identifier of the player.</param>

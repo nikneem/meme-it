@@ -52,6 +52,8 @@ public sealed class Game : IGame
 
     public DateTimeOffset CreatedAt { get; }
 
+    public int RoundTarget => _roundTarget;
+
     public void AddPlayer(Guid playerId, string displayName, string? passwordAttempt = null)
     {
         EnsureState(State.Equals(GameState.Lobby), "Players can only join while the game is in the lobby.");

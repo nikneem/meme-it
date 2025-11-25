@@ -52,7 +52,11 @@ public sealed class ScheduledTaskWorker : BackgroundService
                     break;
 
                 case GameTaskType.RoundEnded:
-                    HandleRoundEnded(task);
+                    _ = HandleRoundEndedAsync(task);
+                    break;
+
+                case GameTaskType.StartNewRound:
+                    _ = HandleStartNewRoundAsync(task);
                     break;
 
                 default:
@@ -135,14 +139,60 @@ public sealed class ScheduledTaskWorker : BackgroundService
         }
     }
 
-    private void HandleRoundEnded(ScheduledGameTask task)
+    private async Task HandleRoundEndedAsync(ScheduledGameTask task)
     {
         _logger.LogInformation(
             "Round ended for Game={GameCode}, Round={Round}",
             task.GameCode, task.RoundNumber);
 
-        // TODO: Publish RoundEndedIntegrationEvent or send EndRoundCommand
-        // Example:
-        // await _mediator.Send(new EndRoundCommand(task.GameCode, task.RoundNumber));
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<EndRoundCommand, EndRoundResult>>();
+
+            var command = new EndRoundCommand(task.GameCode, task.RoundNumber);
+            var result = await handler.HandleAsync(command);
+
+            if (result.IsLastRound)
+            {
+                _logger.LogInformation(
+                    "Game {GameCode} completed after round {Round}. All rounds finished.",
+                    task.GameCode, task.RoundNumber);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "Game {GameCode} continuing after round {Round}. StartNewRound task scheduled.",
+                    task.GameCode, task.RoundNumber);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Failed to end round for Game={GameCode}, Round={Round}",
+                task.GameCode, task.RoundNumber);
+        }
+    }
+
+    private async Task HandleStartNewRoundAsync(ScheduledGameTask task)
+    {
+        _logger.LogInformation(
+            "Starting new round for Game={GameCode}, Round={Round}",
+            task.GameCode, task.RoundNumber);
+
+        try
+        {
+            // TODO: Implement StartNewRoundCommand/Handler to create next round and start creative phase
+            // For now, just log that the task fired
+            _logger.LogInformation(
+                "StartNewRound task fired for Game={GameCode}, NextRound={Round}. Handler not yet implemented.",
+                task.GameCode, task.RoundNumber);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Failed to start new round for Game={GameCode}, Round={Round}",
+                task.GameCode, task.RoundNumber);
+        }
     }
 }

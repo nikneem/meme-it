@@ -4,5 +4,6 @@ public enum GameTaskType
 {
     CreativePhaseEnded = 1,
     ScorePhaseEnded = 2,
-    RoundEnded = 3
+    RoundEnded = 3,
+    StartNewRound = 4
 }
