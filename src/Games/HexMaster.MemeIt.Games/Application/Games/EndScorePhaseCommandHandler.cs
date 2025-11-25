@@ -78,7 +78,7 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
             // Still have unrated submissions, start scoring the next one
             _logger.LogInformation(
                 "Found unrated submission {MemeId} in round {RoundNumber} of game {GameCode}.",
-                nextSubmission.MemeTemplateId, command.RoundNumber, command.GameCode);
+                nextSubmission.MemeId, command.RoundNumber, command.GameCode);
 
             var textEntries = nextSubmission.TextEntries
                 .Select(te => new MemeTextEntryDto(te.TextFieldId, te.Value))
@@ -87,7 +87,7 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
             var scorePhaseStartedEvent = new ScorePhaseStartedEvent(
                 game.GameCode,
                 command.RoundNumber,
-                nextSubmission.MemeTemplateId,
+                nextSubmission.MemeId,
                 nextSubmission.PlayerId,
                 nextSubmission.MemeTemplateId,
                 textEntries,

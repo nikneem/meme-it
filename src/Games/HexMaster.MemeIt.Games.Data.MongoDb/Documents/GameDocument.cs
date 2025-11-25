@@ -70,6 +70,10 @@ internal sealed class GameRoundDocument
 
 internal sealed class MemeSubmissionDocument
 {
+    [BsonElement("memeId")]
+    [BsonRepresentation(BsonType.String)]
+    public Guid MemeId { get; set; }
+
     [BsonElement("playerId")]
     [BsonRepresentation(BsonType.String)]
     public Guid PlayerId { get; set; }

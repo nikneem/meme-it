@@ -68,7 +68,7 @@ public sealed class RateMemeCommandHandler : ICommandHandler<RateMemeCommand, Ra
 
             // Check if all eligible players have rated this meme
             var updatedScores = round.GetScoresForMeme(command.MemeId);
-            var memeOwner = round.Submissions.FirstOrDefault(s => s.MemeTemplateId == command.MemeId)?.PlayerId;
+            var memeOwner = round.Submissions.FirstOrDefault(s => s.MemeId == command.MemeId)?.PlayerId;
             var eligibleVoters = game.Players.Count(p => p.PlayerId != memeOwner); // All players except the meme creator
             var totalRatings = updatedScores.Count;
 

@@ -85,7 +85,7 @@ public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreative
             var scorePhaseStartedEvent = new ScorePhaseStartedEvent(
                 game.GameCode,
                 command.RoundNumber,
-                firstSubmission.MemeTemplateId,
+                firstSubmission.MemeId,
                 firstSubmission.PlayerId,
                 firstSubmission.MemeTemplateId,
                 textEntries,
