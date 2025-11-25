@@ -10,6 +10,8 @@ public record UpdateMemeTemplateCommand(
     Guid Id,
     string Title,
     string ImageUrl,
+    int Width,
+    int Height,
     IReadOnlyList<TextAreaDefinitionDto> TextAreas
 ) : ICommand<UpdateMemeTemplateResult>;
 

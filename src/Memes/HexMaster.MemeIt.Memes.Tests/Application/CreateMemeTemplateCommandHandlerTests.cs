@@ -35,6 +35,8 @@ public class CreateMemeTemplateCommandHandlerTests
         var command = new CreateMemeTemplateCommand(
             _faker.Lorem.Sentence(),
             "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
+            800,
+            600,
             new List<TextAreaDefinitionDto>
             {
                 new(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
@@ -65,6 +67,8 @@ public class CreateMemeTemplateCommandHandlerTests
         var command = new CreateMemeTemplateCommand(
             "", // Invalid title
             "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
+            800,
+            600,
             new List<TextAreaDefinitionDto>
             {
                 new(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)

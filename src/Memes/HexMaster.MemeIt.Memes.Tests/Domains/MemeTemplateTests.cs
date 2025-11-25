@@ -20,7 +20,7 @@ public class MemeTemplateTests
         };
 
         // Act
-        var template = MemeTemplate.Create(title, imageUrl, textAreas);
+        var template = MemeTemplate.Create(title, imageUrl, 800, 600, textAreas);
 
         // Assert
         Assert.NotNull(template);
@@ -42,7 +42,7 @@ public class MemeTemplateTests
         };
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => MemeTemplate.Create("", imageUrl, textAreas));
+        Assert.Throws<ArgumentException>(() => MemeTemplate.Create("", imageUrl, 800, 600, textAreas));
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class MemeTemplateTests
 
         // Act & Assert
         var exception = Assert.Throws<DomainException>(() =>
-            MemeTemplate.Create(title, "not-a-valid-url", textAreas));
+            MemeTemplate.Create(title, "not-a-valid-url", 800, 600, textAreas));
         Assert.Contains("relative path starting with /", exception.Message);
     }
 
@@ -71,7 +71,7 @@ public class MemeTemplateTests
 
         // Act & Assert
         var exception = Assert.Throws<DomainException>(() =>
-            MemeTemplate.Create(title, imageUrl, textAreas));
+            MemeTemplate.Create(title, imageUrl, 800, 600, textAreas));
         Assert.Contains("At least one text area", exception.Message);
     }
 
@@ -88,7 +88,7 @@ public class MemeTemplateTests
         };
 
         // Act
-        template.Update(newTitle, newImageUrl, newTextAreas);
+        template.Update(newTitle, newImageUrl, 800, 600, newTextAreas);
 
         // Assert
         Assert.Equal(newTitle, template.Title);
@@ -157,6 +157,6 @@ public class MemeTemplateTests
         {
             TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
         };
-        return MemeTemplate.Create(title, imageUrl, textAreas);
+        return MemeTemplate.Create(title, imageUrl, 800, 600, textAreas);
     }
 }

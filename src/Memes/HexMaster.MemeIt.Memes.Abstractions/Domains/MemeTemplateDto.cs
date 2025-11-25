@@ -9,6 +9,8 @@ public record MemeTemplateDto(
     Guid Id,
     string Title,
     string ImageUrl,
+    int Width,
+    int Height,
     IReadOnlyList<TextAreaDefinitionDto> TextAreas,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt

@@ -76,25 +76,15 @@
     border-radius: 8px;
     overflow: hidden;
 
-    .meme-image {
+    .meme-svg {
         width: 100%;
         height: auto;
         display: block;
     }
 
-    .text-overlay {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-        word-wrap: break-word;
-        overflow-wrap: break-word;
+    .meme-text {
+        user-select: none;
         pointer-events: none;
-        padding: 4px;
-        line-height: 1.2;
     }
 }
 

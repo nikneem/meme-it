@@ -26,6 +26,8 @@ public static class MemeTemplateEndpoints
                 var command = new CreateMemeTemplateCommand(
                     request.Title,
                     request.ImageUrl,
+                    request.Width,
+                    request.Height,
                     request.TextAreas
                 );
 
@@ -54,6 +56,8 @@ public static class MemeTemplateEndpoints
                     id,
                     request.Title,
                     request.ImageUrl,
+                    request.Width,
+                    request.Height,
                     request.TextAreas
                 );
 

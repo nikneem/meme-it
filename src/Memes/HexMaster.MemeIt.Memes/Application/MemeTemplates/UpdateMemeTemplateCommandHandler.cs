@@ -49,7 +49,7 @@ public class UpdateMemeTemplateCommandHandler : ICommandHandler<UpdateMemeTempla
             ).ToList();
 
             // Update domain entity
-            template.Update(command.Title, command.ImageUrl, textAreas);
+            template.Update(command.Title, command.ImageUrl, command.Width, command.Height, textAreas);
 
             // Persist
             await _repository.UpdateAsync(template, cancellationToken);

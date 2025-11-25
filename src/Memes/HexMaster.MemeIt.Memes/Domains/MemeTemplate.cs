@@ -10,6 +10,8 @@ public class MemeTemplate
     public Guid Id { get; private set; }
     public string Title { get; private set; } = default!;
     public string ImageUrl { get; private set; } = default!;
+    public int Width { get; private set; }
+    public int Height { get; private set; }
 
     private readonly List<TextAreaDefinition> _textAreas = new();
     public IReadOnlyList<TextAreaDefinition> TextAreas => _textAreas.AsReadOnly();
@@ -23,11 +25,16 @@ public class MemeTemplate
     /// <summary>
     /// Factory method to create a new meme template.
     /// </summary>
-    public static MemeTemplate Create(string title, string imageUrl, IEnumerable<TextAreaDefinition> textAreas)
+    public static MemeTemplate Create(string title, string imageUrl, int width, int height, IEnumerable<TextAreaDefinition> textAreas)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title, nameof(title));
         ArgumentException.ThrowIfNullOrWhiteSpace(imageUrl, nameof(imageUrl));
         ArgumentNullException.ThrowIfNull(textAreas, nameof(textAreas));
+
+        if (width <= 0)
+            throw new DomainException("Width must be greater than 0");
+        if (height <= 0)
+            throw new DomainException("Height must be greater than 0");
 
         var textAreasList = textAreas.ToList();
         if (textAreasList.Count == 0)
@@ -41,6 +48,8 @@ public class MemeTemplate
             Id = Guid.NewGuid(),
             Title = title,
             ImageUrl = imageUrl,
+            Width = width,
+            Height = height,
             CreatedAt = DateTimeOffset.UtcNow
         };
 
@@ -55,11 +64,16 @@ public class MemeTemplate
     /// <summary>
     /// Updates the meme template with new values.
     /// </summary>
-    public void Update(string title, string imageUrl, IEnumerable<TextAreaDefinition> textAreas)
+    public void Update(string title, string imageUrl, int width, int height, IEnumerable<TextAreaDefinition> textAreas)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title, nameof(title));
         ArgumentException.ThrowIfNullOrWhiteSpace(imageUrl, nameof(imageUrl));
         ArgumentNullException.ThrowIfNull(textAreas, nameof(textAreas));
+
+        if (width <= 0)
+            throw new DomainException("Width must be greater than 0");
+        if (height <= 0)
+            throw new DomainException("Height must be greater than 0");
 
         var textAreasList = textAreas.ToList();
         if (textAreasList.Count == 0)
@@ -70,6 +84,8 @@ public class MemeTemplate
 
         Title = title;
         ImageUrl = imageUrl;
+        Width = width;
+        Height = height;
         UpdatedAt = DateTimeOffset.UtcNow;
 
         _textAreas.Clear();

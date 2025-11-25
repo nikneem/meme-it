@@ -9,6 +9,8 @@ namespace HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 public record CreateMemeTemplateCommand(
     string Title,
     string ImageUrl,
+    int Width,
+    int Height,
     IReadOnlyList<TextAreaDefinitionDto> TextAreas
 ) : ICommand<CreateMemeTemplateResult>;
 

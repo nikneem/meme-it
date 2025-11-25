@@ -14,6 +14,8 @@ export interface MemeTemplate {
     id: string;
     title: string;
     imageUrl: string;
+    width?: number;
+    height?: number;
     textAreas: TextAreaDefinition[];
     createdAt: string;
     updatedAt?: string;

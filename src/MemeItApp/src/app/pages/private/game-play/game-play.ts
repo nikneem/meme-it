@@ -127,7 +127,7 @@ export class GamePlayPage implements OnInit, OnDestroy {
     private loadMemeById(memeId: string): void {
         this.memeService.getTemplateById(memeId).subscribe({
             next: (template) => {
-                this.memeTemplate = template;
+                this.memeTemplate = this.ensureTemplateDimensions(template);
                 this.textInputs = new Array(template.textAreas.length).fill('');
                 this.isLoading = false;
                 this.memeChangesRemaining = 0; // Already selected, no changes allowed
@@ -140,12 +140,21 @@ export class GamePlayPage implements OnInit, OnDestroy {
         });
     }
 
+    private ensureTemplateDimensions(template: MemeTemplate): MemeTemplate {
+        // If dimensions are not set, use defaults or load from image
+        if (!template.width || !template.height) {
+            template.width = 800;
+            template.height = 600;
+        }
+        return template;
+    }
+
     private loadRandomMeme(): void {
         this.isLoading = true;
 
         this.memeService.getRandomTemplate().subscribe({
             next: (template) => {
-                this.memeTemplate = template;
+                this.memeTemplate = this.ensureTemplateDimensions(template);
                 this.textInputs = new Array(template.textAreas.length).fill('');
                 this.isLoading = false;
 

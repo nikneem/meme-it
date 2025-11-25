@@ -24,6 +24,12 @@ public class MemeTemplateConfiguration : IEntityTypeConfiguration<MemeTemplate>
             .IsRequired()
             .HasMaxLength(2000);
 
+        builder.Property(m => m.Width)
+            .IsRequired();
+
+        builder.Property(m => m.Height)
+            .IsRequired();
+
         builder.Property(m => m.CreatedAt)
             .IsRequired();
 

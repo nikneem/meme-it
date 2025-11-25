@@ -8,5 +8,7 @@ namespace HexMaster.MemeIt.Memes.Api.Requests;
 public record CreateMemeTemplateRequest(
     string Title,
     string ImageUrl,
+    int Width,
+    int Height,
     IReadOnlyList<TextAreaDefinitionDto> TextAreas
 );

@@ -35,6 +35,8 @@ public class ListMemeTemplatesQueryHandlerTests
             MemeTemplate.Create(
                 _faker.Lorem.Sentence(),
                 "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
+                800,
+                600,
                 new List<TextAreaDefinition>
                 {
                     TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
@@ -43,6 +45,8 @@ public class ListMemeTemplatesQueryHandlerTests
             MemeTemplate.Create(
                 _faker.Lorem.Sentence(),
                 "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg",
+                800,
+                600,
                 new List<TextAreaDefinition>
                 {
                     TextAreaDefinition.Create(20, 20, 300, 60, 32, "#FF0000", 3, "#FFFFFF", false)

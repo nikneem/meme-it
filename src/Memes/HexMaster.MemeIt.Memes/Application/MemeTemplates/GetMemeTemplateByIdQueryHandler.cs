@@ -48,6 +48,8 @@ public class GetMemeTemplateByIdQueryHandler : IQueryHandler<GetMemeTemplateById
             template.Id,
             template.Title,
             fullImageUrl,
+            template.Width,
+            template.Height,
             template.TextAreas.Select(ta => new TextAreaDefinitionDto(
                 ta.X,
                 ta.Y,

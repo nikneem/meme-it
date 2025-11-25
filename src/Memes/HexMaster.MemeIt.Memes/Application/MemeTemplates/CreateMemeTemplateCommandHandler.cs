@@ -42,7 +42,7 @@ public class CreateMemeTemplateCommandHandler : ICommandHandler<CreateMemeTempla
             ).ToList();
 
             // Create domain entity
-            var template = MemeTemplate.Create(command.Title, command.ImageUrl, textAreas);
+            var template = MemeTemplate.Create(command.Title, command.ImageUrl, command.Width, command.Height, textAreas);
 
             // Persist
             var id = await _repository.AddAsync(template, cancellationToken);
