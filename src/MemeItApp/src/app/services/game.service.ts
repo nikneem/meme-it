@@ -135,9 +135,9 @@ export class GameService {
   }
 
   submitMeme(gameCode: string, roundNumber: number, memeTemplateId: string, textEntries: Array<{ textFieldId: string; value: string }>): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${gameCode}/rounds/${roundNumber}/submit-meme`, { 
-      memeTemplateId, 
-      textEntries 
+    return this.http.post(`${this.apiUrl}/${gameCode}/rounds/${roundNumber}/submit-meme`, {
+      memeTemplateId,
+      textEntries
     });
   }
 

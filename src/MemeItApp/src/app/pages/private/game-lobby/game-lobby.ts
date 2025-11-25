@@ -94,7 +94,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
 
     // Only leave the group, don't disconnect (game-play page will reuse connection)
     if (this.hasJoinedRealtimeGroup && this.gameCode) {
-      this.realtimeService.leaveGameGroup(this.gameCode).catch(err => 
+      this.realtimeService.leaveGameGroup(this.gameCode).catch(err =>
         console.error('Error leaving game group:', err)
       );
     }

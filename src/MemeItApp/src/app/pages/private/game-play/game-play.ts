@@ -80,7 +80,7 @@ export class GamePlayPage implements OnInit, OnDestroy {
 
     async ngOnDestroy(): Promise<void> {
         this.subscriptions.forEach(sub => sub.unsubscribe());
-        
+
         // Leave the game group but keep connection alive for potential navigation back
         if (this.gameCode) {
             try {
@@ -134,7 +134,7 @@ export class GamePlayPage implements OnInit, OnDestroy {
     onScorePhaseStarted(event: any): void {
         console.log('Score phase started, loading meme for rating:', event);
         this.currentPhase = 'score';
-        
+
         // Update timer with rating duration from event
         this.timerDuration = event.ratingDurationSeconds || 30;
 
