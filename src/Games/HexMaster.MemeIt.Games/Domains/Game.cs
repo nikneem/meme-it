@@ -185,6 +185,12 @@ public sealed class Game : IGame
         return _rounds.FirstOrDefault(r => r.RoundNumber == roundNumber);
     }
 
+    public IMemeSubmission? GetRandomUnratedSubmissionForRound(int roundNumber)
+    {
+        var round = _rounds.OfType<GameRound>().FirstOrDefault(r => r.RoundNumber == roundNumber);
+        return round?.GetRandomUnratedSubmission();
+    }
+
     public void AddScore(int roundNumber, Guid memeId, Guid voterId, int score)
     {
         var round = _rounds.FirstOrDefault(r => r.RoundNumber == roundNumber);

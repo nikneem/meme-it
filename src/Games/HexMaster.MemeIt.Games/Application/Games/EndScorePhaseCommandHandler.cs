@@ -70,37 +70,26 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
             concreteRound.MarkMemeScorePhaseEnded(command.MemeId);
         }
 
-        // Check if there are more memes to score (pick any player as reference - we need unscored memes for anyone)
-        var anyPlayer = game.Players.FirstOrDefault();
-        if (anyPlayer == null)
+        // Check if there are more unrated submissions
+        var nextSubmission = game.GetRandomUnratedSubmissionForRound(command.RoundNumber);
+
+        if (nextSubmission != null)
         {
-            throw new InvalidOperationException($"No players found in game {command.GameCode}.");
-        }
-
-        // Count remaining unscored memes
-        var unscoredMemes = round.Submissions
-            .Where(s => round.GetNextUnscoredMeme(anyPlayer.PlayerId) != null)
-            .ToList();
-
-        var nextMeme = round.GetNextUnscoredMeme(anyPlayer.PlayerId);
-
-        if (nextMeme != null && unscoredMemes.Count > 1)
-        {
-            // Still have multiple memes to score, start scoring the next one
+            // Still have unrated submissions, start scoring the next one
             _logger.LogInformation(
-                "Found unscored meme {MemeId} in round {RoundNumber} of game {GameCode}. {RemainingCount} memes remaining.",
-                nextMeme.MemeTemplateId, command.RoundNumber, command.GameCode, unscoredMemes.Count);
+                "Found unrated submission {MemeId} in round {RoundNumber} of game {GameCode}.",
+                nextSubmission.MemeTemplateId, command.RoundNumber, command.GameCode);
 
-            var textEntries = nextMeme.TextEntries
+            var textEntries = nextSubmission.TextEntries
                 .Select(te => new MemeTextEntryDto(te.TextFieldId, te.Value))
                 .ToList();
 
             var scorePhaseStartedEvent = new ScorePhaseStartedEvent(
                 game.GameCode,
                 command.RoundNumber,
-                nextMeme.MemeTemplateId,
-                nextMeme.PlayerId,
-                nextMeme.MemeTemplateId,
+                nextSubmission.MemeTemplateId,
+                nextSubmission.PlayerId,
+                nextSubmission.MemeTemplateId,
                 textEntries,
                 RatingDurationSeconds: 30);
 
@@ -114,7 +103,7 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
             _scheduledTaskService.ScheduleScorePhaseEnded(
                 game.GameCode,
                 command.RoundNumber,
-                nextMeme.MemeTemplateId,
+                nextSubmission.MemeTemplateId,
                 delaySeconds: 30);
 
             await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);

@@ -74,8 +74,8 @@ public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreative
             creativePhaseEndedEvent,
             cancellationToken).ConfigureAwait(false);
 
-        // Start score phase: pick the first unscored meme
-        var firstSubmission = round.Submissions.FirstOrDefault();
+        // Start score phase: pick a random unrated submission
+        var firstSubmission = game.GetRandomUnratedSubmissionForRound(command.RoundNumber);
         if (firstSubmission != null)
         {
             var textEntries = firstSubmission.TextEntries

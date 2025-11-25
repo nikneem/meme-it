@@ -9,6 +9,12 @@ namespace HexMaster.MemeIt.Games.Abstractions.Domains;
 public interface IMemeSubmission
 {
     /// <summary>
+    /// Unique identifier for this specific meme submission.
+    /// Multiple players can use the same MemeTemplateId, so this ID distinguishes individual submissions.
+    /// </summary>
+    Guid MemeId { get; }
+
+    /// <summary>
     /// Identifier of the player who created the submission.
     /// </summary>
     Guid PlayerId { get; }

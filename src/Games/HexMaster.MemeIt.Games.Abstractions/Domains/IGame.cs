@@ -125,6 +125,13 @@ public interface IGame
     IGameRound? GetRound(int roundNumber);
 
     /// <summary>
+    /// Gets a random submission from the specified round that has received no ratings yet.
+    /// </summary>
+    /// <param name="roundNumber">The round number to search.</param>
+    /// <returns>A random unrated submission, or null if all submissions have been rated.</returns>
+    IMemeSubmission? GetRandomUnratedSubmissionForRound(int roundNumber);
+
+    /// <summary>
     /// Adds a score for a meme in a specific round.
     /// </summary>
     /// <param name="roundNumber">The round number.</param>

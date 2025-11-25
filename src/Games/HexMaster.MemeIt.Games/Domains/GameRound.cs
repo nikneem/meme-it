@@ -6,12 +6,17 @@ using HexMaster.MemeIt.Games.Abstractions.Domains;
 namespace HexMaster.MemeIt.Games.Domains;
 
 /// <summary>
+/// Represents a score given by a player for a meme.
+/// </summary>
+internal sealed record MemeScore(int RoundNumber, Guid MemeId, Guid PlayerId, int Rating);
+
+/// <summary>
 /// Concrete round state that keeps track of per-player submissions.
 /// </summary>
 public sealed class GameRound : IGameRound
 {
     private readonly List<IMemeSubmission> _submissions = new();
-    private readonly Dictionary<Guid, Dictionary<Guid, int>> _scores = new(); // [memeId][voterId] = score
+    private readonly List<MemeScore> _scores = new();
     private readonly HashSet<Guid> _memesWithEndedScorePhase = new(); // Track memes whose score phase has ended
 
     public GameRound(int roundNumber, DateTimeOffset? startedAt = null)
@@ -92,7 +97,7 @@ public sealed class GameRound : IGameRound
             throw new ArgumentOutOfRangeException(nameof(score), score, "Score must be between 0 and 5.");
         }
 
-        var submission = _submissions.FirstOrDefault(s => s.MemeTemplateId == memeId);
+        var submission = _submissions.FirstOrDefault(s => s.MemeId == memeId);
         if (submission == null)
         {
             throw new InvalidOperationException($"No submission found for meme {memeId}.");
@@ -103,12 +108,11 @@ public sealed class GameRound : IGameRound
             throw new InvalidOperationException("Players cannot score their own memes.");
         }
 
-        if (!_scores.ContainsKey(memeId))
-        {
-            _scores[memeId] = new Dictionary<Guid, int>();
-        }
+        // Remove existing score if present
+        _scores.RemoveAll(s => s.MemeId == memeId && s.PlayerId == voterId);
 
-        _scores[memeId][voterId] = score;
+        // Add new score
+        _scores.Add(new MemeScore(RoundNumber, memeId, voterId, score));
     }
 
     /// <summary>
@@ -116,9 +120,9 @@ public sealed class GameRound : IGameRound
     /// </summary>
     public IReadOnlyDictionary<Guid, int> GetScoresForMeme(Guid memeId)
     {
-        return _scores.TryGetValue(memeId, out var scores)
-            ? scores
-            : new Dictionary<Guid, int>();
+        return _scores
+            .Where(s => s.MemeId == memeId)
+            .ToDictionary(s => s.PlayerId, s => s.Rating);
     }
 
     /// <summary>
@@ -128,6 +132,28 @@ public sealed class GameRound : IGameRound
     {
         return _submissions.FirstOrDefault(s =>
             s.PlayerId != voterId && // Can't vote on own meme
-            (!_scores.TryGetValue(s.MemeTemplateId, out var votes) || !votes.ContainsKey(voterId)));
+            !_scores.Any(score => score.MemeId == s.MemeId && score.PlayerId == voterId));
+    }
+
+    /// <summary>
+    /// Gets a random submission that has received no ratings yet, or null if all submissions have been rated.
+    /// This ensures fair distribution of rating opportunities across all submissions.
+    /// </summary>
+    public IMemeSubmission? GetRandomUnratedSubmission()
+    {
+        // Find submissions that have no ratings at all (no entry in scores collection)
+        var unratedSubmissions = _submissions
+            .Where(s => !_scores.Any(score => score.MemeId == s.MemeId))
+            .ToList();
+
+        if (unratedSubmissions.Count == 0)
+        {
+            return null;
+        }
+
+        // Return a random unrated submission
+        var random = new Random();
+        var randomIndex = random.Next(unratedSubmissions.Count);
+        return unratedSubmissions[randomIndex];
     }
 }
