@@ -113,18 +113,29 @@ public sealed class EndScorePhaseCommandHandler(
                 "Last meme scored in round {RoundNumber} of game {GameCode}. Ending round.",
                 command.RoundNumber, command.GameCode);
 
-            game.MarkScorePhaseEnded(command.RoundNumber);
-            await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+            // Check if score phase is already marked as ended before proceeding
+            if (!round.ScorePhaseEnded)
+            {
+                game.MarkScorePhaseEnded(command.RoundNumber);
+                await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "Score phase for round {RoundNumber} of game {GameCode} was already marked as ended.",
+                    command.RoundNumber, command.GameCode);
+            }
 
             // Directly invoke EndRoundCommand to calculate scoreboard and publish event
+            // The EndRoundCommand is idempotent, so multiple invocations are safe
             var endRoundCommand = new EndRoundCommand(game.GameCode, command.RoundNumber);
             using var scope = _serviceProvider.CreateScope();
             var endRoundHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<EndRoundCommand, EndRoundResult>>();
-            await endRoundHandler.HandleAsync(endRoundCommand, cancellationToken).ConfigureAwait(false);
+            var endRoundResult = await endRoundHandler.HandleAsync(endRoundCommand, cancellationToken).ConfigureAwait(false);
 
             _logger.LogInformation(
-                "Round {RoundNumber} ended for game {GameCode}.",
-                command.RoundNumber, game.GameCode);
+                "Round {RoundNumber} ended for game {GameCode}. Round was {Status}.",
+                command.RoundNumber, game.GameCode, endRoundResult.RoundEnded ? "processed" : "already ended");
 
             return new EndScorePhaseResult(game.GameCode, command.RoundNumber, true, true);
         }

@@ -53,6 +53,17 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
         {
             throw new InvalidOperationException($"Round {command.RoundNumber} not found in game {command.GameCode}.");
         }
+        bool isLastRound = game.CurrentRound >= game.RoundTarget;
+
+        // Check if round has already ended (idempotency check)
+        if (round.ScorePhaseEnded)
+        {
+            _logger.LogInformation(
+                "Round {RoundNumber} of game {GameCode} has already ended. Ignoring duplicate request.",
+                command.RoundNumber, game.GameCode);
+            
+            return new EndRoundResult(game.GameCode, command.RoundNumber, false, isLastRound, false);
+        }
 
         // Calculate scoreboard: sum all ratings received by each player across all rounds
         var scoreboard = CalculateScoreboard(game);
@@ -73,9 +84,6 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
         _logger.LogInformation(
             "Round {RoundNumber} ended for game {GameCode}. Scoreboard published with {PlayerCount} players.",
             command.RoundNumber, game.GameCode, scoreboard.Count);
-
-        // Check if this is the last round
-        bool isLastRound = game.CurrentRound >= game.RoundTarget;
 
         if (!isLastRound)
         {
@@ -98,7 +106,7 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
 
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
-        return new EndRoundResult(game.GameCode, command.RoundNumber, true, isLastRound);
+        return new EndRoundResult(game.GameCode, command.RoundNumber, true, isLastRound, true);
     }
 
     private static List<ScoreboardEntryDto> CalculateScoreboard(IGame game)

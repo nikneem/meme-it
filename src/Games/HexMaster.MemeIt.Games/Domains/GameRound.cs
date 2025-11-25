@@ -61,8 +61,16 @@ public sealed class GameRound : IGameRound
         CreativePhaseEnded = true;
     }
 
+    /// <summary>
+    /// Marks the score phase as ended for the entire round.
+    /// This operation is idempotent and can be called multiple times safely.
+    /// </summary>
     public void MarkScorePhaseEnded()
     {
+        if (ScorePhaseEnded)
+        {
+            return; // Already marked, no-op
+        }
         ScorePhaseEnded = true;
     }
 
