@@ -6,13 +6,15 @@ import { Subscription, interval } from 'rxjs';
 import { GameService } from '@services/game.service';
 import { NotificationService } from '@services/notification.service';
 import { MemeCreativeComponent } from '@components/meme-creative/meme-creative.component';
+import { MemeRatingComponent, MemeSubmission } from '@components/meme-rating/meme-rating.component';
 
 @Component({
     selector: 'memeit-game-play',
     imports: [
         CommonModule,
         MatProgressBarModule,
-        MemeCreativeComponent
+        MemeCreativeComponent,
+        MemeRatingComponent
     ],
     templateUrl: './game-play.html',
     styleUrl: './game-play.scss',
@@ -23,6 +25,8 @@ export class GamePlayPage implements OnInit, OnDestroy {
     roundStartedAt: Date | null = null;
     timeRemaining = 30;
     progressPercentage = 100;
+    currentPhase: 'creative' | 'score' = 'creative';
+    currentMemeToRate: MemeSubmission | null = null;
     private subscriptions: Subscription[] = [];
     private timerSubscription?: Subscription;
 
@@ -57,6 +61,10 @@ export class GamePlayPage implements OnInit, OnDestroy {
             next: (state) => {
                 this.roundNumber = state.roundNumber;
                 this.roundStartedAt = new Date(state.roundStartedAt);
+
+                // Determine the current phase based on game state
+                // TODO: Get this from the API response
+                this.currentPhase = 'creative';
 
                 // Start the timer
                 this.startTimer();
@@ -97,6 +105,30 @@ export class GamePlayPage implements OnInit, OnDestroy {
     onMemeSubmitted(): void {
         // Handle meme submission - could navigate to waiting screen or next phase
         console.log('Meme submitted from creative component');
-        // TODO: Navigate to next phase or wait for other players
+        // TODO: Transition to score phase or wait for other players
+        // For now, simulate transition to score phase
+        // this.currentPhase = 'score';
+        // this.loadNextMemeToRate();
+    }
+
+    onRatingSubmitted(): void {
+        // Handle rating submission
+        console.log('Rating submitted from rating component');
+        // TODO: Load next meme to rate or end round
+        this.loadNextMemeToRate();
+    }
+
+    private loadNextMemeToRate(): void {
+        // TODO: Implement API call to get next meme to rate
+        // For now, just set to null to show waiting message
+        this.currentMemeToRate = null;
+    }
+
+    get isCreativePhase(): boolean {
+        return this.currentPhase === 'creative';
+    }
+
+    get isScorePhase(): boolean {
+        return this.currentPhase === 'score';
     }
 }

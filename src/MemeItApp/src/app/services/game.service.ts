@@ -127,4 +127,8 @@ export class GameService {
       selectedMemeTemplateId?: string;
     }>(`${this.apiUrl}/${gameCode}/select-meme`);
   }
+
+  rateMeme(gameCode: string, roundNumber: number, memeId: string, rating: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${gameCode}/rounds/${roundNumber}/rate-meme`, { memeId, rating });
+  }
 }

@@ -15,6 +15,12 @@
     </div>
 
     <!-- Meme Creative Phase Component -->
-    <memeit-meme-creative [gameCode]="gameCode" [roundNumber]="roundNumber" (memeSubmitted)="onMemeSubmitted()">
+    <memeit-meme-creative *ngIf="isCreativePhase" [gameCode]="gameCode" [roundNumber]="roundNumber"
+        (memeSubmitted)="onMemeSubmitted()">
     </memeit-meme-creative>
+
+    <!-- Meme Rating Phase Component -->
+    <memeit-meme-rating *ngIf="isScorePhase" [gameCode]="gameCode" [roundNumber]="roundNumber"
+        [memeSubmission]="currentMemeToRate" (ratingSubmitted)="onRatingSubmitted()">
+    </memeit-meme-rating>
 </div>

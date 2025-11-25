@@ -1,0 +1,49 @@
+<div *ngIf="memeSubmission" class="rating-container">
+    <mat-card class="meme-card">
+        <mat-card-header>
+            <mat-card-title>Rate this Meme</mat-card-title>
+            <mat-card-subtitle>Created by: {{ memeSubmission.createdByName }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="meme-preview">
+                <div class="meme-image-container">
+                    <svg [attr.viewBox]="'0 0 ' + memeSubmission.width + ' ' + memeSubmission.height"
+                        preserveAspectRatio="xMidYMid meet" class="meme-svg">
+                        <image [attr.href]="memeSubmission.imageUrl" [attr.width]="memeSubmission.width"
+                            [attr.height]="memeSubmission.height" />
+                        <text *ngFor="let textEntry of memeSubmission.textEntries"
+                            [attr.x]="textEntry.x + textEntry.width / 2" [attr.y]="textEntry.y + textEntry.height / 2"
+                            [attr.font-size]="textEntry.fontSize" [attr.fill]="textEntry.fontColor"
+                            [attr.font-weight]="textEntry.isBold ? 'bold' : 'normal'" [attr.stroke]="textEntry.borderColor"
+                            [attr.stroke-width]="textEntry.borderSize" [attr.paint-order]="'stroke'" text-anchor="middle"
+                            dominant-baseline="middle" class="meme-text">
+                            {{ textEntry.text }}
+                        </text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="rating-section">
+                <h3>Your Rating</h3>
+                <div class="star-rating" (mouseleave)="clearHoverRating()">
+                    <button *ngFor="let star of [1, 2, 3, 4, 5]" mat-icon-button class="star-button"
+                        (click)="setRating(star)" (mouseenter)="setHoverRating(star)" [disabled]="isSubmitting">
+                        <mat-icon [class.filled]="star <= (hoverRating || rating)">
+                            {{ getStarIcon(star) }}
+                        </mat-icon>
+                    </button>
+                </div>
+                <p class="rating-text">{{ rating > 0 ? rating + ' / 5 stars' : 'Select a rating' }}</p>
+            </div>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-raised-button color="primary" (click)="submitRating()" [disabled]="rating === 0 || isSubmitting">
+                {{ isSubmitting ? 'Submitting...' : 'Submit Rating' }}
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>
+
+<div *ngIf="!memeSubmission" class="loading-message">
+    <p>Waiting for meme to rate...</p>
+</div>
