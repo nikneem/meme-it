@@ -21,4 +21,14 @@ public interface IGameRound
     /// Per-player meme submissions collected for this round.
     /// </summary>
     IReadOnlyCollection<IMemeSubmission> Submissions { get; }
+
+    /// <summary>
+    /// Indicates whether the creative phase has ended for this round.
+    /// </summary>
+    bool CreativePhaseEnded { get; }
+
+    /// <summary>
+    /// Indicates whether the score phase has ended for this round.
+    /// </summary>
+    bool ScorePhaseEnded { get; }
 }

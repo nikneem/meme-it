@@ -162,6 +162,27 @@ public sealed class Game : IGame
         State = State.TransitionTo(GameState.Completed);
     }
 
+    public void MarkCreativePhaseEnded(int roundNumber)
+    {
+        var round = _rounds.OfType<GameRound>().FirstOrDefault(r => r.RoundNumber == roundNumber)
+                    ?? throw new InvalidOperationException($"Round {roundNumber} not found.");
+
+        round.MarkCreativePhaseEnded();
+    }
+
+    public void MarkScorePhaseEnded(int roundNumber)
+    {
+        var round = _rounds.OfType<GameRound>().FirstOrDefault(r => r.RoundNumber == roundNumber)
+                    ?? throw new InvalidOperationException($"Round {roundNumber} not found.");
+
+        round.MarkScorePhaseEnded();
+    }
+
+    public IGameRound? GetRound(int roundNumber)
+    {
+        return _rounds.FirstOrDefault(r => r.RoundNumber == roundNumber);
+    }
+
     private static string ValidateGameCode(string gameCode)
     {
         if (string.IsNullOrWhiteSpace(gameCode))

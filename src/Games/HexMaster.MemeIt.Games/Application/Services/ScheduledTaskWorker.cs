@@ -1,4 +1,7 @@
+using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.Games.Application.Games;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -7,13 +10,16 @@ namespace HexMaster.MemeIt.Games.Application.Services;
 public sealed class ScheduledTaskWorker : BackgroundService
 {
     private readonly ScheduledTaskService _taskService;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<ScheduledTaskWorker> _logger;
 
     public ScheduledTaskWorker(
         ScheduledTaskService taskService,
+        IServiceScopeFactory scopeFactory,
         ILogger<ScheduledTaskWorker> logger)
     {
         _taskService = taskService ?? throw new ArgumentNullException(nameof(taskService));
+        _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -38,11 +44,11 @@ public sealed class ScheduledTaskWorker : BackgroundService
             switch (task.TaskType)
             {
                 case GameTaskType.CreativePhaseEnded:
-                    HandleCreativePhaseEnded(task);
+                    _ = HandleCreativePhaseEndedAsync(task);
                     break;
 
                 case GameTaskType.ScorePhaseEnded:
-                    HandleScorePhaseEnded(task);
+                    _ = HandleScorePhaseEndedAsync(task);
                     break;
 
                 case GameTaskType.RoundEnded:
@@ -60,18 +66,33 @@ public sealed class ScheduledTaskWorker : BackgroundService
         }
     }
 
-    private void HandleCreativePhaseEnded(ScheduledGameTask task)
+    private async Task HandleCreativePhaseEndedAsync(ScheduledGameTask task)
     {
         _logger.LogInformation(
             "Creative phase ended for Game={GameCode}, Round={Round}",
             task.GameCode, task.RoundNumber);
 
-        // TODO: Publish CreativePhaseEndedIntegrationEvent or send EndCreativePhaseCommand
-        // Example:
-        // await _mediator.Send(new EndCreativePhaseCommand(task.GameCode, task.RoundNumber));
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<EndCreativePhaseCommand, EndCreativePhaseResult>>();
+
+            var command = new EndCreativePhaseCommand(task.GameCode, task.RoundNumber);
+            await handler.HandleAsync(command);
+
+            _logger.LogInformation(
+                "Successfully ended creative phase for Game={GameCode}, Round={Round}",
+                task.GameCode, task.RoundNumber);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Failed to end creative phase for Game={GameCode}, Round={Round}",
+                task.GameCode, task.RoundNumber);
+        }
     }
 
-    private void HandleScorePhaseEnded(ScheduledGameTask task)
+    private async Task HandleScorePhaseEndedAsync(ScheduledGameTask task)
     {
         _logger.LogInformation(
             "Score phase ended for Game={GameCode}, Round={Round}, Meme={MemeId}",

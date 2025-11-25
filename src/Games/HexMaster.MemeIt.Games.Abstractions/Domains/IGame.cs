@@ -99,4 +99,23 @@ public interface IGame
     /// Completes the game, finalizing leaderboards and locking further changes.
     /// </summary>
     void Finish();
+
+    /// <summary>
+    /// Marks the creative phase as ended for a specific round.
+    /// </summary>
+    /// <param name="roundNumber">The round number to mark.</param>
+    void MarkCreativePhaseEnded(int roundNumber);
+
+    /// <summary>
+    /// Marks the score phase as ended for a specific round.
+    /// </summary>
+    /// <param name="roundNumber">The round number to mark.</param>
+    void MarkScorePhaseEnded(int roundNumber);
+
+    /// <summary>
+    /// Gets a specific round by its number.
+    /// </summary>
+    /// <param name="roundNumber">The round number to retrieve.</param>
+    /// <returns>The round, or null if not found.</returns>
+    IGameRound? GetRound(int roundNumber);
 }

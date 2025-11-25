@@ -1,0 +1,95 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Dapr.Client;
+using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
+using HexMaster.MemeIt.Games.Abstractions.Repositories;
+using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.IntegrationEvents.Events;
+
+namespace HexMaster.MemeIt.Games.Application.Games;
+
+/// <summary>
+/// Handles ending the creative phase and starting the score phase.
+/// </summary>
+public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreativePhaseCommand, EndCreativePhaseResult>
+{
+    private readonly IGamesRepository _repository;
+    private readonly DaprClient _daprClient;
+    private readonly IScheduledTaskService _scheduledTaskService;
+
+    public EndCreativePhaseCommandHandler(
+        IGamesRepository repository,
+        DaprClient daprClient,
+        IScheduledTaskService scheduledTaskService)
+    {
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
+        _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
+    }
+
+    public async Task<EndCreativePhaseResult> HandleAsync(
+        EndCreativePhaseCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var game = await _repository.GetByGameCodeAsync(command.GameCode, cancellationToken).ConfigureAwait(false);
+        if (game == null)
+        {
+            throw new InvalidOperationException($"Game with code '{command.GameCode}' not found.");
+        }
+
+        var round = game.GetRound(command.RoundNumber);
+        if (round == null)
+        {
+            throw new InvalidOperationException($"Round {command.RoundNumber} not found in game {command.GameCode}.");
+        }
+
+        // Mark creative phase as ended
+        game.MarkCreativePhaseEnded(command.RoundNumber);
+
+        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+
+        // Publish CreativePhaseEnded event
+        var creativePhaseEndedEvent = new CreativePhaseEndedEvent(game.GameCode, command.RoundNumber);
+        await _daprClient.PublishEventAsync(
+            "chatservice-pubsub",
+            "creativephaseended",
+            creativePhaseEndedEvent,
+            cancellationToken).ConfigureAwait(false);
+
+        // Start score phase: pick the first unscored meme
+        var firstSubmission = round.Submissions.FirstOrDefault();
+        if (firstSubmission != null)
+        {
+            var textEntries = firstSubmission.TextEntries
+                .Select(te => new MemeTextEntryDto(te.TextFieldId, te.Value))
+                .ToList();
+
+            var scorePhaseStartedEvent = new ScorePhaseStartedEvent(
+                game.GameCode,
+                command.RoundNumber,
+                firstSubmission.MemeTemplateId,
+                firstSubmission.PlayerId,
+                firstSubmission.MemeTemplateId,
+                textEntries);
+
+            await _daprClient.PublishEventAsync(
+                "chatservice-pubsub",
+                "scorephasestarted",
+                scorePhaseStartedEvent,
+                cancellationToken).ConfigureAwait(false);
+
+            // Schedule score phase end for this meme
+            _scheduledTaskService.ScheduleScorePhaseEnded(
+                game.GameCode,
+                command.RoundNumber,
+                firstSubmission.MemeTemplateId,
+                delaySeconds: 30);
+        }
+
+        return new EndCreativePhaseResult(game.GameCode, command.RoundNumber, true);
+    }
+}

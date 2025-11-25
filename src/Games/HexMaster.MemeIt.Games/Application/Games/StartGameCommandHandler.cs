@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dapr.Client;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
+using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Domains;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 
@@ -16,13 +17,16 @@ public sealed class StartGameCommandHandler : ICommandHandler<StartGameCommand, 
 {
     private readonly IGamesRepository _repository;
     private readonly DaprClient _daprClient;
+    private readonly IScheduledTaskService _scheduledTaskService;
 
     public StartGameCommandHandler(
         IGamesRepository repository,
-        DaprClient daprClient)
+        DaprClient daprClient,
+        IScheduledTaskService scheduledTaskService)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
+        _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
     }
 
     public async Task<StartGameResult> HandleAsync(StartGameCommand command, CancellationToken cancellationToken = default)
@@ -46,6 +50,9 @@ public sealed class StartGameCommandHandler : ICommandHandler<StartGameCommand, 
 
         // Persist the updated game
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+
+        // Schedule the creativity phase end task (30 seconds from now)
+        _scheduledTaskService.ScheduleCreativePhaseEnded(game.GameCode, round.RoundNumber, delaySeconds: 30);
 
         // Publish GameStarted event
         var gameStartedEvent = new GameStartedEvent(game.GameCode, round.RoundNumber);
