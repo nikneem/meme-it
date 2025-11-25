@@ -45,4 +45,11 @@ public interface IGameRound
     /// <param name="voterId">The voter's player ID.</param>
     /// <returns>The next unscored meme submission, or null.</returns>
     IMemeSubmission? GetNextUnscoredMeme(Guid voterId);
+
+    /// <summary>
+    /// Checks if the score phase has ended for a specific meme.
+    /// </summary>
+    /// <param name="memeId">The meme template ID.</param>
+    /// <returns>True if the score phase has ended for this meme, false otherwise.</returns>
+    bool IsMemeScorePhaseEnded(Guid memeId);
 }

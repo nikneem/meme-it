@@ -53,6 +53,19 @@ internal sealed class GameRoundDocument
 
     [BsonElement("submissions")]
     public List<MemeSubmissionDocument> Submissions { get; set; } = new();
+
+    [BsonElement("creativePhaseEnded")]
+    public bool CreativePhaseEnded { get; set; }
+
+    [BsonElement("scorePhaseEnded")]
+    public bool ScorePhaseEnded { get; set; }
+
+    [BsonElement("memesWithEndedScorePhase")]
+    [BsonRepresentation(BsonType.String)]
+    public List<Guid> MemesWithEndedScorePhase { get; set; } = new();
+
+    [BsonElement("scores")]
+    public Dictionary<string, Dictionary<string, int>> Scores { get; set; } = new();
 }
 
 internal sealed class MemeSubmissionDocument

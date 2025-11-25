@@ -7,6 +7,7 @@ using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.IntegrationEvents.Events;
+using Microsoft.Extensions.Logging;
 
 namespace HexMaster.MemeIt.Games.Application.Games;
 
@@ -18,15 +19,18 @@ public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreative
     private readonly IGamesRepository _repository;
     private readonly DaprClient _daprClient;
     private readonly IScheduledTaskService _scheduledTaskService;
+    private readonly ILogger<EndCreativePhaseCommandHandler> _logger;
 
     public EndCreativePhaseCommandHandler(
         IGamesRepository repository,
         DaprClient daprClient,
-        IScheduledTaskService scheduledTaskService)
+        IScheduledTaskService scheduledTaskService,
+        ILogger<EndCreativePhaseCommandHandler> logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
         _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<EndCreativePhaseResult> HandleAsync(
@@ -45,6 +49,15 @@ public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreative
         if (round == null)
         {
             throw new InvalidOperationException($"Round {command.RoundNumber} not found in game {command.GameCode}.");
+        }
+
+        // Check if creative phase already ended - ignore duplicate requests
+        if (round.CreativePhaseEnded)
+        {
+            _logger.LogInformation(
+                "Creative phase already ended for Game={GameCode}, Round={Round}. Ignoring duplicate request.",
+                command.GameCode, command.RoundNumber);
+            return new EndCreativePhaseResult(game.GameCode, command.RoundNumber, false);
         }
 
         // Mark creative phase as ended

@@ -12,6 +12,7 @@ public sealed class GameRound : IGameRound
 {
     private readonly List<IMemeSubmission> _submissions = new();
     private readonly Dictionary<Guid, Dictionary<Guid, int>> _scores = new(); // [memeId][voterId] = score
+    private readonly HashSet<Guid> _memesWithEndedScorePhase = new(); // Track memes whose score phase has ended
 
     public GameRound(int roundNumber, DateTimeOffset? startedAt = null)
     {
@@ -53,21 +54,38 @@ public sealed class GameRound : IGameRound
         _submissions.RemoveAll(s => s.PlayerId == playerId);
     }
 
-    internal void MarkCreativePhaseEnded()
+    public void MarkCreativePhaseEnded()
     {
         CreativePhaseEnded = true;
     }
 
-    internal void MarkScorePhaseEnded()
+    public void MarkScorePhaseEnded()
     {
         ScorePhaseEnded = true;
+    }
+
+    /// <summary>
+    /// Marks the score phase as ended for a specific meme.
+    /// Returns true if this is the first time marking it, false if already marked.
+    /// </summary>
+    public bool MarkMemeScorePhaseEnded(Guid memeId)
+    {
+        return _memesWithEndedScorePhase.Add(memeId);
+    }
+
+    /// <summary>
+    /// Checks if the score phase has ended for a specific meme.
+    /// </summary>
+    public bool IsMemeScorePhaseEnded(Guid memeId)
+    {
+        return _memesWithEndedScorePhase.Contains(memeId);
     }
 
     /// <summary>
     /// Adds or updates a score for a meme. Score must be between 0 and 5.
     /// Players cannot score their own memes.
     /// </summary>
-    internal void AddScore(Guid memeId, Guid voterId, int score)
+    public void AddScore(Guid memeId, Guid voterId, int score)
     {
         if (score < 0 || score > 5)
         {

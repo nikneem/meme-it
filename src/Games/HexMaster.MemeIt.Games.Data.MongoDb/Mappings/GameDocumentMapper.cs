@@ -57,6 +57,40 @@ internal static class GameDocumentMapper
 
                 game.AddMemeSubmission(round.RoundNumber, submission);
             }
+
+            // Restore phase tracking
+            if (roundDoc.CreativePhaseEnded && round is GameRound concreteRound)
+            {
+                concreteRound.MarkCreativePhaseEnded();
+            }
+
+            if (roundDoc.ScorePhaseEnded && round is GameRound concreteRound2)
+            {
+                concreteRound2.MarkScorePhaseEnded();
+            }
+
+            // Restore memes with ended score phase
+            if (round is GameRound concreteRound3)
+            {
+                foreach (var memeId in roundDoc.MemesWithEndedScorePhase)
+                {
+                    concreteRound3.MarkMemeScorePhaseEnded(memeId);
+                }
+            }
+
+            // Restore scores
+            if (round is GameRound concreteRound4)
+            {
+                foreach (var memeScores in roundDoc.Scores)
+                {
+                    var memeId = Guid.Parse(memeScores.Key);
+                    foreach (var voterScore in memeScores.Value)
+                    {
+                        var voterId = Guid.Parse(voterScore.Key);
+                        concreteRound4.AddScore(memeId, voterId, voterScore.Value);
+                    }
+                }
+            }
         }
 
         return game;
@@ -71,11 +105,38 @@ internal static class GameDocumentMapper
         };
 
     private static GameRoundDocument MapRound(IGameRound round)
-        => new()
+    {
+        var doc = new GameRoundDocument
         {
             RoundNumber = round.RoundNumber,
-            Submissions = round.Submissions.Select(MapSubmission).ToList()
+            Submissions = round.Submissions.Select(MapSubmission).ToList(),
+            CreativePhaseEnded = round.CreativePhaseEnded,
+            ScorePhaseEnded = round.ScorePhaseEnded
         };
+
+        // Map scores dictionary
+        if (round is GameRound concreteRound)
+        {
+            // Map the internal _memesWithEndedScorePhase HashSet
+            doc.MemesWithEndedScorePhase = round.Submissions
+                .Where(s => round.IsMemeScorePhaseEnded(s.MemeTemplateId))
+                .Select(s => s.MemeTemplateId)
+                .ToList();
+
+            // Map scores [memeId][voterId] = score
+            foreach (var submission in round.Submissions)
+            {
+                var scores = round.GetScoresForMeme(submission.MemeTemplateId);
+                if (scores.Any())
+                {
+                    doc.Scores[submission.MemeTemplateId.ToString()] = scores
+                        .ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value);
+                }
+            }
+        }
+
+        return doc;
+    }
 
     private static MemeSubmissionDocument MapSubmission(IMemeSubmission submission)
         => new()

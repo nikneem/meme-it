@@ -8,6 +8,7 @@ using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Domains;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.Games.Domains;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 using Microsoft.Extensions.Logging;
 
@@ -51,6 +52,21 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
         if (round == null)
         {
             throw new InvalidOperationException($"Round {command.RoundNumber} not found in game {command.GameCode}.");
+        }
+
+        // Check if this meme's score phase has already ended
+        if (round.IsMemeScorePhaseEnded(command.MemeId))
+        {
+            _logger.LogInformation(
+                "Score phase for meme {MemeId} in round {RoundNumber} of game {GameCode} already ended. Ignoring duplicate request.",
+                command.MemeId, command.RoundNumber, command.GameCode);
+            return new EndScorePhaseResult(game.GameCode, command.RoundNumber, false, false);
+        }
+
+        // Mark this meme's score phase as ended (cast to concrete type to access internal method)
+        if (round is GameRound concreteRound)
+        {
+            concreteRound.MarkMemeScorePhaseEnded(command.MemeId);
         }
 
         // Check if there are more memes to score (pick any player as reference - we need unscored memes for anyone)
