@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GameService } from '@services/game.service';
+import { MemeService } from '@services/meme.service';
 import { NotificationService } from '@services/notification.service';
 import { RealtimeService } from '@services/realtime.service';
 import { MemeCreativeComponent } from '@components/meme-creative/meme-creative.component';
@@ -34,16 +35,26 @@ export class GamePlayPage implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private router: Router,
         private gameService: GameService,
+        private memeService: MemeService,
         private notificationService: NotificationService,
         private realtimeService: RealtimeService
     ) { }
 
-    ngOnInit(): void {
+    async ngOnInit(): Promise<void> {
         this.gameCode = this.route.snapshot.paramMap.get('code') || '';
 
         if (!this.gameCode) {
             this.router.navigate(['/']);
             return;
+        }
+
+        // Connect to SignalR and join the game group
+        try {
+            await this.realtimeService.connect();
+            await this.realtimeService.joinGameGroup(this.gameCode);
+        } catch (error) {
+            console.error('Failed to connect to real-time service:', error);
+            this.notificationService.error('Connection Error', 'Failed to connect to real-time updates');
         }
 
         const creativePhaseEndedSub = this.realtimeService.creativePhaseEnded$.subscribe({
@@ -55,11 +66,29 @@ export class GamePlayPage implements OnInit, OnDestroy {
         });
         this.subscriptions.push(creativePhaseEndedSub);
 
+        const scorePhaseStartedSub = this.realtimeService.scorePhaseStarted$.subscribe({
+            next: (event) => {
+                if (event.gameCode === this.gameCode) {
+                    this.onScorePhaseStarted(event);
+                }
+            }
+        });
+        this.subscriptions.push(scorePhaseStartedSub);
+
         this.loadPlayerRoundState();
     }
 
-    ngOnDestroy(): void {
+    async ngOnDestroy(): Promise<void> {
         this.subscriptions.forEach(sub => sub.unsubscribe());
+        
+        // Leave the game group but keep connection alive for potential navigation back
+        if (this.gameCode) {
+            try {
+                await this.realtimeService.leaveGameGroup(this.gameCode);
+            } catch (error) {
+                console.error('Failed to leave game group:', error);
+            }
+        }
     }
 
     private loadPlayerRoundState(): void {
@@ -98,31 +127,59 @@ export class GamePlayPage implements OnInit, OnDestroy {
     }
 
     onCreativePhaseEnded(roundNumber: number): void {
-        console.log('Creative phase ended, switching to score phase');
+        console.log('Creative phase ended, waiting for score phase to start');
         this.currentPhase = 'score';
-        this.loadNextMemeToRate();
+    }
+
+    onScorePhaseStarted(event: any): void {
+        console.log('Score phase started, loading meme for rating:', event);
+        this.currentPhase = 'score';
+        
+        // Update timer with rating duration from event
+        this.timerDuration = event.ratingDurationSeconds || 30;
+
+        // Fetch the meme template details to build the complete MemeSubmission
+        this.memeService.getTemplateById(event.memeTemplateId).subscribe({
+            next: (template) => {
+                // Map the event data to MemeSubmission format
+                // Combine template structure with player's text entries
+                this.currentMemeToRate = {
+                    id: event.memeId,
+                    memeTemplateId: event.memeTemplateId,
+                    imageUrl: template.imageUrl,
+                    width: template.width || 800,
+                    height: template.height || 600,
+                    textEntries: template.textAreas.map((textArea, index) => {
+                        // Find the corresponding text entry from the event
+                        const playerText = event.textEntries[index]?.value || '';
+                        return {
+                            x: textArea.x,
+                            y: textArea.y,
+                            width: textArea.width,
+                            height: textArea.height,
+                            text: playerText,
+                            fontSize: textArea.fontSize,
+                            fontColor: textArea.fontColor,
+                            borderSize: textArea.borderSize,
+                            borderColor: textArea.borderColor,
+                            isBold: textArea.isBold
+                        };
+                    }),
+                    createdBy: event.playerId,
+                    createdByName: 'Player' // We don't have the player name in the event
+                };
+            },
+            error: (error) => {
+                console.error('Failed to load meme template:', error);
+                this.notificationService.error('Error', 'Failed to load meme for rating');
+            }
+        });
     }
 
     onRatingSubmitted(): void {
         console.log('Rating submitted from rating component');
-        this.loadNextMemeToRate();
-    }
-
-    private loadNextMemeToRate(): void {
-        this.gameService.getNextMemeToScore(this.gameCode, this.roundNumber).subscribe({
-            next: (meme) => {
-                if (meme) {
-                    this.currentMemeToRate = meme;
-                } else {
-                    this.currentMemeToRate = null;
-                    this.notificationService.info('Round Complete', 'All memes have been rated!');
-                }
-            },
-            error: (error) => {
-                console.error('Failed to load next meme to rate:', error);
-                this.currentMemeToRate = null;
-            }
-        });
+        // Clear current meme and wait for next ScorePhaseStarted event
+        this.currentMemeToRate = null;
     }
 
     get isCreativePhase(): boolean {

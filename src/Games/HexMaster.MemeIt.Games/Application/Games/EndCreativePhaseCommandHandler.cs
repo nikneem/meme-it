@@ -88,7 +88,8 @@ public sealed class EndCreativePhaseCommandHandler : ICommandHandler<EndCreative
                 firstSubmission.MemeTemplateId,
                 firstSubmission.PlayerId,
                 firstSubmission.MemeTemplateId,
-                textEntries);
+                textEntries,
+                RatingDurationSeconds: 30);
 
             await _daprClient.PublishEventAsync(
                 DaprConstants.PubSubName,

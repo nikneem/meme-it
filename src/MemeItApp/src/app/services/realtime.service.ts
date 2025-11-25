@@ -29,6 +29,21 @@ export interface CreativePhaseEndedEvent {
     roundNumber: number;
 }
 
+export interface MemeTextEntryDto {
+    textFieldId: string;
+    value: string;
+}
+
+export interface ScorePhaseStartedEvent {
+    gameCode: string;
+    roundNumber: number;
+    memeId: string;
+    playerId: string;
+    memeTemplateId: string;
+    textEntries: MemeTextEntryDto[];
+    ratingDurationSeconds: number;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -42,12 +57,14 @@ export class RealtimeService {
     private playerRemovedSubject = new Subject<PlayerRemovedEvent>();
     private gameStartedSubject = new Subject<GameStartedEvent>();
     private creativePhaseEndedSubject = new Subject<CreativePhaseEndedEvent>();
+    private scorePhaseStartedSubject = new Subject<ScorePhaseStartedEvent>();
 
     public playerJoined$: Observable<PlayerJoinedEvent> = this.playerJoinedSubject.asObservable();
     public playerStateChanged$: Observable<PlayerStateChangedEvent> = this.playerStateChangedSubject.asObservable();
     public playerRemoved$: Observable<PlayerRemovedEvent> = this.playerRemovedSubject.asObservable();
     public gameStarted$: Observable<GameStartedEvent> = this.gameStartedSubject.asObservable();
     public creativePhaseEnded$: Observable<CreativePhaseEndedEvent> = this.creativePhaseEndedSubject.asObservable();
+    public scorePhaseStarted$: Observable<ScorePhaseStartedEvent> = this.scorePhaseStartedSubject.asObservable();
 
     constructor() { }
 
@@ -155,6 +172,11 @@ export class RealtimeService {
         this.hubConnection.on('CreativePhaseEnded', (event: CreativePhaseEndedEvent) => {
             console.log('CreativePhaseEnded event received:', event);
             this.creativePhaseEndedSubject.next(event);
+        });
+
+        this.hubConnection.on('ScorePhaseStarted', (event: ScorePhaseStartedEvent) => {
+            console.log('ScorePhaseStarted event received:', event);
+            this.scorePhaseStartedSubject.next(event);
         });
 
         this.hubConnection.onreconnecting((error) => {

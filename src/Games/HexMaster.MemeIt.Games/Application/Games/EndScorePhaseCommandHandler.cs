@@ -101,7 +101,8 @@ public sealed class EndScorePhaseCommandHandler : ICommandHandler<EndScorePhaseC
                 nextMeme.MemeTemplateId,
                 nextMeme.PlayerId,
                 nextMeme.MemeTemplateId,
-                textEntries);
+                textEntries,
+                RatingDurationSeconds: 30);
 
             await _daprClient.PublishEventAsync(
                 DaprConstants.PubSubName,

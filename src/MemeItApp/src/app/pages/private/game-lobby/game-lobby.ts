@@ -92,8 +92,12 @@ export class GameLobbyPage implements OnInit, OnDestroy {
 
     this.realtimeSubscriptions.forEach(sub => sub.unsubscribe());
 
-    // Disconnect from SignalR
-    this.disconnectFromRealtime();
+    // Only leave the group, don't disconnect (game-play page will reuse connection)
+    if (this.hasJoinedRealtimeGroup && this.gameCode) {
+      this.realtimeService.leaveGameGroup(this.gameCode).catch(err => 
+        console.error('Error leaving game group:', err)
+      );
+    }
   }
 
   private async connectToRealtime(): Promise<void> {
@@ -123,7 +127,9 @@ export class GameLobbyPage implements OnInit, OnDestroy {
 
   private async disconnectFromRealtime(): Promise<void> {
     try {
-      await this.realtimeService.leaveGameGroup(this.gameCode);
+      if (this.gameCode) {
+        await this.realtimeService.leaveGameGroup(this.gameCode);
+      }
       await this.realtimeService.disconnect();
     } catch (error) {
       console.error('Error disconnecting from realtime service:', error);

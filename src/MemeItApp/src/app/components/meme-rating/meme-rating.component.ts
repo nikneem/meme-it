@@ -88,6 +88,10 @@ export class MemeRatingComponent implements OnInit {
         this.gameService.rateMeme(this.gameCode, this.roundNumber, this.memeSubmission.id, this.rating).subscribe({
             next: () => {
                 this.notificationService.success('Success', 'Rating submitted successfully!');
+                // Reset rating state and wait for next meme from real-time event
+                this.rating = 0;
+                this.hoverRating = 0;
+                this.isSubmitting = false;
                 this.ratingSubmitted.emit();
             },
             error: (error) => {

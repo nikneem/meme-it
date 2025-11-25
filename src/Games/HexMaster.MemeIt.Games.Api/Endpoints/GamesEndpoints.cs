@@ -79,11 +79,12 @@ public static class GamesEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("/{gameCode}/select-meme", GetPlayerRoundStateAsync)
-            .WithName("GetPlayerRoundState")
-            .WithSummary("Gets the current player's round state including selected meme.")
-            .Produces<GetPlayerRoundStateResponse>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status401Unauthorized)
+        group.MapPost("/{gameCode}/rounds/{roundNumber:int}/submit-meme", SubmitMemeAsync)
+            .Accepts<SubmitMemeRequest>(MediaTypeNames.Application.Json)
+            .WithName("SubmitMeme")
+            .WithSummary("Submits a meme with text entries for the current round.")
+            .Produces<SubmitMemeResponse>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
@@ -96,14 +97,14 @@ public static class GamesEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        group.MapPost("/{gameCode}/rounds/{roundNumber:int}/submit-meme", SubmitMemeAsync)
-            .Accepts<SubmitMemeRequest>(MediaTypeNames.Application.Json)
-            .WithName("SubmitMeme")
-            .WithSummary("Submits a meme with text entries for the current round.")
-            .Produces<SubmitMemeResponse>(StatusCodes.Status200OK)
-            .ProducesValidationProblem()
+        group.MapGet("/{gameCode}/select-meme", GetPlayerRoundStateAsync)
+            .WithName("GetPlayerRoundState")
+            .WithSummary("Gets the current player's round state including selected meme.")
+            .Produces<GetPlayerRoundStateResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
+
 
         return endpoints;
     }

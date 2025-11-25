@@ -6,6 +6,7 @@ public sealed record ScorePhaseStartedEvent(
     Guid MemeId,
     Guid PlayerId,
     Guid MemeTemplateId,
-    IReadOnlyCollection<MemeTextEntryDto> TextEntries);
+    IReadOnlyCollection<MemeTextEntryDto> TextEntries,
+    int RatingDurationSeconds = 30);
 
 public sealed record MemeTextEntryDto(Guid TextFieldId, string Value);

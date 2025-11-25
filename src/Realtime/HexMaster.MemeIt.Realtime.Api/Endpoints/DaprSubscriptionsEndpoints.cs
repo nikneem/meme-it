@@ -55,6 +55,13 @@ public static class DaprSubscriptionsEndpoints
             .WithSummary("Handles creative phase ended events from Dapr pubsub")
             .ExcludeFromDescription();
 
+        // Subscribe to score phase started events
+        group.MapPost("/scorephasestarted", OnScorePhaseStartedAsync)
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.ScorePhaseStarted)
+            .WithName("ScorePhaseStartedSubscription")
+            .WithSummary("Handles score phase started events from Dapr pubsub")
+            .ExcludeFromDescription();
+
         return endpoints;
     }
 
@@ -235,6 +242,46 @@ public static class DaprSubscriptionsEndpoints
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing CreativePhaseEnded event");
+            // Return 200 OK to prevent Dapr from retrying
+            return Results.Ok();
+        }
+    }
+
+    /// <summary>
+    /// Handles ScorePhaseStartedEvent from Dapr pubsub and broadcasts to SignalR clients with the meme to rate.
+    /// </summary>
+    private static async Task<IResult> OnScorePhaseStartedAsync(
+        [FromBody] ScorePhaseStartedEvent @event,
+        IHubContext<GamesHub> hubContext,
+        ILogger<GamesHub> logger,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Received ScorePhaseStarted event: GameCode={GameCode}, RoundNumber={RoundNumber}, MemeId={MemeId}, PlayerId={PlayerId}",
+                @event.GameCode, @event.RoundNumber, @event.MemeId, @event.PlayerId);
+
+            // Broadcast to all connected clients in the game group
+            await hubContext.Clients.Group(@event.GameCode).SendAsync(
+                "ScorePhaseStarted",
+                new
+                {
+                    @event.GameCode,
+                    @event.RoundNumber,
+                    @event.MemeId,
+                    @event.PlayerId,
+                    @event.MemeTemplateId,
+                    @event.TextEntries,
+                    @event.RatingDurationSeconds
+                },
+                cancellationToken);
+
+            return Results.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing ScorePhaseStarted event");
             // Return 200 OK to prevent Dapr from retrying
             return Results.Ok();
         }

@@ -145,7 +145,18 @@ export class MemeCreativeComponent implements OnInit, OnDestroy {
     submitMeme(): void {
         if (!this.memeTemplate) return;
 
-        this.gameService.selectMemeTemplate(this.gameCode, this.roundNumber, this.memeTemplate.id).subscribe({
+        // Map text inputs to text entries with generated text field IDs
+        // Use a deterministic approach: combine template ID with index to generate consistent GUIDs
+        const textEntries = this.memeTemplate.textAreas.map((textArea, index) => {
+            // Generate a consistent GUID for each text field based on template ID and index
+            const fieldId = this.generateTextFieldId(this.memeTemplate!.id, index);
+            return {
+                textFieldId: fieldId,
+                value: this.textInputs[index] || ''
+            };
+        });
+
+        this.gameService.submitMeme(this.gameCode, this.roundNumber, this.memeTemplate.id, textEntries).subscribe({
             next: () => {
                 this.notificationService.success('Success', 'Meme submitted successfully!');
                 this.memeSubmitted.emit();
@@ -155,5 +166,26 @@ export class MemeCreativeComponent implements OnInit, OnDestroy {
                 this.notificationService.error('Error', 'Failed to submit meme. Please try again.');
             }
         });
+    }
+
+    private generateTextFieldId(templateId: string, index: number): string {
+        // Create a deterministic GUID based on template ID and index
+        // This ensures consistency between selecting and submitting
+        const combined = `${templateId}-field-${index}`;
+        // Simple hash to GUID (in production, use a proper UUID v5 or consistent hashing)
+        return this.hashToGuid(combined);
+    }
+
+    private hashToGuid(input: string): string {
+        // Simple deterministic GUID generation
+        // Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        let hash = 0;
+        for (let i = 0; i < input.length; i++) {
+            hash = ((hash << 5) - hash) + input.charCodeAt(i);
+            hash = hash & hash;
+        }
+        const hex = Math.abs(hash).toString(16).padStart(8, '0');
+        // Create a GUID-like string
+        return `${hex.slice(0, 8)}-${hex.slice(0, 4)}-${hex.slice(0, 4)}-${hex.slice(0, 4)}-${hex.padEnd(12, '0')}`;
     }
 }
