@@ -1,0 +1,55 @@
+<div class="scoreboard-container" @fadeInScale>
+    <mat-card class="scoreboard-card">
+        <mat-card-header>
+            <mat-card-title class="scoreboard-title">
+                <mat-icon class="title-icon">leaderboard</mat-icon>
+                <span>{{ title }}</span>
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <!-- Winner Celebration (Final Round Only) -->
+            @if (isFinalRound && winner) {
+            <div class="winner-celebration" @winnerCelebration>
+                <mat-icon class="trophy-icon">emoji_events</mat-icon>
+                <h2 class="winner-name">{{ winner.playerName }}</h2>
+                <p class="winner-label">is the Champion!</p>
+                <div class="winner-score">{{ winner.totalScore }} points</div>
+            </div>
+            <div class="divider"></div>
+            }
+
+            <!-- Scoreboard List -->
+            <div class="scoreboard-list" @listAnimation>
+                @for (entry of sortedScoreboard; track entry.playerId; let i = $index) {
+                <div class="scoreboard-entry" [class]="getRankClass(i)">
+                    <div class="rank-badge">
+                        <mat-icon class="rank-icon">{{ getRankIcon(i) }}</mat-icon>
+                        <span class="rank-number">{{ i + 1 }}</span>
+                    </div>
+
+                    <div class="player-info">
+                        <span class="player-name">{{ entry.playerName }}</span>
+                        @if (i === 0 && !isFinalRound) {
+                        <mat-icon class="leading-icon" inline>trending_up</mat-icon>
+                        }
+                    </div>
+
+                    <div class="player-score">
+                        <span class="score-value">{{ entry.totalScore }}</span>
+                        <span class="score-label">pts</span>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Next Round Message (Not Final Round) -->
+            @if (!isFinalRound) {
+            <div class="next-round-message">
+                <mat-icon>timer</mat-icon>
+                <span>Next round starting soon...</span>
+            </div>
+            }
+        </mat-card-content>
+    </mat-card>
+</div>

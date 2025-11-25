@@ -9,6 +9,13 @@ import { RealtimeService } from '@services/realtime.service';
 import { MemeCreativeComponent } from '@components/meme-creative/meme-creative.component';
 import { MemeRatingComponent, MemeSubmission } from '@components/meme-rating/meme-rating.component';
 import { GameTimerComponent } from '@components/game-timer/game-timer.component';
+import { GameScoreboardComponent } from '@components/game-scoreboard/game-scoreboard.component';
+
+interface ScoreboardEntry {
+    playerId: string;
+    playerName: string;
+    totalScore: number;
+}
 
 @Component({
     selector: 'memeit-game-play',
@@ -16,7 +23,8 @@ import { GameTimerComponent } from '@components/game-timer/game-timer.component'
         CommonModule,
         MemeCreativeComponent,
         MemeRatingComponent,
-        GameTimerComponent
+        GameTimerComponent,
+        GameScoreboardComponent
     ],
     templateUrl: './game-play.html',
     styleUrl: './game-play.scss',
@@ -24,11 +32,14 @@ import { GameTimerComponent } from '@components/game-timer/game-timer.component'
 export class GamePlayPage implements OnInit, OnDestroy {
     gameCode: string = '';
     roundNumber: number = 1;
+    totalRounds: number = 5;
     roundStartedAt: Date | null = null;
     creativePhaseEndTime: Date | null = null;
     timerDuration = 0;
-    currentPhase: 'creative' | 'score' = 'creative';
+    currentPhase: 'creative' | 'score' | 'scoreboard' = 'creative';
     currentMemeToRate: MemeSubmission | null = null;
+    currentScoreboard: ScoreboardEntry[] = [];
+    showScoreboard = false;
     private subscriptions: Subscription[] = [];
 
     constructor(
@@ -153,7 +164,8 @@ export class GamePlayPage implements OnInit, OnDestroy {
             3000
         );
 
-        // Reset to creative phase for the new round
+        // Hide scoreboard and reset to creative phase for the new round
+        this.showScoreboard = false;
         this.roundNumber = roundNumber;
         this.currentPhase = 'creative';
         this.currentMemeToRate = null;
@@ -173,23 +185,27 @@ export class GamePlayPage implements OnInit, OnDestroy {
 
     onRoundEnded(event: any): void {
         console.log('Round ended, showing scoreboard:', event);
-        this.notificationService.info(
-            'Round Complete',
-            `Round ${event.roundNumber} has ended. Next round starting soon!`,
-            undefined,
-            5000
-        );
 
-        // Display scoreboard (could be expanded to show a modal/overlay)
-        console.log('Current scoreboard:', event.scoreboard);
+        // Update scoreboard data
+        this.currentScoreboard = event.scoreboard || [];
+        this.totalRounds = event.totalRounds || 5;
+        this.showScoreboard = true;
+        this.currentPhase = 'scoreboard';
 
-        // If it's the last round, notify differently
+        // Display notification based on whether it's the final round
         if (event.roundNumber >= event.totalRounds) {
             this.notificationService.success(
                 'Game Complete!',
                 'All rounds finished. Check out the final scores!',
                 undefined,
                 8000
+            );
+        } else {
+            this.notificationService.info(
+                'Round Complete',
+                `Round ${event.roundNumber} has ended. Next round starting soon!`,
+                undefined,
+                5000
             );
         }
     }
@@ -251,5 +267,9 @@ export class GamePlayPage implements OnInit, OnDestroy {
 
     get isScorePhase(): boolean {
         return this.currentPhase === 'score';
+    }
+
+    get isScoreboardPhase(): boolean {
+        return this.currentPhase === 'scoreboard' && this.showScoreboard;
     }
 }

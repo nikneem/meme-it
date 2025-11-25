@@ -17,4 +17,9 @@
     <memeit-meme-rating *ngIf="isScorePhase" [gameCode]="gameCode" [roundNumber]="roundNumber"
         [memeSubmission]="currentMemeToRate" (ratingSubmitted)="onRatingSubmitted()">
     </memeit-meme-rating>
+
+    <!-- Scoreboard Component -->
+    <memeit-game-scoreboard *ngIf="isScoreboardPhase" [roundNumber]="roundNumber" [totalRounds]="totalRounds"
+        [scoreboard]="currentScoreboard">
+    </memeit-game-scoreboard>
 </div>
