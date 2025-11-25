@@ -11,6 +11,7 @@ import { GameService } from '@services/game.service';
 import { NotificationService } from '@services/notification.service';
 import { AuthService } from '@services/auth.service';
 import { RealtimeService } from '@services/realtime.service';
+import { SettingsService } from '@services/settings.service';
 import { GameResponse, Player } from '@models/game.model';
 
 @Component({
@@ -35,6 +36,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   private gameStateSubscription?: Subscription;
   private realtimeSubscriptions: Subscription[] = [];
   private hasJoinedRealtimeGroup = false;
+  private autoReadyTriggered = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -43,6 +45,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private authService: AuthService,
     private realtimeService: RealtimeService,
+    private settingsService: SettingsService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -65,7 +68,12 @@ export class GameLobbyPage implements OnInit, OnDestroy {
 
           // Connect to SignalR and join game group after successfully loading game (only once)
           if (!this.hasJoinedRealtimeGroup) {
-            this.connectToRealtime();
+            this.connectToRealtime().then(() => {
+              // After connecting to realtime, check auto-ready setting
+              this.checkAndApplyAutoReady();
+            }).catch(err => {
+              console.error('Failed to connect to realtime:', err);
+            });
           }
         }
       },
@@ -245,6 +253,37 @@ export class GameLobbyPage implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private checkAndApplyAutoReady(): void {
+    // Only trigger once per lobby session
+    if (this.autoReadyTriggered) {
+      return;
+    }
+
+    // Check if auto-ready is enabled in settings
+    const settings = this.settingsService.getCurrentSettings();
+    if (!settings.user.autoReady) {
+      return;
+    }
+
+    // Only auto-ready if game is in lobby state
+    if (!this.game || this.game.state !== 'Lobby') {
+      return;
+    }
+
+    // Find current player and check if already ready
+    const currentPlayer = this.game.players.find(p => p.playerId === this.currentUserId);
+    if (!currentPlayer || currentPlayer.isReady) {
+      return;
+    }
+
+    // Mark flag to prevent multiple triggers
+    this.autoReadyTriggered = true;
+
+    // Automatically set player ready
+    console.log('Auto-ready enabled, setting player ready');
+    this.setPlayerReady();
   }
 
   copyGameCode(): void {
