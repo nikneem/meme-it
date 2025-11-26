@@ -135,9 +135,9 @@ export const GameStore = signalStore(
                 switchMap((gameCode) => {
                     // If we have recent cached state for an in-progress game, skip server fetch
                     // SignalR will keep the state up-to-date
-                    const hasRecentCache = store.phase() === 'in-progress' && 
-                                          store.lastUpdated() &&
-                                          (Date.now() - new Date(store.lastUpdated()).getTime()) < 5000;
+                    const hasRecentCache = store.phase() === 'in-progress' &&
+                        store.lastUpdated() &&
+                        (Date.now() - new Date(store.lastUpdated()).getTime()) < 5000;
 
                     if (hasRecentCache) {
                         console.log('Using cached state for in-progress game, skipping server fetch');
