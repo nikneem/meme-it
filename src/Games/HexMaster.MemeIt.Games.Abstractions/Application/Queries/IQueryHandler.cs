@@ -1,6 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace HexMaster.MemeIt.Games.Abstractions.Application.Queries;
 
 /// <summary>

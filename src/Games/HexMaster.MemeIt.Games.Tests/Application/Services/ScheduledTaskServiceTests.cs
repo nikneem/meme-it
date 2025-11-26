@@ -2,7 +2,6 @@ using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Application.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 namespace HexMaster.MemeIt.Games.Tests.Application.Services;
 

@@ -1,5 +1,3 @@
-using System;
-
 namespace HexMaster.MemeIt.Games.Abstractions.Domains;
 
 /// <summary>

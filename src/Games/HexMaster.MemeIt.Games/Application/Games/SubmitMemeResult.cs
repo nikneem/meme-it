@@ -1,5 +1,3 @@
-using System;
-
 namespace HexMaster.MemeIt.Games.Application.Games;
 
 public sealed record SubmitMemeResult(

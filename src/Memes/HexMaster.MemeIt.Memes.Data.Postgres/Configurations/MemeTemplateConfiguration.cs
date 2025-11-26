@@ -1,5 +1,4 @@
 using HexMaster.MemeIt.Memes.Domains;
-using HexMaster.MemeIt.Memes.Domains.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,4 +1,3 @@
-using Dapr;
 using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 using HexMaster.MemeIt.Realtime.Api.Hubs;

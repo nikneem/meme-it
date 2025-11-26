@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-
 namespace HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
 
 /// <summary>

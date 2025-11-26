@@ -1,10 +1,7 @@
-using System.Collections.Generic;
 using HexMaster.MemeIt.Users.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Users.Abstractions.Application.Users;
 using HexMaster.MemeIt.Users.Abstractions.Contracts;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 

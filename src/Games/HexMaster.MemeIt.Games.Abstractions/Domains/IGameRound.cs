@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace HexMaster.MemeIt.Games.Abstractions.Domains;
 
 /// <summary>

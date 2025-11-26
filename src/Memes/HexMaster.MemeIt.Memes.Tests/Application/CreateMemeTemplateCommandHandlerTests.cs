@@ -5,7 +5,6 @@ using HexMaster.MemeIt.Memes.Repositories;
 using HexMaster.MemeIt.Memes.Abstractions.ValueObjects;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Domains;
-using HexMaster.MemeIt.Memes.Domains.ValueObjects;
 using Moq;
 
 namespace HexMaster.MemeIt.Memes.Tests.Application;

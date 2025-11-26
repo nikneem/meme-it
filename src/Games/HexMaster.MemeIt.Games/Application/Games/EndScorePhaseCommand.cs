@@ -1,4 +1,3 @@
-using System;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 
 namespace HexMaster.MemeIt.Games.Application.Games;

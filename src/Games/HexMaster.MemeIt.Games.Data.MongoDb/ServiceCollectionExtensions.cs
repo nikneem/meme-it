@@ -1,4 +1,3 @@
-using System;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Data.MongoDb.Options;
 using Microsoft.Extensions.Configuration;

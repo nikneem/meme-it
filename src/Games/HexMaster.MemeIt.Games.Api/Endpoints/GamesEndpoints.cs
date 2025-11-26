@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Net.Mime;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Application.Games;

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 

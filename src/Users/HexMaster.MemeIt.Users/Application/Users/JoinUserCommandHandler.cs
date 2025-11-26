@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using HexMaster.MemeIt.Users.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Users.Abstractions.Application.Users;
 using HexMaster.MemeIt.Users.Abstractions.Services;

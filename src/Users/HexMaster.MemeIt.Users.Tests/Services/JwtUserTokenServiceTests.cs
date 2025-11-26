@@ -1,7 +1,5 @@
-using HexMaster.MemeIt.Users.Abstractions.Services;
 using HexMaster.MemeIt.Users.Options;
 using HexMaster.MemeIt.Users.Services;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HexMaster.MemeIt.Users.Tests.Services;

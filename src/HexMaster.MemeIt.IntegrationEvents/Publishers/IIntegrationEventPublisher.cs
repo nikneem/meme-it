@@ -1,6 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace HexMaster.MemeIt.IntegrationEvents.Publishers;
 
 public interface IIntegrationEventPublisher
