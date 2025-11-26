@@ -125,39 +125,54 @@ export const GameStore = signalStore(
                     // Try to restore from session storage first
                     const restored = restoreFromStorage(gameCode);
                     if (restored) {
-                        console.log('Restored game state from session storage');
+                        console.log('Restored game state from session storage', restored);
                         patchState(store, {
                             ...restored,
-                            isLoading: true // Still loading to verify with server
+                            isLoading: false // Use cached state, don't wait for server
                         });
                     }
                 }),
-                switchMap((gameCode) =>
-                    gameService.getGame(gameCode).pipe(
+                switchMap((gameCode) => {
+                    // If we have recent cached state for an in-progress game, skip server fetch
+                    // SignalR will keep the state up-to-date
+                    const hasRecentCache = store.phase() === 'in-progress' && 
+                                          store.lastUpdated() &&
+                                          (Date.now() - new Date(store.lastUpdated()).getTime()) < 5000;
+
+                    if (hasRecentCache) {
+                        console.log('Using cached state for in-progress game, skipping server fetch');
+                        return of(null);
+                    }
+
+                    return gameService.getGame(gameCode).pipe(
                         tap((game) => {
+                            if (!game) return;
+
                             const currentPlayerId = authService.getCurrentUserId() || '';
 
-                            patchState(store, {
+                            // Only update certain fields from server if we don't have them
+                            // Preserve round state from SignalR events
+                            const updates: any = {
                                 gameCode: game.gameCode,
-                                phase: mapGamePhase(game.state),
                                 createdAt: game.createdAt,
                                 isAdmin: game.isAdmin,
-                                players: game.players.map(p => ({
-                                    ...p,
-                                    score: 0 // Initial score, will be updated by events
-                                })),
                                 currentPlayerId,
-                                totalRounds: game.rounds?.length || 5,
                                 isLoading: false,
-                                error: null,
-                                lastUpdated: new Date().toISOString(),
-                                version: store.version() + 1
-                            });
+                                error: null
+                            };
 
-                            // If game is in progress, restore round state
-                            if (game.currentRoundInfo) {
-                                updateRoundFromServerState(store, game);
+                            // Only update phase and players if we're in lobby
+                            // (in-progress state is managed by SignalR events)
+                            if (store.phase() === 'lobby') {
+                                updates.phase = mapGamePhase(game.state);
+                                updates.players = game.players.map(p => ({
+                                    ...p,
+                                    score: 0
+                                }));
+                                updates.totalRounds = game.rounds?.length || 5;
                             }
+
+                            patchState(store, updates);
 
                             // Persist to session storage
                             persistToStorage(gameCode, store);
@@ -170,8 +185,8 @@ export const GameStore = signalStore(
                             });
                             return of(null);
                         })
-                    )
-                )
+                    );
+                })
             )
         ),
 
@@ -245,13 +260,27 @@ export const GameStore = signalStore(
         handleGameStarted(event: GameStartedEvent): void {
             if (event.gameCode !== store.gameCode()) return;
 
+            const startTime = new Date().toISOString();
+            const endTime = new Date(Date.now() + event.durationInSeconds * 1000).toISOString();
+
+            // Create the first round
+            const firstRound: Round = {
+                roundNumber: event.roundNumber,
+                phase: 'creative' as RoundPhase,
+                startedAt: startTime,
+                creativePhaseEndTime: endTime,
+                submissions: [],
+                playerRatings: []
+            };
+
             patchState(store, {
                 phase: 'in-progress',
                 currentRound: event.roundNumber,
                 currentPhase: 'creative',
+                rounds: [firstRound],
                 timer: {
                     duration: event.durationInSeconds,
-                    endTime: new Date(Date.now() + event.durationInSeconds * 1000).toISOString(),
+                    endTime,
                     isActive: true
                 },
                 hasSubmittedMeme: false,
