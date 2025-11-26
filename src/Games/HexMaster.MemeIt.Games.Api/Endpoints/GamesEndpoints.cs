@@ -370,13 +370,36 @@ public static class GamesEndpoints
         {
             var result = await handler.HandleAsync(query, cancellationToken).ConfigureAwait(false);
 
+            CurrentRoundDetailsDto? currentRoundDetails = null;
+            if (result.CurrentRoundInfo != null)
+            {
+                currentRoundDetails = new CurrentRoundDetailsDto(
+                    result.CurrentRoundInfo.RoundNumber,
+                    result.CurrentRoundInfo.StartedAt,
+                    result.CurrentRoundInfo.Phase,
+                    result.CurrentRoundInfo.CreativePhaseEndTime);
+            }
+
+            PlayerSubmissionDetailsDto? playerSubmissionDetails = null;
+            if (result.PlayerSubmission != null)
+            {
+                playerSubmissionDetails = new PlayerSubmissionDetailsDto(
+                    result.PlayerSubmission.MemeTemplateId,
+                    result.PlayerSubmission.TextEntries
+                        .Select(te => new TextEntryDetailsDto(te.TextFieldId, te.Value))
+                        .ToArray(),
+                    result.PlayerSubmission.SubmittedAt);
+            }
+
             var response = new GetGameDetailsResponse(
                 result.GameCode,
                 result.State,
                 result.CreatedAt,
                 result.Players.Select(p => new PlayerDetailsDto(p.PlayerId, p.DisplayName, p.IsReady)).ToArray(),
                 result.Rounds.Select(r => new RoundDetailsDto(r.RoundNumber, r.SubmissionCount)).ToArray(),
-                result.IsAdmin);
+                result.IsAdmin,
+                currentRoundDetails,
+                playerSubmissionDetails);
 
             return Results.Ok(response);
         }

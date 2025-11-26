@@ -47,12 +47,66 @@ public sealed class GetGameDetailsQueryHandler : IQueryHandler<GetGameDetailsQue
             .Select(r => new GameRoundDto(r.RoundNumber, r.Submissions.Count))
             .ToArray();
 
+        // Get current round information if game is in progress
+        CurrentRoundInfoDto? currentRoundInfo = null;
+        PlayerSubmissionDto? playerSubmission = null;
+
+        if (game.CurrentRound > 0)
+        {
+            var currentRound = game.Rounds.FirstOrDefault(r => r.RoundNumber == game.CurrentRound);
+            if (currentRound != null)
+            {
+                // Determine phase
+                string phase;
+                DateTimeOffset? creativePhaseEndTime = null;
+
+                if (!currentRound.HasCreativePhaseEnded)
+                {
+                    phase = "Creative";
+                    // Creative phase typically lasts 60 seconds from round start
+                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(60);
+                }
+                else if (!currentRound.HasRoundEnded)
+                {
+                    phase = "Scoring";
+                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(60);
+                }
+                else
+                {
+                    phase = "Ended";
+                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(60);
+                }
+
+                currentRoundInfo = new CurrentRoundInfoDto(
+                    currentRound.RoundNumber,
+                    currentRound.StartedAt,
+                    phase,
+                    creativePhaseEndTime);
+
+                // Get player's submission for current round
+                var submission = currentRound.Submissions.FirstOrDefault(s => s.PlayerId == query.RequestingPlayerId);
+                if (submission != null)
+                {
+                    var textEntries = submission.TextEntries
+                        .Select(te => new TextEntryDto(te.TextFieldId.ToString(), te.Value))
+                        .ToArray();
+
+                    playerSubmission = new PlayerSubmissionDto(
+                        submission.MemeTemplateId.ToString(),
+                        textEntries,
+                        currentRound.StartedAt); // Use round start time as approximation
+                }
+            }
+        }
+
         return new GetGameDetailsResult(
             game.GameCode,
             game.State.Name,
             game.CreatedAt,
             players,
             rounds,
-            isAdmin);
+            isAdmin,
+            currentRoundInfo,
+            playerSubmission);
     }
 }

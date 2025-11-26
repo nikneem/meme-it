@@ -124,16 +124,16 @@ export class GamePlayPage implements OnInit, OnDestroy {
     }
 
     private loadGameState(): void {
-        // First, fetch the game metadata to get total rounds and current state
+        // Fetch comprehensive game state including current round and player submission info
         this.gameService.refreshGame(this.gameCode).subscribe({
             next: (game) => {
                 // Update total rounds from game configuration or default
                 this.totalRounds = game.rounds?.length || 5;
 
-                // Check if game is in progress
-                if (game.state === 'InProgress') {
-                    // Load the player's current round state
-                    this.loadPlayerRoundState();
+                // Check if game is in progress and has current round info
+                if (game.state === 'InProgress' && game.currentRoundInfo) {
+                    // Restore complete game state
+                    this.restoreGameState(game);
                 } else if (game.state === 'Completed') {
                     this.notificationService.info(
                         'Game Ended',
@@ -142,6 +142,9 @@ export class GamePlayPage implements OnInit, OnDestroy {
                         5000
                     );
                     // Could navigate back to lobby or show final scores
+                } else if (game.state === 'Scoring' && game.currentRoundInfo) {
+                    // Game is in scoring phase
+                    this.restoreGameState(game);
                 } else {
                     this.notificationService.info(
                         'Game Not Started',
@@ -157,6 +160,45 @@ export class GamePlayPage implements OnInit, OnDestroy {
                 // Optionally navigate back
                 setTimeout(() => this.router.navigate(['/']), 3000);
             }
+        });
+    }
+
+    private restoreGameState(game: any): void {
+        const currentRound = game.currentRoundInfo;
+
+        // Set round information
+        this.roundNumber = currentRound.roundNumber;
+        this.roundStartedAt = new Date(currentRound.startedAt);
+
+        if (currentRound.creativePhaseEndTime) {
+            this.creativePhaseEndTime = new Date(currentRound.creativePhaseEndTime);
+        }
+
+        // Determine and set current phase
+        const now = new Date();
+
+        if (currentRound.phase === 'Creative') {
+            this.currentPhase = 'creative';
+            this.calculateTimerDuration();
+
+            // If player has already submitted, they might be waiting
+            if (game.playerSubmission) {
+                console.log('Player has already submitted meme for this round');
+            }
+        } else if (currentRound.phase === 'Scoring') {
+            this.currentPhase = 'score';
+            // Try to fetch next meme to rate
+            this.tryFetchNextMemeToRate();
+        } else if (currentRound.phase === 'Ended') {
+            this.currentPhase = 'scoreboard';
+            // Round has ended, wait for scoreboard or next round
+            console.log('Round has ended, waiting for scoreboard');
+        }
+
+        console.log('Game state restored:', {
+            round: this.roundNumber,
+            phase: this.currentPhase,
+            hasSubmission: !!game.playerSubmission
         });
     }
 

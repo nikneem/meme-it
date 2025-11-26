@@ -48,6 +48,8 @@ public class GetGameDetailsQueryHandlerTests
         Assert.NotNull(result);
         Assert.True(result.IsAdmin);
         Assert.Equal(2, result.Players.Count);
+        Assert.Null(result.CurrentRoundInfo); // No rounds started yet
+        Assert.Null(result.PlayerSubmission); // No submission yet
         _repositoryMock.Verify(r => r.GetByGameCodeAsync(gameCode, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -140,5 +142,38 @@ public class GetGameDetailsQueryHandlerTests
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
             _handler.HandleAsync(query, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithGameInProgress_ShouldReturnCurrentRoundInfo()
+    {
+        // Arrange
+        var gameCode = "TESTGAME";
+        var playerId = Guid.NewGuid();
+        var initialPlayers = new[]
+        {
+            new GamePlayer(playerId, _faker.Person.FullName, false)
+        };
+        var game = new Game(gameCode, playerId, password: null, initialPlayers: initialPlayers);
+
+        // Start the game and add a round
+        var round = game.NextRound();
+
+        _repositoryMock
+            .Setup(r => r.GetByGameCodeAsync(gameCode, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(game);
+
+        var query = new GetGameDetailsQuery(gameCode, playerId);
+
+        // Act
+        var result = await _handler.HandleAsync(query, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.CurrentRoundInfo);
+        Assert.Equal(1, result.CurrentRoundInfo.RoundNumber);
+        Assert.Equal("Creative", result.CurrentRoundInfo.Phase);
+        Assert.NotNull(result.CurrentRoundInfo.CreativePhaseEndTime);
+        _repositoryMock.Verify(r => r.GetByGameCodeAsync(gameCode, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

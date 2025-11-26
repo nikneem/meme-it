@@ -14,6 +14,8 @@ export interface GameResponse {
   players: Player[];
   rounds: GameRound[];
   isAdmin: boolean;
+  currentRoundInfo?: CurrentRoundInfo;
+  playerSubmission?: PlayerSubmission;
 }
 
 export interface Player {
@@ -25,4 +27,22 @@ export interface Player {
 export interface GameRound {
   roundNumber: number;
   submissionCount: number;
+}
+
+export interface CurrentRoundInfo {
+  roundNumber: number;
+  startedAt: string;
+  phase: 'Creative' | 'Scoring' | 'Ended';
+  creativePhaseEndTime?: string;
+}
+
+export interface PlayerSubmission {
+  memeTemplateId: string;
+  textEntries: TextEntry[];
+  submittedAt: string;
+}
+
+export interface TextEntry {
+  textFieldId: string;
+  value: string;
 }
