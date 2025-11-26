@@ -49,28 +49,21 @@ internal sealed class GameRoundDocument
     [BsonElement("roundNumber")]
     public int RoundNumber { get; set; }
 
+    [BsonElement("startedAt")]
+    public DateTimeOffset StartedAt { get; set; }
+
     [BsonElement("submissions")]
     public List<MemeSubmissionDocument> Submissions { get; set; } = new();
 
-    [BsonElement("creativePhaseEnded")]
-    public bool CreativePhaseEnded { get; set; }
-
-    [BsonElement("scorePhaseEnded")]
-    public bool ScorePhaseEnded { get; set; }
-
-    [BsonElement("memesWithEndedScorePhase")]
-    [BsonRepresentation(BsonType.String)]
-    public List<Guid> MemesWithEndedScorePhase { get; set; } = new();
-
-    [BsonElement("scores")]
-    public Dictionary<string, Dictionary<string, int>> Scores { get; set; } = new();
+    [BsonElement("hasCreativePhaseEnded")]
+    public bool HasCreativePhaseEnded { get; set; }
 }
 
 internal sealed class MemeSubmissionDocument
 {
-    [BsonElement("memeId")]
+    [BsonElement("submissionId")]
     [BsonRepresentation(BsonType.String)]
-    public Guid MemeId { get; set; }
+    public Guid SubmissionId { get; set; }
 
     [BsonElement("playerId")]
     [BsonRepresentation(BsonType.String)]
@@ -82,6 +75,15 @@ internal sealed class MemeSubmissionDocument
 
     [BsonElement("textEntries")]
     public List<MemeTextEntryDocument> TextEntries { get; set; } = new();
+
+    [BsonElement("scores")]
+    public List<MemeSubmissionScoreDocument> Scores { get; set; } = new();
+
+    [BsonElement("hasScorePhaseStarted")]
+    public bool HasScorePhaseStarted { get; set; }
+
+    [BsonElement("hasScorePhaseEnded")]
+    public bool HasScorePhaseEnded { get; set; }
 }
 
 internal sealed class MemeTextEntryDocument
@@ -92,4 +94,14 @@ internal sealed class MemeTextEntryDocument
 
     [BsonElement("value")]
     public string Value { get; set; } = string.Empty;
+}
+
+internal sealed class MemeSubmissionScoreDocument
+{
+    [BsonElement("playerId")]
+    [BsonRepresentation(BsonType.String)]
+    public Guid PlayerId { get; set; }
+
+    [BsonElement("rating")]
+    public int Rating { get; set; }
 }

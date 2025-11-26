@@ -13,8 +13,6 @@ internal sealed record MemeScore(int RoundNumber, Guid MemeId, Guid PlayerId, in
 public sealed class GameRound : IGameRound
 {
     private readonly List<IMemeSubmission> _submissions = new();
-    private readonly List<MemeScore> _scores = new();
-    private readonly HashSet<Guid> _memesWithEndedScorePhase = new(); // Track memes whose score phase has ended
 
     public GameRound(int roundNumber, DateTimeOffset? startedAt = null)
     {
@@ -62,12 +60,15 @@ public sealed class GameRound : IGameRound
     }
 
     /// <summary>
-    /// Marks the score phase as ended for a specific meme.
-    /// Returns true if this is the first time marking it, false if already marked.
+    /// Marks the score phase as ended for a specific submission.
     /// </summary>
-    public bool MarkMemeScorePhaseEnded(Guid memeId)
+    public void MarkMemeScorePhaseEnded(Guid submissionId)
     {
-        return _memesWithEndedScorePhase.Add(memeId);
+        var submission = _submissions.FirstOrDefault(s => s.SubmissionId == submissionId);
+        if (submission != null)
+        {
+            submission.EndScorePhase();
+        }
     }
 
     /// <summary>
@@ -75,7 +76,8 @@ public sealed class GameRound : IGameRound
     /// </summary>
     public bool HasScoringPhaseBeenEnded(Guid submissionId)
     {
-        return Submissions.First(s => s.SubmissionId == submissionId).HasScorePhaseEnded;
+        var submission = _submissions.FirstOrDefault(s => s.SubmissionId == submissionId);
+        return submission?.HasScorePhaseEnded ?? false;
     }
 
     /// <summary>
@@ -100,13 +102,17 @@ public sealed class GameRound : IGameRound
     }
 
     /// <summary>
-    /// Gets all scores for a specific meme.
+    /// Gets all scores for a specific submission.
     /// </summary>
-    public IReadOnlyDictionary<Guid, int> GetScoresForSubmission(Guid memeId)
+    public IReadOnlyDictionary<Guid, int> GetScoresForSubmission(Guid submissionId)
     {
-        return _scores
-            .Where(s => s.MemeId == memeId)
-            .ToDictionary(s => s.PlayerId, s => s.Rating);
+        var submission = _submissions.FirstOrDefault(s => s.SubmissionId == submissionId);
+        if (submission == null)
+        {
+            return new Dictionary<Guid, int>();
+        }
+
+        return submission.Scores.ToDictionary(s => s.PlayerId, s => s.Rating);
     }
 
 
@@ -129,6 +135,6 @@ public sealed class GameRound : IGameRound
         var randomIndex = random.Next(unratedSubmissions.Count);
         var selecedSubmission = unratedSubmissions[randomIndex];
         selecedSubmission.StartScorePhase();
-                return selecedSubmission;
+        return selecedSubmission;
     }
 }

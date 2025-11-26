@@ -8,7 +8,7 @@ namespace HexMaster.MemeIt.Games.Domains;
 public sealed class MemeSubmission : IMemeSubmission
 {
     private readonly List<IMemeTextEntry> _textEntries;
-    private readonly List<IMemeSubmissionScore> _scores;
+    private readonly List<IMemeSubmissionScore> _scores = new();
 
     public MemeSubmission(Guid playerId, Guid memeTemplateId, IEnumerable<IMemeTextEntry> textEntries)
         : this(Guid.NewGuid(), playerId, memeTemplateId, textEntries)
@@ -48,7 +48,7 @@ public sealed class MemeSubmission : IMemeSubmission
         RemoveScore(playerId);
         if (Scores.All(s => s.PlayerId != playerId))
         {
-            _scores.Add( new MemeSubmissionScore(playerId, rating));
+            _scores.Add(new MemeSubmissionScore(playerId, rating));
         }
     }
 

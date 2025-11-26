@@ -60,7 +60,6 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
             return new EndRoundResult(game.GameCode, command.RoundNumber, false, isLastRound, false);
         }
 
-        game.MarkScorePhaseEnded(round.RoundNumber);
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
         // Calculate scoreboard: sum all ratings received by each player across all rounds

@@ -45,7 +45,7 @@ public interface IGameRound
     bool HasScoringPhaseBeenEnded(Guid submissionId);
 
     void AddScore(Guid submissionId, Guid playerId, int score);
-    void MarkMemeScorePhaseEnded(Guid commandSubmissionId);
+    void MarkMemeScorePhaseEnded(Guid submissionId);
 
     IMemeSubmission? GetRandomUnratedSubmission();
 }
