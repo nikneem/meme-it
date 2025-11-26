@@ -2,7 +2,7 @@ using Bogus;
 using HexMaster.MemeIt.Games.Abstractions.Application.Games;
 using HexMaster.MemeIt.Games.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
-using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Games.GetGameDetails;
 using HexMaster.MemeIt.Games.Domains;
 using Moq;
 

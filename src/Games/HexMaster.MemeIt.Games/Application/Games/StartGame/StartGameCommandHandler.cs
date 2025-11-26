@@ -1,0 +1,65 @@
+using Dapr.Client;
+using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
+using HexMaster.MemeIt.Games.Abstractions.Repositories;
+using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.IntegrationEvents;
+using HexMaster.MemeIt.IntegrationEvents.Events;
+
+namespace HexMaster.MemeIt.Games.Application.Games.StartGame;
+
+/// <summary>
+/// Handles the StartGameCommand by verifying admin rights, starting the game, and publishing the event.
+/// </summary>
+public sealed class StartGameCommandHandler : ICommandHandler<StartGameCommand, StartGameResult>
+{
+    private readonly IGamesRepository _repository;
+    private readonly DaprClient _daprClient;
+    private readonly IScheduledTaskService _scheduledTaskService;
+
+    public StartGameCommandHandler(
+        IGamesRepository repository,
+        DaprClient daprClient,
+        IScheduledTaskService scheduledTaskService)
+    {
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
+        _scheduledTaskService = scheduledTaskService ?? throw new ArgumentNullException(nameof(scheduledTaskService));
+    }
+
+    public async Task<StartGameResult> HandleAsync(StartGameCommand command, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var game = await _repository.GetByGameCodeAsync(command.GameCode, cancellationToken).ConfigureAwait(false);
+        if (game == null)
+        {
+            throw new InvalidOperationException($"Game with code '{command.GameCode}' not found.");
+        }
+
+        // Verify the caller is the game admin
+        if (game.AdminPlayerId != command.AdminPlayerId)
+        {
+            throw new UnauthorizedAccessException("Only the game admin can start the game.");
+        }
+
+        // Start the first round (this also sets State to InProgress and updates CurrentRound)
+        var round = game.NextRound();
+
+        // Persist the updated game
+        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+
+        // Schedule the creativity phase end task (30 seconds from now)
+        const int creativePhaseDuration = 30;
+        _scheduledTaskService.ScheduleCreativePhaseEnded(game.GameCode, round.RoundNumber, delaySeconds: creativePhaseDuration);
+
+        // Publish GameStarted event
+        var gameStartedEvent = new GameStartedEvent(game.GameCode, round.RoundNumber, creativePhaseDuration);
+        await _daprClient.PublishEventAsync(
+            DaprConstants.PubSubName,
+            DaprConstants.Topics.GameStarted,
+            gameStartedEvent,
+            cancellationToken).ConfigureAwait(false);
+
+        return new StartGameResult(game.GameCode, round.RoundNumber);
+    }
+}

@@ -1,7 +1,7 @@
 using HexMaster.MemeIt.Games.Abstractions.Domains;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
-using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Games.CreateGame;
 using Moq;
 
 namespace HexMaster.MemeIt.Games.Tests.Application;

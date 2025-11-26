@@ -2,7 +2,7 @@ using HexMaster.MemeIt.Users.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Users.Abstractions.Application.Users;
 using HexMaster.MemeIt.Users.Abstractions.Services;
 using HexMaster.MemeIt.Users.Api.Endpoints;
-using HexMaster.MemeIt.Users.Application.Users;
+using HexMaster.MemeIt.Users.Application.Users.JoinUser;
 using HexMaster.MemeIt.Users.Options;
 using HexMaster.MemeIt.Users.Services;
 using Scalar.AspNetCore;

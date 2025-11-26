@@ -1,7 +1,7 @@
 using HexMaster.MemeIt.Games.Abstractions.Domains;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.ValueObjects;
-using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Games.JoinGame;
 using HexMaster.MemeIt.Games.Domains;
 using Moq;
 

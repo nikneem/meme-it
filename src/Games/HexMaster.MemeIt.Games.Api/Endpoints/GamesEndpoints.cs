@@ -5,7 +5,16 @@ using HexMaster.MemeIt.Games.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
 using HexMaster.MemeIt.Games.Api.Requests;
 using HexMaster.MemeIt.Games.Api.Responses;
-using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Games.CreateGame;
+using HexMaster.MemeIt.Games.Application.Games.GetGameDetails;
+using HexMaster.MemeIt.Games.Application.Games.GetPlayerRoundState;
+using HexMaster.MemeIt.Games.Application.Games.JoinGame;
+using HexMaster.MemeIt.Games.Application.Games.RateMeme;
+using HexMaster.MemeIt.Games.Application.Games.RemovePlayer;
+using HexMaster.MemeIt.Games.Application.Games.SelectMemeTemplate;
+using HexMaster.MemeIt.Games.Application.Games.SetPlayerReady;
+using HexMaster.MemeIt.Games.Application.Games.StartGame;
+using HexMaster.MemeIt.Games.Application.Games.SubmitMeme;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 
 namespace HexMaster.MemeIt.Games.Api.Endpoints;

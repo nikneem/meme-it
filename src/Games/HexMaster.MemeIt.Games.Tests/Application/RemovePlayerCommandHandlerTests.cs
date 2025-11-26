@@ -1,6 +1,6 @@
 using HexMaster.MemeIt.Games.Abstractions.Domains;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
-using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Games.RemovePlayer;
 using HexMaster.MemeIt.Games.Domains;
 using Moq;
 

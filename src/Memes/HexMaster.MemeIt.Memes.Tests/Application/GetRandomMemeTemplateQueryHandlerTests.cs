@@ -3,7 +3,7 @@ using Bogus;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Memes.Repositories;
-using HexMaster.MemeIt.Memes.Application.MemeTemplates;
+using HexMaster.MemeIt.Memes.Application.MemeTemplates.GetRandomMemeTemplate;
 using HexMaster.MemeIt.Memes.Domains;
 using HexMaster.MemeIt.Memes.Domains.ValueObjects;
 using Moq;
