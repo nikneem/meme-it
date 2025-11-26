@@ -39,7 +39,7 @@ public sealed class CreateGameCommandHandler : ICommandHandler<CreateGameCommand
             code,
             command.PlayerId,
             command.Password,
-            new[] { new GamePlayer(command.PlayerId, command.PlayerDisplayName) },
+            [new GamePlayer(command.PlayerId, command.PlayerDisplayName)],
             createdAt);
 
         await _repository.CreateAsync(game, cancellationToken).ConfigureAwait(false);

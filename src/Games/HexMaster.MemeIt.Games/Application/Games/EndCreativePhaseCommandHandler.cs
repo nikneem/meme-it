@@ -52,7 +52,6 @@ public sealed class EndCreativePhaseCommandHandler(
 
         // Mark creative phase as ended
         game.MarkCreativePhaseEnded(command.RoundNumber);
-
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
         // Publish HasCreativePhaseEnded event
@@ -64,19 +63,19 @@ public sealed class EndCreativePhaseCommandHandler(
             cancellationToken).ConfigureAwait(false);
 
         // Start score phase: pick a random unrated submission
-        var firstSubmission = game.GetRandomUnratedSubmissionForRound(command.RoundNumber);
-        if (firstSubmission != null)
+        var randomSubmission = game.GetRandomUnratedSubmissionForRound(command.RoundNumber);
+        if (randomSubmission != null)
         {
-            var textEntries = firstSubmission.TextEntries
+            var textEntries = randomSubmission.TextEntries
                 .Select(te => new MemeTextEntryDto(te.TextFieldId, te.Value))
                 .ToList();
 
             var scorePhaseStartedEvent = new ScorePhaseStartedEvent(
                 game.GameCode,
                 command.RoundNumber,
-                firstSubmission.SubmissionId,
-                firstSubmission.PlayerId,
-                firstSubmission.MemeTemplateId,
+                randomSubmission.SubmissionId,
+                randomSubmission.PlayerId,
+                randomSubmission.MemeTemplateId,
                 textEntries,
                 RatingDurationSeconds: 30);
 
@@ -90,7 +89,7 @@ public sealed class EndCreativePhaseCommandHandler(
             _scheduledTaskService.ScheduleScorePhaseEnded(
                 game.GameCode,
                 command.RoundNumber,
-                firstSubmission.MemeTemplateId,
+                randomSubmission.MemeTemplateId,
                 delaySeconds: 30);
         }
 

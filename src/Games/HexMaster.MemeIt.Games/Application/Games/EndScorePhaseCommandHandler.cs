@@ -54,10 +54,11 @@ public sealed class EndScorePhaseCommandHandler(
             return new EndScorePhaseResult(game.GameCode, command.RoundNumber, false, false);
         }
 
-            round.MarkMemeScorePhaseEnded(command.SubmissionId);
-        // Check if there are more unrated submissions
-        var nextSubmission = round.GetRandomUnratedSubmission();
+        // Mark score phase for this round as completed.
+        round.MarkMemeScorePhaseEnded(command.SubmissionId);
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
+
+        var nextSubmission = round.GetRandomUnratedSubmission();
         if (nextSubmission != null)
         {
             // Still have unrated submissions, start scoring the next one

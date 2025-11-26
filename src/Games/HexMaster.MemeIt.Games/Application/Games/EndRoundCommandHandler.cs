@@ -37,7 +37,9 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var game = await _repository.GetByGameCodeAsync(command.GameCode, cancellationToken).ConfigureAwait(false);
+        var game = await _repository
+            .GetByGameCodeAsync(command.GameCode, cancellationToken)
+            .ConfigureAwait(false);
         if (game == null)
         {
             throw new InvalidOperationException($"Game with code '{command.GameCode}' not found.");
