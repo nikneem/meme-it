@@ -28,7 +28,9 @@ public interface IGameRound
     /// <summary>
     /// Indicates whether the score phase has ended for this round.
     /// </summary>
-    bool HasRoundEnded { get; }
+    bool HasScorePhaseEnded { get; }
+
+    bool HasClosedRound { get;  }
 
     /// <summary>
     /// Gets all scores for a specific meme.
@@ -46,6 +48,7 @@ public interface IGameRound
 
     void AddScore(Guid submissionId, Guid playerId, int score);
     void MarkMemeScorePhaseEnded(Guid submissionId);
+    void MarkRoundClosed();
 
     IMemeSubmission? GetRandomUnratedSubmission();
 }

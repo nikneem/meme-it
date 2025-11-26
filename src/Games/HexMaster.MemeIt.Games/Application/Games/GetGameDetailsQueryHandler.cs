@@ -66,7 +66,7 @@ public sealed class GetGameDetailsQueryHandler : IQueryHandler<GetGameDetailsQue
                     // Creative phase typically lasts 60 seconds from round start
                     creativePhaseEndTime = currentRound.StartedAt.AddSeconds(60);
                 }
-                else if (!currentRound.HasRoundEnded)
+                else if (!currentRound.HasScorePhaseEnded)
                 {
                     phase = "Scoring";
                     creativePhaseEndTime = currentRound.StartedAt.AddSeconds(60);

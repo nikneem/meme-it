@@ -31,7 +31,8 @@ public sealed class GameRound : IGameRound
 
     public bool HasCreativePhaseEnded { get; private set; }
 
-    public bool HasRoundEnded => Submissions.All(s => s.HasScorePhaseEnded);
+    public bool HasScorePhaseEnded => Submissions.All(s => s.HasScorePhaseEnded);
+    public bool HasClosedRound { get; private set; }
 
     public IReadOnlyCollection<IMemeSubmission> Submissions => _submissions.AsReadOnly();
 
@@ -57,6 +58,11 @@ public sealed class GameRound : IGameRound
     public void MarkCreativePhaseEnded()
     {
         HasCreativePhaseEnded = true;
+    }
+
+    public void MarkRoundClosed()
+    {
+        HasClosedRound = true;
     }
 
     /// <summary>

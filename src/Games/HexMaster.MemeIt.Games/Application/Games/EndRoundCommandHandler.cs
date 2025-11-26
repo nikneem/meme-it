@@ -53,7 +53,7 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
         bool isLastRound = game.CurrentRound >= game.RoundTarget;
 
         // Check if round has already ended (idempotency check)
-        if (round.HasRoundEnded)
+        if (round.HasClosedRound)
         {
             _logger.LogInformation(
                 "Round {RoundNumber} of game {GameCode} has already ended. Ignoring duplicate request.",
@@ -62,6 +62,13 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
             return new EndRoundResult(game.GameCode, command.RoundNumber, false, isLastRound, false);
         }
 
+        if (!round.HasScorePhaseEnded)
+        {
+            _logger.LogWarning("Oops, round is being closed while the score phase is not ended... This cannot be right ;)");
+            return new EndRoundResult(game.GameCode, round.RoundNumber, false, isLastRound, true);
+        }
+
+        round.MarkRoundClosed();
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
         // Calculate scoreboard: sum all ratings received by each player across all rounds

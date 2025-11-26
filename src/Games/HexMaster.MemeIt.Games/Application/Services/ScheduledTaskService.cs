@@ -59,7 +59,7 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
 
         ScheduleTask(task);
         _logger.LogInformation(
-            "Scheduled HasRoundEnded for Game={GameCode}, Round={Round}, Meme={SubmissionId}, ExecuteAt={ExecuteAt}",
+            "Scheduled HasScorePhaseEnded for Game={GameCode}, Round={Round}, Meme={SubmissionId}, ExecuteAt={ExecuteAt}",
             gameCode, roundNumber, submissionId, task.ExecuteAt);
         return task.Id;
     }
