@@ -113,6 +113,13 @@ export class GameTimerComponent implements OnDestroy, OnChanges {
         }
     }
 
+    public resetTimer(): void {
+        this.stopTimer();
+        this.timeRemaining = 0;
+        this.progressPercentage = 0;
+        this.cdr.markForCheck();
+    }
+
     get progressBarColor(): 'primary' | 'warn' {
         return this.timeRemaining > 10 ? 'primary' : 'warn';
     }

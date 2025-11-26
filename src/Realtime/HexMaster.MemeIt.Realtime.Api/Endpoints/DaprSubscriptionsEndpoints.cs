@@ -201,8 +201,8 @@ public static class DaprSubscriptionsEndpoints
         try
         {
             logger.LogInformation(
-                "Received GameStarted event: GameCode={GameCode}, RoundNumber={RoundNumber}",
-                @event.GameCode, @event.RoundNumber);
+                "Received GameStarted event: GameCode={GameCode}, RoundNumber={RoundNumber}, DurationInSeconds={DurationInSeconds}",
+                @event.GameCode, @event.RoundNumber, @event.DurationInSeconds);
 
             // Broadcast to all connected clients in the game group
             await hubContext.Clients.Group(@event.GameCode).SendAsync(
@@ -210,7 +210,8 @@ public static class DaprSubscriptionsEndpoints
                 new
                 {
                     @event.GameCode,
-                    @event.RoundNumber
+                    @event.RoundNumber,
+                    @event.DurationInSeconds
                 },
                 cancellationToken);
 
@@ -236,8 +237,8 @@ public static class DaprSubscriptionsEndpoints
         try
         {
             logger.LogInformation(
-                "Received RoundStarted event: GameCode={GameCode}, RoundNumber={RoundNumber}",
-                @event.GameCode, @event.RoundNumber);
+                "Received RoundStarted event: GameCode={GameCode}, RoundNumber={RoundNumber}, DurationInSeconds={DurationInSeconds}",
+                @event.GameCode, @event.RoundNumber, @event.DurationInSeconds);
 
             // Broadcast to all connected clients in the game group
             await hubContext.Clients.Group(@event.GameCode).SendAsync(
@@ -245,7 +246,8 @@ public static class DaprSubscriptionsEndpoints
                 new
                 {
                     @event.GameCode,
-                    @event.RoundNumber
+                    @event.RoundNumber,
+                    @event.DurationInSeconds
                 },
                 cancellationToken);
 

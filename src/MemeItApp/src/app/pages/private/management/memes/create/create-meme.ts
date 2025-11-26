@@ -188,11 +188,11 @@ export class CreateMemePage implements OnInit, OnDestroy {
             y: Math.round(y),
             width: 200,
             height: 60,
-            fontSize: 24,
+            fontSize: 32,
             fontColor: '#FFFFFF',
-            borderSize: 2,
+            borderSize: 1,
             borderColor: '#000000',
-            isBold: true,
+            isBold: false,
             isSelected: true
         };
 

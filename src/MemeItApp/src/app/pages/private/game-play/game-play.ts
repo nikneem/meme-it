@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -30,6 +30,8 @@ interface ScoreboardEntry {
     styleUrl: './game-play.scss',
 })
 export class GamePlayPage implements OnInit, OnDestroy {
+    @ViewChild(GameTimerComponent) gameTimer?: GameTimerComponent;
+
     gameCode: string = '';
     roundNumber: number = 1;
     totalRounds: number = 5;
@@ -71,7 +73,7 @@ export class GamePlayPage implements OnInit, OnDestroy {
         const roundStartedSub = this.realtimeService.roundStarted$.subscribe({
             next: (event) => {
                 if (event.gameCode === this.gameCode) {
-                    this.onRoundStarted(event.roundNumber);
+                    this.onRoundStarted(event.roundNumber, event.durationInSeconds);
                 }
             }
         });
@@ -155,8 +157,8 @@ export class GamePlayPage implements OnInit, OnDestroy {
         console.log('Meme submitted from creative component');
     }
 
-    onRoundStarted(roundNumber: number): void {
-        console.log('New round started:', roundNumber);
+    onRoundStarted(roundNumber: number, durationInSeconds: number): void {
+        console.log('New round started:', roundNumber, 'Duration:', durationInSeconds);
         this.notificationService.success(
             'New Round Started',
             `Round ${roundNumber} has begun!`,
@@ -171,8 +173,8 @@ export class GamePlayPage implements OnInit, OnDestroy {
         this.currentMemeToRate = null;
         this.roundStartedAt = new Date();
 
-        // Set timer for creative phase (30 seconds)
-        this.timerDuration = 30;
+        // Set timer for creative phase with duration from event
+        this.timerDuration = durationInSeconds;
 
         // Reload player round state to get updated information
         this.loadPlayerRoundState();
@@ -185,6 +187,11 @@ export class GamePlayPage implements OnInit, OnDestroy {
 
     onRoundEnded(event: any): void {
         console.log('Round ended, showing scoreboard:', event);
+
+        // Reset the timer to stop it from running
+        if (this.gameTimer) {
+            this.gameTimer.resetTimer();
+        }
 
         // Update scoreboard data
         this.currentScoreboard = event.scoreboard || [];

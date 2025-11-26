@@ -22,6 +22,7 @@ export interface PlayerRemovedEvent {
 export interface GameStartedEvent {
     gameCode: string;
     roundNumber: number;
+    durationInSeconds: number;
 }
 
 export interface CreativePhaseEndedEvent {
@@ -47,6 +48,7 @@ export interface ScorePhaseStartedEvent {
 export interface RoundStartedEvent {
     gameCode: string;
     roundNumber: number;
+    durationInSeconds: number;
 }
 
 export interface ScoreboardEntryDto {

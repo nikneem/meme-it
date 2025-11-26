@@ -49,10 +49,11 @@ public sealed class StartGameCommandHandler : ICommandHandler<StartGameCommand, 
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
         // Schedule the creativity phase end task (30 seconds from now)
-        _scheduledTaskService.ScheduleCreativePhaseEnded(game.GameCode, round.RoundNumber, delaySeconds: 30);
+        const int creativePhaseDuration = 30;
+        _scheduledTaskService.ScheduleCreativePhaseEnded(game.GameCode, round.RoundNumber, delaySeconds: creativePhaseDuration);
 
         // Publish GameStarted event
-        var gameStartedEvent = new GameStartedEvent(game.GameCode, round.RoundNumber);
+        var gameStartedEvent = new GameStartedEvent(game.GameCode, round.RoundNumber, creativePhaseDuration);
         await _daprClient.PublishEventAsync(
             DaprConstants.PubSubName,
             DaprConstants.Topics.GameStarted,
