@@ -1,20 +1,157 @@
-﻿.game-play-container {
+﻿@use 'sass:color';
+@use 'variables/fonts' as fonts;
+
+:host {
+    display: block;
+    position: relative;
+    background: radial-gradient(circle at top right, #1a0a47 0%, #000384 35%, #000225 70%);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.sunray-container {
+    position: absolute;
+    top: -150vmax;
+    right: -150vmax;
+    width: 300vmax;
+    height: 300vmax;
+    transform: translate(50%, -50%);
+    z-index: 0;
+    background-image: url('/images/sunray-background.svg');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: saturate(0.8) hue-rotate(240deg);
+    animation: sunray-spin 120s linear infinite;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+@keyframes sunray-spin {
+    from {
+        transform: translate(50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 10px 40px rgba(200, 7, 175, 0.3);
+    }
+    50% {
+        box-shadow: 0 10px 60px rgba(200, 7, 175, 0.5);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.game-play-container {
+    position: relative;
+    z-index: 2;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 2rem clamp(1rem, 3vw, 2rem);
 }
 
 .game-header {
+    background: rgba(20, 15, 50, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200, 7, 175, 0.3);
+    border-radius: 1.75rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    box-shadow: 0 25px 70px rgba(200, 7, 175, 0.2);
     text-align: center;
     margin-bottom: 2rem;
+    animation: pulse-glow 3s ease-in-out infinite;
+
+    .header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--mat-sys-primary), #da44c4);
+        color: var(--mat-sys-on-primary);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(200, 7, 175, 0.4);
+        animation: float 3s ease-in-out infinite;
+    }
 
     h1 {
         margin: 0;
-        font-size: 2.5rem;
+        font-family: fonts.$font-family-heading;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        line-height: 1.2;
+        background: linear-gradient(135deg, #ffffff, #da44c4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    p {
-        margin: 0.5rem 0 0 0;
-        color: #666;
+    .game-code {
+        margin: 0.75rem 0 0 0;
+        font-size: 1rem;
+        color: var(--mat-sys-on-surface-variant);
+        font-weight: 500;
+        letter-spacing: 0.05em;
+
+        strong {
+            color: var(--mat-sys-tertiary);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+    }
+}
+
+::ng-deep memeit-game-timer {
+    .timer-container {
+        background: linear-gradient(135deg, rgba(124, 136, 212, 0.2), rgba(200, 7, 175, 0.2));
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(124, 136, 212, 0.3);
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        margin-bottom: 1.5rem;
+    }
+}
+
+::ng-deep memeit-meme-creative,
+::ng-deep memeit-meme-rating,
+::ng-deep memeit-game-scoreboard {
+    display: block;
+    background: rgba(20, 15, 50, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(124, 136, 212, 0.2);
+    border-radius: 1.5rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+    .game-header {
+        padding: 1.25rem;
+
+        h1 {
+            font-size: 1.75rem;
+        }
+
+        .game-code {
+            font-size: 0.9rem;
+
+            strong {
+                font-size: 1rem;
+            }
+        }
     }
 }

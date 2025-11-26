@@ -1,11 +1,17 @@
+<div class="sunray-container"></div>
 <div class="game-play-container">
     <!-- Game Timer -->
     <memeit-game-timer [duration]="timerDuration" [endTime]="creativePhaseEndTime" (timeExpired)="onTimeExpired()">
     </memeit-game-timer>
 
     <div class="game-header">
-        <h1>Round {{ roundNumber }}</h1>
-        <p>Game Code: {{ gameCode }}</p>
+        <div class="header-badge">
+            <span *ngIf="isCreativePhase">🎨 Creative Phase</span>
+            <span *ngIf="isScorePhase">⭐ Rating Phase</span>
+            <span *ngIf="isScoreboardPhase">🏆 Scoreboard</span>
+        </div>
+        <h1>Round {{ roundNumber }} of {{ totalRounds }}</h1>
+        <p class="game-code">Game Code: <strong>{{ gameCode }}</strong></p>
     </div>
 
     <!-- Meme Creative Phase Component -->
