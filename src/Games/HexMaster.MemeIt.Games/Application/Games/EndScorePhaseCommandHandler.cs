@@ -56,9 +56,10 @@ public sealed class EndScorePhaseCommandHandler(
 
         // Mark score phase for this round as completed.
         round.MarkMemeScorePhaseEnded(command.SubmissionId);
+        // Start score phase: pick a random unrated submission, this also updates the state so we need to save the game after this
+        var nextSubmission = round.GetRandomUnratedSubmission();
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
-        var nextSubmission = round.GetRandomUnratedSubmission();
         if (nextSubmission != null)
         {
             // Still have unrated submissions, start scoring the next one

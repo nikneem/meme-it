@@ -52,6 +52,8 @@ public sealed class EndCreativePhaseCommandHandler(
 
         // Mark creative phase as ended
         game.MarkCreativePhaseEnded(command.RoundNumber);
+        // Start score phase: pick a random unrated submission, this also updates the state so we need to save the game after this
+        var randomSubmission = game.GetRandomUnratedSubmissionForRound(command.RoundNumber);
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
         // Publish HasCreativePhaseEnded event
@@ -62,8 +64,6 @@ public sealed class EndCreativePhaseCommandHandler(
             creativePhaseEndedEvent,
             cancellationToken).ConfigureAwait(false);
 
-        // Start score phase: pick a random unrated submission
-        var randomSubmission = game.GetRandomUnratedSubmissionForRound(command.RoundNumber);
         if (randomSubmission != null)
         {
             var textEntries = randomSubmission.TextEntries
