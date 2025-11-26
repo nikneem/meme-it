@@ -107,19 +107,6 @@ public sealed class EndScorePhaseCommandHandler(
                 "Last meme scored in round {RoundNumber} of game {GameCode}. Ending round.",
                 command.RoundNumber, command.GameCode);
 
-            // Check if score phase is already marked as ended before proceeding
-            if (!round.ScorePhaseEnded)
-            {
-                game.MarkScorePhaseEnded(command.RoundNumber);
-                await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                _logger.LogInformation(
-                    "Score phase for round {RoundNumber} of game {GameCode} was already marked as ended.",
-                    command.RoundNumber, command.GameCode);
-            }
-
             // Directly invoke EndRoundCommand to calculate scoreboard and publish event
             // The EndRoundCommand is idempotent, so multiple invocations are safe
             var endRoundCommand = new EndRoundCommand(game.GameCode, command.RoundNumber);
