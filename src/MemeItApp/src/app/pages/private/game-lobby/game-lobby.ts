@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { AuthService } from '@services/auth.service';
 import { RealtimeService } from '@services/realtime.service';
 import { SettingsService } from '@services/settings.service';
 import { GameResponse, Player } from '@models/game.model';
+import { GameStore } from '../../../store/game.store';
 
 @Component({
   selector: 'memeit-game-lobby',
@@ -29,14 +30,21 @@ import { GameResponse, Player } from '@models/game.model';
   styleUrl: './game-lobby.scss',
 })
 export class GameLobbyPage implements OnInit, OnDestroy {
-  gameCode: string = '';
-  game: GameResponse | null = null;
-  isLoading = true;
+  // Inject the game store
+  readonly gameStore = inject(GameStore);
+
+  // Store signals for template binding
+  readonly gameCode = this.gameStore.gameCode;
+  readonly players = this.gameStore.players;
+  readonly isAdmin = this.gameStore.isAdmin;
+  readonly allPlayersReady = this.gameStore.allPlayersReady;
+  readonly isLoading = this.gameStore.isLoading;
+
   errorMessage = '';
-  private gameStateSubscription?: Subscription;
   private realtimeSubscriptions: Subscription[] = [];
   private hasJoinedRealtimeGroup = false;
   private autoReadyTriggered = false;
+  private gameCodeValue: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -50,59 +58,35 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.gameCode = this.route.snapshot.paramMap.get('code') || '';
+    this.gameCodeValue = this.route.snapshot.paramMap.get('code') || '';
 
-    if (!this.gameCode) {
+    if (!this.gameCodeValue) {
       this.router.navigate(['/']);
       return;
     }
 
-    // Subscribe to the game state observable
-    this.gameStateSubscription = this.gameService.getGameState$(this.gameCode).subscribe({
-      next: (game) => {
-        if (game) {
-          console.log('Game state updated:', game);
-          this.game = game;
-          this.isLoading = false;
-          this.cdr.detectChanges();
+    // Initialize the game store - this will restore from session storage if available
+    this.gameStore.initializeGame(this.gameCodeValue);
 
-          // Connect to SignalR and join game group after successfully loading game (only once)
-          if (!this.hasJoinedRealtimeGroup) {
-            this.connectToRealtime().then(() => {
-              // After connecting to realtime, check auto-ready setting
-              this.checkAndApplyAutoReady();
-            }).catch(err => {
-              console.error('Failed to connect to realtime:', err);
-            });
-          }
-        }
-      },
-      error: (error) => {
-        console.error('Game state error:', error);
-        this.isLoading = false;
-        this.errorMessage = 'Failed to load game. The game may not exist or you may not have access.';
-        this.notificationService.error(
-          'Game Not Found',
-          'Failed to load game. The game may not exist or you may not have access.',
-          undefined,
-          8000
-        );
-        this.cdr.detectChanges();
+    // Connect to SignalR after a short delay to allow store initialization
+    setTimeout(() => {
+      if (!this.hasJoinedRealtimeGroup) {
+        this.connectToRealtime().then(() => {
+          this.checkAndApplyAutoReady();
+        }).catch(err => {
+          console.error('Failed to connect to realtime:', err);
+        });
       }
-    });
+    }, 100);
   }
 
   ngOnDestroy(): void {
     // Cleanup subscriptions
-    if (this.gameStateSubscription) {
-      this.gameStateSubscription.unsubscribe();
-    }
-
     this.realtimeSubscriptions.forEach(sub => sub.unsubscribe());
 
     // Only leave the group, don't disconnect (game-play page will reuse connection)
-    if (this.hasJoinedRealtimeGroup && this.gameCode) {
-      this.realtimeService.leaveGameGroup(this.gameCode).catch(err =>
+    if (this.hasJoinedRealtimeGroup && this.gameCodeValue) {
+      this.realtimeService.leaveGameGroup(this.gameCodeValue).catch(err =>
         console.error('Error leaving game group:', err)
       );
     }
@@ -114,13 +98,13 @@ export class GameLobbyPage implements OnInit, OnDestroy {
       await this.realtimeService.connect();
 
       // Join the game group
-      await this.realtimeService.joinGameGroup(this.gameCode);
+      await this.realtimeService.joinGameGroup(this.gameCodeValue);
       this.hasJoinedRealtimeGroup = true;
 
       // Subscribe to real-time events
       this.setupRealtimeEventHandlers();
 
-      console.log('Connected to realtime service for game:', this.gameCode);
+      console.log('Connected to realtime service for game:', this.gameCodeValue);
     } catch (error) {
       console.error('Failed to connect to realtime service:', error);
       this.hasJoinedRealtimeGroup = false;
@@ -135,8 +119,8 @@ export class GameLobbyPage implements OnInit, OnDestroy {
 
   private async disconnectFromRealtime(): Promise<void> {
     try {
-      if (this.gameCode) {
-        await this.realtimeService.leaveGameGroup(this.gameCode);
+      if (this.gameCodeValue) {
+        await this.realtimeService.leaveGameGroup(this.gameCodeValue);
       }
       await this.realtimeService.disconnect();
     } catch (error) {
@@ -148,27 +132,20 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Handle player joined events
     const playerJoinedSub = this.realtimeService.playerJoined$.subscribe(event => {
       console.log('Player joined:', event);
+      this.gameStore.handlePlayerJoined(event);
       this.notificationService.success(
         'Player Joined',
         `${event.displayName} joined the game`,
         undefined,
         3000
       );
-      // Refresh game state
-      this.loadGame();
     });
     this.realtimeSubscriptions.push(playerJoinedSub);
 
     // Handle player state changed events
     const playerStateChangedSub = this.realtimeService.playerStateChanged$.subscribe(event => {
       console.log('Player state changed:', event);
-      if (this.game) {
-        const player = this.game.players.find(p => p.playerId === event.playerId);
-        if (player) {
-          player.isReady = event.isReady;
-          this.cdr.detectChanges();
-        }
-      }
+      this.gameStore.handlePlayerStateChanged(event);
 
       const status = event.isReady ? 'ready' : 'not ready';
       this.notificationService.success(
@@ -193,22 +170,18 @@ export class GameLobbyPage implements OnInit, OnDestroy {
           5000
         );
         try {
-          await this.realtimeService.leaveGameGroup(this.gameCode);
+          await this.realtimeService.leaveGameGroup(this.gameCodeValue);
           await this.realtimeService.disconnect();
         } catch (err) {
           console.error('Error while leaving realtime group after kick:', err);
         }
-        this.gameService.clearGameState(this.gameCode);
+        this.gameStore.clearGame(this.gameCodeValue);
         this.router.navigate(['/']);
-        return; // Do not process further as user is leaving
+        return;
       }
 
-      // For other players simply update local state
-      if (this.game) {
-        this.game.players = this.game.players.filter(p => p.playerId !== event.playerId);
-        this.cdr.detectChanges();
-      }
-
+      // For other players update store
+      this.gameStore.handlePlayerRemoved(event);
       this.notificationService.success(
         'Player Left',
         `${event.displayName} left the game`,
@@ -221,6 +194,7 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Handle game started events
     const gameStartedSub = this.realtimeService.gameStarted$.subscribe(event => {
       console.log('Game started:', event);
+      this.gameStore.handleGameStarted(event);
       this.notificationService.success(
         'Game Started!',
         'The game has begun. Good luck!',
@@ -231,28 +205,6 @@ export class GameLobbyPage implements OnInit, OnDestroy {
       this.router.navigate([`/app/games/${event.gameCode}/play`]);
     });
     this.realtimeSubscriptions.push(gameStartedSub);
-  }
-
-  loadGame(): void {
-    console.log('Refreshing game with code:', this.gameCode);
-    this.gameService.refreshGame(this.gameCode).subscribe({
-      next: (game) => {
-        console.log('Game refreshed successfully:', game);
-        // State is automatically updated via the subscription
-      },
-      error: (error) => {
-        console.error('Game refresh error:', error);
-        this.isLoading = false;
-        this.errorMessage = 'Failed to load game. The game may not exist or you may not have access.';
-        this.notificationService.error(
-          'Game Not Found',
-          'Failed to load game. The game may not exist or you may not have access.',
-          undefined,
-          8000
-        );
-        this.cdr.detectChanges();
-      }
-    });
   }
 
   private checkAndApplyAutoReady(): void {
@@ -268,12 +220,12 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     }
 
     // Only auto-ready if game is in lobby state
-    if (!this.game || this.game.state !== 'Lobby') {
+    if (this.gameStore.phase() !== 'lobby') {
       return;
     }
 
     // Find current player and check if already ready
-    const currentPlayer = this.game.players.find(p => p.playerId === this.currentUserId);
+    const currentPlayer = this.players().find(p => p.playerId === this.currentUserId);
     if (!currentPlayer || currentPlayer.isReady) {
       return;
     }
@@ -287,26 +239,17 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   copyGameCode(): void {
-    const joinUrl = `${window.location.origin}/games/join/${this.gameCode}`;
+    const joinUrl = `${window.location.origin}/games/join/${this.gameCodeValue}`;
     navigator.clipboard.writeText(joinUrl);
     this.notificationService.success('Copied!', 'Join link copied to clipboard', undefined, 2000);
   }
 
-  get isAdmin(): boolean {
-    return this.game?.isAdmin || false;
-  }
-
   get playerCount(): number {
-    return this.game?.players.length || 0;
+    return this.players().length;
   }
 
   get readyPlayerCount(): number {
-    return this.game?.players.filter(p => p.isReady).length || 0;
-  }
-
-  get allPlayersReady(): boolean {
-    if (!this.game || this.game.players.length < 2) return false;
-    return this.game.players.every(p => p.isReady);
+    return this.players().filter(p => p.isReady).length;
   }
 
   get currentUserId(): string | null {
@@ -318,14 +261,14 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   isPlayerAdmin(playerId: string): boolean {
-    return this.game?.players[0]?.playerId === playerId;
+    return this.players()[0]?.playerId === playerId;
   }
 
   setPlayerReady(): void {
-    this.gameService.setPlayerReady(this.gameCode, true).subscribe({
+    this.gameService.setPlayerReady(this.gameCodeValue, true).subscribe({
       next: () => {
         console.log('Player set to ready');
-        this.loadGame();
+        // State will be updated via SignalR event
       },
       error: (error) => {
         console.error('Failed to set player ready:', error);
@@ -337,11 +280,10 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   toggleReady(player: any): void {
     if (!this.isCurrentUser(player.playerId)) return;
 
-    this.gameService.setPlayerReady(this.gameCode, !player.isReady).subscribe({
+    this.gameService.setPlayerReady(this.gameCodeValue, !player.isReady).subscribe({
       next: () => {
         console.log('Ready state updated');
-        player.isReady = !player.isReady;
-        this.cdr.detectChanges();
+        // State will be updated via SignalR event
       },
       error: (error) => {
         console.error('Failed to update ready state:', error);
@@ -351,15 +293,12 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   removePlayer(playerId: string): void {
-    if (!this.isAdmin) return;
+    if (!this.isAdmin()) return;
 
-    this.gameService.removePlayer(this.gameCode, playerId).subscribe({
+    this.gameService.removePlayer(this.gameCodeValue, playerId).subscribe({
       next: () => {
         console.log('Player removed');
-        if (this.game) {
-          this.game.players = this.game.players.filter(p => p.playerId !== playerId);
-          this.cdr.detectChanges();
-        }
+        // State will be updated via SignalR event
         this.notificationService.success('Success', 'Player removed from game');
       },
       error: (error) => {
@@ -370,12 +309,12 @@ export class GameLobbyPage implements OnInit, OnDestroy {
   }
 
   startGame(): void {
-    if (!this.isAdmin) {
+    if (!this.isAdmin()) {
       this.notificationService.error('Error', 'Only the game admin can start the game');
       return;
     }
 
-    this.gameService.startGame(this.gameCode).subscribe({
+    this.gameService.startGame(this.gameCodeValue).subscribe({
       next: (result) => {
         console.log('Game started successfully:', result);
         // The navigation will happen via the GameStarted event from SignalR
@@ -391,8 +330,8 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Disconnect from realtime before leaving
     this.disconnectFromRealtime();
 
-    // Clear the cached game state when leaving
-    this.gameService.clearGameState(this.gameCode);
+    // Clear the game state from store and session storage
+    this.gameStore.clearGame(this.gameCodeValue);
     this.router.navigate(['/']);
   }
 }
