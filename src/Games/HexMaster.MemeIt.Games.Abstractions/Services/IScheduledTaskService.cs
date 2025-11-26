@@ -16,10 +16,10 @@ public interface IScheduledTaskService
     /// </summary>
     /// <param name="gameCode">The game code.</param>
     /// <param name="roundNumber">The round number.</param>
-    /// <param name="memeId">The meme ID being scored.</param>
+    /// <param name="submissionId">The meme ID being scored.</param>
     /// <param name="delaySeconds">Delay in seconds (1-120, default 30).</param>
     /// <returns>Scheduled task ID.</returns>
-    Guid ScheduleScorePhaseEnded(string gameCode, int roundNumber, Guid memeId, int delaySeconds = 30);
+    Guid ScheduleScorePhaseEnded(string gameCode, int roundNumber, Guid submissionId, int delaySeconds = 30);
 
     /// <summary>
     /// Schedules a start new round task.

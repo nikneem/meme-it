@@ -46,7 +46,7 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
         return task.Id;
     }
 
-    public Guid ScheduleScorePhaseEnded(string gameCode, int roundNumber, Guid memeId, int delaySeconds = DefaultDelaySeconds)
+    public Guid ScheduleScorePhaseEnded(string gameCode, int roundNumber, Guid submissionId, int delaySeconds = DefaultDelaySeconds)
     {
         ValidateDelay(ref delaySeconds);
         var task = new ScheduledGameTask(
@@ -55,12 +55,12 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
             gameCode,
             roundNumber,
             DateTimeOffset.UtcNow.AddSeconds(delaySeconds),
-            memeId);
+            submissionId);
 
         ScheduleTask(task);
         _logger.LogInformation(
             "Scheduled HasRoundEnded for Game={GameCode}, Round={Round}, Meme={SubmissionId}, ExecuteAt={ExecuteAt}",
-            gameCode, roundNumber, memeId, task.ExecuteAt);
+            gameCode, roundNumber, submissionId, task.ExecuteAt);
         return task.Id;
     }
 

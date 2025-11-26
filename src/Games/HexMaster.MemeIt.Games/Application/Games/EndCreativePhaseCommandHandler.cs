@@ -89,7 +89,7 @@ public sealed class EndCreativePhaseCommandHandler(
             _scheduledTaskService.ScheduleScorePhaseEnded(
                 game.GameCode,
                 command.RoundNumber,
-                randomSubmission.MemeTemplateId,
+                randomSubmission.SubmissionId,
                 delaySeconds: 30);
         }
 
