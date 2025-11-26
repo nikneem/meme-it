@@ -31,24 +31,31 @@
     from {
         transform: translate(50%, -50%) rotate(0deg);
     }
+
     to {
         transform: translate(50%, -50%) rotate(360deg);
     }
 }
 
 @keyframes pulse-glow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 10px 40px rgba(200, 7, 175, 0.3);
     }
+
     50% {
         box-shadow: 0 10px 60px rgba(200, 7, 175, 0.5);
     }
 }
 
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-10px);
     }
