@@ -107,10 +107,32 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
 
     private static List<ScoreboardEntryDto> CalculateScoreboard(IGame game)
     {
-        var players = new List<ScoreboardEntryDto>();
-        players.AddRange(game.Players.Select(p => new ScoreboardEntryDto(p.PlayerId, p.DisplayName, 0)));
+        // Initialize all players with 0 score
+        var playerScores = game.Players.ToDictionary(
+            p => p.PlayerId,
+            p => new { Name = p.DisplayName, TotalScore = 0 });
 
+        // Iterate through all rounds and sum up each player's submission scores
+        foreach (var round in game.Rounds)
+        {
+            foreach (var submission in round.Submissions)
+            {
+                if (playerScores.ContainsKey(submission.PlayerId))
+                {
+                    var current = playerScores[submission.PlayerId];
+                    playerScores[submission.PlayerId] = new
+                    {
+                        current.Name,
+                        TotalScore = current.TotalScore + submission.TotalScore
+                    };
+                }
+            }
+        }
 
-
+        // Convert to list and sort by score descending
+        return playerScores
+            .Select(kvp => new ScoreboardEntryDto(kvp.Key, kvp.Value.Name, kvp.Value.TotalScore))
+            .OrderByDescending(entry => entry.TotalScore)
+            .ToList();
     }
 }

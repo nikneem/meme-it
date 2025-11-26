@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<MemesDbContext>("memes-db");
-builder.AddAzureBlobClient("memes-blobs");
+builder.AddAzureBlobServiceClient("memes-blobs");
 
 // Add services to the container
 builder.Services.AddOpenApi();
