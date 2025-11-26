@@ -10,6 +10,7 @@ using HexMaster.MemeIt.Memes.Application.MemeTemplates.GetMemeTemplateById;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.GetRandomMemeTemplate;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.ListMemeTemplates;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.UpdateMemeTemplate;
+using HexMaster.MemeIt.Memes.Application.Observability;
 using HexMaster.MemeIt.Memes.Data.Postgres;
 using HexMaster.MemeIt.Memes.Services;
 using Scalar.AspNetCore;
@@ -17,6 +18,14 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// Configure OpenTelemetry with custom activity sources and meters
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddSource(MemesActivitySource.SourceName))
+    .WithMetrics(metrics => metrics
+        .AddMeter("HexMaster.MemeIt.Memes"));
+
 builder.AddNpgsqlDbContext<MemesDbContext>("memes-db");
 builder.AddAzureBlobServiceClient("memes-blobs");
 
@@ -39,6 +48,7 @@ builder.Services.AddScoped<HexMaster.MemeIt.Memes.Repositories.IMemeTemplateRepo
 
 // Register services
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddSingleton<MemesMetrics>();
 
 // Register command handlers
 builder.Services.AddScoped<ICommandHandler<CreateMemeTemplateCommand, CreateMemeTemplateResult>, CreateMemeTemplateCommandHandler>();
