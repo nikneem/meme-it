@@ -106,7 +106,8 @@ export class GamePlayPage implements OnInit, OnDestroy {
         });
         this.subscriptions.push(roundEndedSub);
 
-        this.loadPlayerRoundState();
+        // Load the complete game state from the server
+        this.loadGameState();
     }
 
     async ngOnDestroy(): Promise<void> {
@@ -122,18 +123,89 @@ export class GamePlayPage implements OnInit, OnDestroy {
         }
     }
 
+    private loadGameState(): void {
+        // First, fetch the game metadata to get total rounds and current state
+        this.gameService.refreshGame(this.gameCode).subscribe({
+            next: (game) => {
+                // Update total rounds from game configuration or default
+                this.totalRounds = game.rounds?.length || 5;
+
+                // Check if game is in progress
+                if (game.state === 'InProgress') {
+                    // Load the player's current round state
+                    this.loadPlayerRoundState();
+                } else if (game.state === 'Completed') {
+                    this.notificationService.info(
+                        'Game Ended',
+                        'This game has already completed.',
+                        undefined,
+                        5000
+                    );
+                    // Could navigate back to lobby or show final scores
+                } else {
+                    this.notificationService.info(
+                        'Game Not Started',
+                        'Waiting for the game to start...',
+                        undefined,
+                        3000
+                    );
+                }
+            },
+            error: (error) => {
+                console.error('Failed to load game state:', error);
+                this.notificationService.error('Error', 'Failed to load game information');
+                // Optionally navigate back
+                setTimeout(() => this.router.navigate(['/']), 3000);
+            }
+        });
+    }
+
     private loadPlayerRoundState(): void {
         this.gameService.getPlayerRoundState(this.gameCode).subscribe({
             next: (state) => {
                 this.roundNumber = state.roundNumber;
                 this.roundStartedAt = new Date(state.roundStartedAt);
                 this.creativePhaseEndTime = new Date(state.creativePhaseEndTime);
-                this.currentPhase = 'creative';
-                this.calculateTimerDuration();
+
+                // Determine current phase based on timing
+                const now = new Date();
+                if (now < this.creativePhaseEndTime) {
+                    this.currentPhase = 'creative';
+                    this.calculateTimerDuration();
+                } else {
+                    // Creative phase has ended, we're in scoring/waiting phase
+                    this.currentPhase = 'score';
+                    // Wait for score phase started event or try to fetch next meme
+                    this.tryFetchNextMemeToRate();
+                }
             },
             error: (error) => {
                 console.error('Failed to load player round state:', error);
                 this.notificationService.error('Error', 'Failed to load game state');
+            }
+        });
+    }
+
+    private tryFetchNextMemeToRate(): void {
+        if (!this.gameCode || !this.roundNumber) {
+            return;
+        }
+
+        this.gameService.getNextMemeToScore(this.gameCode, this.roundNumber).subscribe({
+            next: (memeData) => {
+                if (memeData && memeData.memeId) {
+                    // We have a meme to rate
+                    this.currentPhase = 'score';
+                    // The meme data structure might need to be mapped similar to onScorePhaseStarted
+                    console.log('Fetched meme to rate:', memeData);
+                } else {
+                    // No more memes to rate, possibly waiting for scoreboard
+                    console.log('No memes available to rate, waiting for next phase');
+                }
+            },
+            error: (error) => {
+                console.log('No memes currently available to rate:', error);
+                // This is okay - we'll wait for real-time events
             }
         });
     }
