@@ -9,7 +9,7 @@ public interface IMemeSubmission
     /// Unique identifier for this specific meme submission.
     /// Multiple players can use the same MemeTemplateId, so this ID distinguishes individual submissions.
     /// </summary>
-    Guid MemeId { get; }
+    Guid SubmissionId { get; }
 
     /// <summary>
     /// Identifier of the player who created the submission.
@@ -21,8 +21,22 @@ public interface IMemeSubmission
     /// </summary>
     Guid MemeTemplateId { get; }
 
+    bool HasScorePhaseStarted { get; }
+    bool HasScorePhaseEnded { get; }
+
+    int TotalScore { get; }
+    
     /// <summary>
     /// Text entries keyed by template text field identifiers.
     /// </summary>
     IReadOnlyCollection<IMemeTextEntry> TextEntries { get; }
+
+    IReadOnlyCollection<IMemeSubmissionScore> Scores { get; }
+
+    public void AddScore(Guid playerId, int rating);
+    public void RemoveScore(Guid playerId);
+
+
+    void StartScorePhase();
+    void EndScorePhase();
 }

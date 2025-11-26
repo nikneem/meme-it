@@ -41,7 +41,7 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
 
         ScheduleTask(task);
         _logger.LogInformation(
-            "Scheduled CreativePhaseEnded for Game={GameCode}, Round={Round}, ExecuteAt={ExecuteAt}",
+            "Scheduled HasCreativePhaseEnded for Game={GameCode}, Round={Round}, ExecuteAt={ExecuteAt}",
             gameCode, roundNumber, task.ExecuteAt);
         return task.Id;
     }
@@ -59,7 +59,7 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
 
         ScheduleTask(task);
         _logger.LogInformation(
-            "Scheduled ScorePhaseEnded for Game={GameCode}, Round={Round}, Meme={MemeId}, ExecuteAt={ExecuteAt}",
+            "Scheduled HasRoundEnded for Game={GameCode}, Round={Round}, Meme={SubmissionId}, ExecuteAt={ExecuteAt}",
             gameCode, roundNumber, memeId, task.ExecuteAt);
         return task.Id;
     }

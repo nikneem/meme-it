@@ -45,11 +45,11 @@ public sealed class RateMemeCommandHandler : ICommandHandler<RateMemeCommand, Ra
         {
             // AddScore will validate: rating range (0-5), no self-voting, and store the score
             // It allows duplicate votes (last one wins) but we'll check if already scored to ignore
-            var existingScores = round.GetScoresForMeme(command.MemeId);
+            var existingScores = round.GetScoresForSubmission(command.MemeId);
             if (existingScores.ContainsKey(command.PlayerId))
             {
                 _logger.LogInformation(
-                    "Player {PlayerId} already rated meme {MemeId} in round {RoundNumber} of game {GameCode}. Ignoring.",
+                    "Player {PlayerId} already rated meme {SubmissionId} in round {RoundNumber} of game {GameCode}. Ignoring.",
                     command.PlayerId, command.MemeId, command.RoundNumber, command.GameCode);
                 return new RateMemeResult(command.GameCode, command.RoundNumber, false);
             }
@@ -59,17 +59,17 @@ public sealed class RateMemeCommandHandler : ICommandHandler<RateMemeCommand, Ra
             await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
             _logger.LogInformation(
-                "Player {PlayerId} rated meme {MemeId} with score {Rating} in round {RoundNumber} of game {GameCode}.",
+                "Player {PlayerId} rated meme {SubmissionId} with score {Rating} in round {RoundNumber} of game {GameCode}.",
                 command.PlayerId, command.MemeId, command.Rating, command.RoundNumber, command.GameCode);
 
             // Check if all eligible players have rated this meme
-            var updatedScores = round.GetScoresForMeme(command.MemeId);
+            var updatedScores = round.GetScoresForSubmission(command.MemeId);
             var eligibleVoters = game.Players.Count - 1; // All players except the meme creator
 
             if (updatedScores.Count >= eligibleVoters)
             {
                 _logger.LogInformation(
-                    "All {EligibleVoters} eligible players have rated meme {MemeId} in round {RoundNumber} of game {GameCode}. Ending score phase.",
+                    "All {EligibleVoters} eligible players have rated meme {SubmissionId} in round {RoundNumber} of game {GameCode}. Ending score phase.",
                     eligibleVoters, command.MemeId, command.RoundNumber, command.GameCode);
 
                 // Automatically end the score phase for this meme
@@ -82,7 +82,7 @@ public sealed class RateMemeCommandHandler : ICommandHandler<RateMemeCommand, Ra
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex,
-                "Failed to add score for player {PlayerId} on meme {MemeId} in round {RoundNumber} of game {GameCode}.",
+                "Failed to add score for player {PlayerId} on meme {SubmissionId} in round {RoundNumber} of game {GameCode}.",
                 command.PlayerId, command.MemeId, command.RoundNumber, command.GameCode);
             return new RateMemeResult(command.GameCode, command.RoundNumber, false);
         }

@@ -31,9 +31,9 @@ public sealed class GameRound : IGameRound
 
     public DateTimeOffset StartedAt { get; }
 
-    public bool CreativePhaseEnded { get; private set; }
+    public bool HasCreativePhaseEnded { get; private set; }
 
-    public bool ScorePhaseEnded { get; private set; }
+    public bool HasRoundEnded => Submissions.All(s => s.HasScorePhaseEnded);
 
     public IReadOnlyCollection<IMemeSubmission> Submissions => _submissions.AsReadOnly();
 
@@ -58,20 +58,7 @@ public sealed class GameRound : IGameRound
 
     public void MarkCreativePhaseEnded()
     {
-        CreativePhaseEnded = true;
-    }
-
-    /// <summary>
-    /// Marks the score phase as ended for the entire round.
-    /// This operation is idempotent and can be called multiple times safely.
-    /// </summary>
-    public void MarkScorePhaseEnded()
-    {
-        if (ScorePhaseEnded)
-        {
-            return; // Already marked, no-op
-        }
-        ScorePhaseEnded = true;
+        HasCreativePhaseEnded = true;
     }
 
     /// <summary>
@@ -86,59 +73,42 @@ public sealed class GameRound : IGameRound
     /// <summary>
     /// Checks if the score phase has ended for a specific meme.
     /// </summary>
-    public bool IsMemeScorePhaseEnded(Guid memeId)
+    public bool HasScoringPhaseBeenEnded(Guid submissionId)
     {
-        return _memesWithEndedScorePhase.Contains(memeId);
+        return Submissions.First(s => s.SubmissionId == submissionId).HasScorePhaseEnded;
     }
 
     /// <summary>
     /// Adds or updates a score for a meme. Score must be between 0 and 5.
     /// Players cannot score their own memes.
     /// </summary>
-    public void AddScore(Guid memeId, Guid voterId, int score)
+    public void AddScore(Guid submissionId, Guid playerId, int rating)
     {
-        if (score < 0 || score > 5)
+        if (rating < 0 || rating > 5)
         {
-            throw new ArgumentOutOfRangeException(nameof(score), score, "Score must be between 0 and 5.");
+            throw new ArgumentOutOfRangeException(nameof(rating), rating, "Score must be between 0 and 5.");
         }
 
-        var submission = _submissions.FirstOrDefault(s => s.MemeId == memeId);
+        var submission = _submissions.FirstOrDefault(s => s.SubmissionId == submissionId);
         if (submission == null)
         {
-            throw new InvalidOperationException($"No submission found for meme {memeId}.");
+            throw new InvalidOperationException($"No submission found for meme {submission}.");
         }
 
-        if (submission.PlayerId == voterId)
-        {
-            throw new InvalidOperationException("Players cannot score their own memes.");
-        }
-
-        // Remove existing score if present
-        _scores.RemoveAll(s => s.MemeId == memeId && s.PlayerId == voterId);
-
-        // Add new score
-        _scores.Add(new MemeScore(RoundNumber, memeId, voterId, score));
+        submission.RemoveScore(playerId);
+        submission.AddScore(playerId, rating);
     }
 
     /// <summary>
     /// Gets all scores for a specific meme.
     /// </summary>
-    public IReadOnlyDictionary<Guid, int> GetScoresForMeme(Guid memeId)
+    public IReadOnlyDictionary<Guid, int> GetScoresForSubmission(Guid memeId)
     {
         return _scores
             .Where(s => s.MemeId == memeId)
             .ToDictionary(s => s.PlayerId, s => s.Rating);
     }
 
-    /// <summary>
-    /// Gets the next unscored meme for a specific voter, or null if all memes have been scored.
-    /// </summary>
-    public IMemeSubmission? GetNextUnscoredMeme(Guid voterId)
-    {
-        return _submissions.FirstOrDefault(s =>
-            s.PlayerId != voterId && // Can't vote on own meme
-            !_scores.Any(score => score.MemeId == s.MemeId && score.PlayerId == voterId));
-    }
 
     /// <summary>
     /// Gets a random submission that has received no ratings yet, or null if all submissions have been rated.
@@ -147,9 +117,7 @@ public sealed class GameRound : IGameRound
     public IMemeSubmission? GetRandomUnratedSubmission()
     {
         // Find submissions that have no ratings at all (no entry in scores collection)
-        var unratedSubmissions = _submissions
-            .Where(s => !_scores.Any(score => score.MemeId == s.MemeId))
-            .ToList();
+        var unratedSubmissions = _submissions.Where(s => !s.HasScorePhaseStarted).ToList();
 
         if (unratedSubmissions.Count == 0)
         {
@@ -159,6 +127,8 @@ public sealed class GameRound : IGameRound
         // Return a random unrated submission
         var random = new Random();
         var randomIndex = random.Next(unratedSubmissions.Count);
-        return unratedSubmissions[randomIndex];
+        var selecedSubmission = unratedSubmissions[randomIndex];
+        selecedSubmission.StartScorePhase();
+                return selecedSubmission;
     }
 }

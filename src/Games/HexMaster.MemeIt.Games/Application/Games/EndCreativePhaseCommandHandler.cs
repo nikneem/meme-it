@@ -42,7 +42,7 @@ public sealed class EndCreativePhaseCommandHandler(
         }
 
         // Check if creative phase already ended - ignore duplicate requests
-        if (round.CreativePhaseEnded)
+        if (round.HasCreativePhaseEnded)
         {
             _logger.LogInformation(
                 "Creative phase already ended for Game={GameCode}, Round={Round}. Ignoring duplicate request.",
@@ -55,7 +55,7 @@ public sealed class EndCreativePhaseCommandHandler(
 
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
-        // Publish CreativePhaseEnded event
+        // Publish HasCreativePhaseEnded event
         var creativePhaseEndedEvent = new CreativePhaseEndedEvent(game.GameCode, command.RoundNumber);
         await _daprClient.PublishEventAsync(
             DaprConstants.PubSubName,
@@ -74,7 +74,7 @@ public sealed class EndCreativePhaseCommandHandler(
             var scorePhaseStartedEvent = new ScorePhaseStartedEvent(
                 game.GameCode,
                 command.RoundNumber,
-                firstSubmission.MemeId,
+                firstSubmission.SubmissionId,
                 firstSubmission.PlayerId,
                 firstSubmission.MemeTemplateId,
                 textEntries,

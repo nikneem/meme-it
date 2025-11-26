@@ -51,7 +51,7 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
         bool isLastRound = game.CurrentRound >= game.RoundTarget;
 
         // Check if round has already ended (idempotency check)
-        if (round.ScorePhaseEnded)
+        if (round.HasRoundEnded)
         {
             _logger.LogInformation(
                 "Round {RoundNumber} of game {GameCode} has already ended. Ignoring duplicate request.",
@@ -59,6 +59,9 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
 
             return new EndRoundResult(game.GameCode, command.RoundNumber, false, isLastRound, false);
         }
+
+        game.MarkScorePhaseEnded(round.RoundNumber);
+        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
         // Calculate scoreboard: sum all ratings received by each player across all rounds
         var scoreboard = CalculateScoreboard(game);
@@ -99,43 +102,16 @@ public sealed class EndRoundCommandHandler : ICommandHandler<EndRoundCommand, En
                 game.GameCode, game.CurrentRound, game.RoundTarget);
         }
 
-        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
         return new EndRoundResult(game.GameCode, command.RoundNumber, true, isLastRound, true);
     }
 
     private static List<ScoreboardEntryDto> CalculateScoreboard(IGame game)
     {
-        // Dictionary to accumulate scores per player
-        var playerScores = new Dictionary<Guid, (string Name, int TotalScore)>();
+        var players = new List<ScoreboardEntryDto>();
+        players.AddRange(game.Players.Select(p => new ScoreboardEntryDto(p.PlayerId, p.DisplayName, 0)));
 
-        // Initialize all players with 0 score
-        foreach (var player in game.Players)
-        {
-            playerScores[player.PlayerId] = (player.DisplayName, 0);
-        }
 
-        // Iterate through all completed rounds and sum scores
-        foreach (var round in game.Rounds.Where(r => r.ScorePhaseEnded))
-        {
-            // For each submission in the round, get all scores and add to player's total
-            foreach (var submission in round.Submissions)
-            {
-                var scoresForMeme = round.GetScoresForMeme(submission.MemeTemplateId);
-                var totalScoreForMeme = scoresForMeme.Values.Sum();
 
-                if (playerScores.ContainsKey(submission.PlayerId))
-                {
-                    var current = playerScores[submission.PlayerId];
-                    playerScores[submission.PlayerId] = (current.Name, current.TotalScore + totalScoreForMeme);
-                }
-            }
-        }
-
-        // Create scoreboard entries and sort by score descending
-        return playerScores
-            .Select(kvp => new ScoreboardEntryDto(kvp.Key, kvp.Value.Name, kvp.Value.TotalScore))
-            .OrderByDescending(entry => entry.TotalScore)
-            .ToList();
     }
 }

@@ -169,14 +169,6 @@ public sealed class Game : IGame
         round.MarkCreativePhaseEnded();
     }
 
-    public void MarkScorePhaseEnded(int roundNumber)
-    {
-        var round = _rounds.OfType<GameRound>().FirstOrDefault(r => r.RoundNumber == roundNumber)
-                    ?? throw new InvalidOperationException($"Round {roundNumber} not found.");
-
-        round.MarkScorePhaseEnded();
-    }
-
     public IGameRound? GetRound(int roundNumber)
     {
         return _rounds.FirstOrDefault(r => r.RoundNumber == roundNumber);
@@ -184,8 +176,12 @@ public sealed class Game : IGame
 
     public IMemeSubmission? GetRandomUnratedSubmissionForRound(int roundNumber)
     {
-        var round = _rounds.OfType<GameRound>().FirstOrDefault(r => r.RoundNumber == roundNumber);
-        return round?.GetRandomUnratedSubmission();
+        var round = _rounds.FirstOrDefault(r => r.RoundNumber == roundNumber);
+        if (round == null)
+        {
+            throw new InvalidOperationException($"Round {roundNumber} not found.");
+        }
+        return round.GetRandomUnratedSubmission();
     }
 
     public void AddScore(int roundNumber, Guid memeId, Guid voterId, int score)

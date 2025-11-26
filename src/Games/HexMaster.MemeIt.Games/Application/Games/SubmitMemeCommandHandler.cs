@@ -59,7 +59,7 @@ public sealed class SubmitMemeCommandHandler : ICommandHandler<SubmitMemeCommand
 
         // Check if all players have submitted their memes
         var round = game.GetRound(command.RoundNumber);
-        if (round != null && !round.CreativePhaseEnded)
+        if (round != null && !round.HasCreativePhaseEnded)
         {
             var totalPlayers = game.Players.Count;
             var totalValidSubmissions = round.Submissions.Count(s => s.TextEntries.Any());

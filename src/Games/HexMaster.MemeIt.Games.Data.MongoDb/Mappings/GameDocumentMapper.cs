@@ -111,8 +111,8 @@ internal static class GameDocumentMapper
         {
             RoundNumber = round.RoundNumber,
             Submissions = round.Submissions.Select(MapSubmission).ToList(),
-            CreativePhaseEnded = round.CreativePhaseEnded,
-            ScorePhaseEnded = round.ScorePhaseEnded
+            CreativePhaseEnded = round.HasCreativePhaseEnded,
+            ScorePhaseEnded = round.HasRoundEnded
         };
 
         // Map scores dictionary
@@ -120,17 +120,17 @@ internal static class GameDocumentMapper
         {
             // Map the internal _memesWithEndedScorePhase HashSet
             doc.MemesWithEndedScorePhase = round.Submissions
-                .Where(s => round.IsMemeScorePhaseEnded(s.MemeId))
-                .Select(s => s.MemeId)
+                .Where(s => round.HasScoringPhaseBeenEnded(s.SubmissionId))
+                .Select(s => s.SubmissionId)
                 .ToList();
 
             // Map scores [memeId][voterId] = score
             foreach (var submission in round.Submissions)
             {
-                var scores = round.GetScoresForMeme(submission.MemeId);
+                var scores = round.GetScoresForSubmission(submission.SubmissionId);
                 if (scores.Any())
                 {
-                    doc.Scores[submission.MemeId.ToString()] = scores
+                    doc.Scores[submission.SubmissionId.ToString()] = scores
                         .ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value);
                 }
             }
@@ -142,7 +142,7 @@ internal static class GameDocumentMapper
     private static MemeSubmissionDocument MapSubmission(IMemeSubmission submission)
         => new()
         {
-            MemeId = submission.MemeId,
+            MemeId = submission.SubmissionId,
             PlayerId = submission.PlayerId,
             MemeTemplateId = submission.MemeTemplateId,
             TextEntries = submission.TextEntries.Select(MapTextEntry).ToList()

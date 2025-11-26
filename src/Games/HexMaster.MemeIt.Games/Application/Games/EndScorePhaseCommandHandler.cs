@@ -46,29 +46,24 @@ public sealed class EndScorePhaseCommandHandler(
         }
 
         // Check if this meme's score phase has already ended
-        if (round.IsMemeScorePhaseEnded(command.MemeId))
+        if (round.HasScoringPhaseBeenEnded(command.SubmissionId))
         {
             _logger.LogInformation(
-                "Score phase for meme {MemeId} in round {RoundNumber} of game {GameCode} already ended. Ignoring duplicate request.",
-                command.MemeId, command.RoundNumber, command.GameCode);
+                "Score phase for meme {SubmissionId} in round {RoundNumber} of game {GameCode} already ended. Ignoring duplicate request.",
+                command.SubmissionId, command.RoundNumber, command.GameCode);
             return new EndScorePhaseResult(game.GameCode, command.RoundNumber, false, false);
         }
 
-        // Mark this meme's score phase as ended (cast to concrete type to access internal method)
-        if (round is GameRound concreteRound)
-        {
-            concreteRound.MarkMemeScorePhaseEnded(command.MemeId);
-        }
-
+            round.MarkMemeScorePhaseEnded(command.SubmissionId);
         // Check if there are more unrated submissions
-        var nextSubmission = game.GetRandomUnratedSubmissionForRound(command.RoundNumber);
-
+        var nextSubmission = round.GetRandomUnratedSubmission();
+        await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
         if (nextSubmission != null)
         {
             // Still have unrated submissions, start scoring the next one
             _logger.LogInformation(
-                "Found unrated submission {MemeId} in round {RoundNumber} of game {GameCode}.",
-                nextSubmission.MemeId, command.RoundNumber, command.GameCode);
+                "Found unrated submission {SubmissionId} in round {RoundNumber} of game {GameCode}.",
+                nextSubmission.SubmissionId, command.RoundNumber, command.GameCode);
 
             var textEntries = nextSubmission.TextEntries
                 .Select(te => new MemeTextEntryDto(te.TextFieldId, te.Value))
@@ -77,7 +72,7 @@ public sealed class EndScorePhaseCommandHandler(
             var scorePhaseStartedEvent = new ScorePhaseStartedEvent(
                 game.GameCode,
                 command.RoundNumber,
-                nextSubmission.MemeId,
+                nextSubmission.SubmissionId,
                 nextSubmission.PlayerId,
                 nextSubmission.MemeTemplateId,
                 textEntries,
@@ -96,7 +91,6 @@ public sealed class EndScorePhaseCommandHandler(
                 nextSubmission.MemeTemplateId,
                 delaySeconds: 30);
 
-            await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
             return new EndScorePhaseResult(game.GameCode, command.RoundNumber, true, false);
         }

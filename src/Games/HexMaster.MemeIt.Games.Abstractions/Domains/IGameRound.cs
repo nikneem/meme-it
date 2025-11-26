@@ -23,31 +23,29 @@ public interface IGameRound
     /// <summary>
     /// Indicates whether the creative phase has ended for this round.
     /// </summary>
-    bool CreativePhaseEnded { get; }
+    bool HasCreativePhaseEnded { get; }
 
     /// <summary>
     /// Indicates whether the score phase has ended for this round.
     /// </summary>
-    bool ScorePhaseEnded { get; }
+    bool HasRoundEnded { get; }
 
     /// <summary>
     /// Gets all scores for a specific meme.
     /// </summary>
     /// <param name="memeId">The meme template ID.</param>
     /// <returns>Dictionary of voter ID to score.</returns>
-    IReadOnlyDictionary<Guid, int> GetScoresForMeme(Guid memeId);
-
-    /// <summary>
-    /// Gets the next unscored meme for a specific voter, or null if all memes have been scored.
-    /// </summary>
-    /// <param name="voterId">The voter's player ID.</param>
-    /// <returns>The next unscored meme submission, or null.</returns>
-    IMemeSubmission? GetNextUnscoredMeme(Guid voterId);
+    IReadOnlyDictionary<Guid, int> GetScoresForSubmission(Guid memeId);
 
     /// <summary>
     /// Checks if the score phase has ended for a specific meme.
     /// </summary>
-    /// <param name="memeId">The meme template ID.</param>
+    /// <param name="submissionId"></param>
     /// <returns>True if the score phase has ended for this meme, false otherwise.</returns>
-    bool IsMemeScorePhaseEnded(Guid memeId);
+    bool HasScoringPhaseBeenEnded(Guid submissionId);
+
+    void AddScore(Guid submissionId, Guid playerId, int score);
+    void MarkMemeScorePhaseEnded(Guid commandSubmissionId);
+
+    IMemeSubmission? GetRandomUnratedSubmission();
 }

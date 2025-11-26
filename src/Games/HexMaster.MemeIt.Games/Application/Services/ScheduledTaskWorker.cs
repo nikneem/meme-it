@@ -95,13 +95,13 @@ public sealed class ScheduledTaskWorker : BackgroundService
     private async Task HandleScorePhaseEndedAsync(ScheduledGameTask task)
     {
         _logger.LogInformation(
-            "Score phase ended for Game={GameCode}, Round={Round}, Meme={MemeId}",
+            "Score phase ended for Game={GameCode}, Round={Round}, Meme={SubmissionId}",
             task.GameCode, task.RoundNumber, task.MemeId);
 
         if (!task.MemeId.HasValue)
         {
             _logger.LogError(
-                "Cannot end score phase: MemeId is missing for Game={GameCode}, Round={Round}",
+                "Cannot end score phase: SubmissionId is missing for Game={GameCode}, Round={Round}",
                 task.GameCode, task.RoundNumber);
             return;
         }
@@ -130,7 +130,7 @@ public sealed class ScheduledTaskWorker : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                "Failed to end score phase for Game={GameCode}, Round={Round}, Meme={MemeId}",
+                "Failed to end score phase for Game={GameCode}, Round={Round}, Meme={SubmissionId}",
                 task.GameCode, task.RoundNumber, task.MemeId);
         }
     }
