@@ -33,15 +33,16 @@ jobs:
         
       - name: Run tests with coverage
         run: |
+          mkdir -p ./TestResults
           dotnet test src/Games/HexMaster.MemeIt.Games.Tests/HexMaster.MemeIt.Games.Tests.csproj \
             --no-restore \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
-            --results-directory:./TestResults \
-            --logger "console;verbosity=normal" \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+            --results-directory ./TestResults \
+            --logger "console;verbosity=normal"
           echo "Test execution completed. Checking for coverage files..."
-          find ./TestResults -type f -name "*.xml" || echo "No coverage files found"
+          ls -R ./TestResults || echo "TestResults directory is empty"
+          find ./TestResults -type f -name "*.xml" || echo "No XML coverage files found"
         
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
