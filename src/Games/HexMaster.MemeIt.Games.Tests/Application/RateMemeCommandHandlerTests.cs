@@ -23,14 +23,14 @@ public sealed class RateMemeCommandHandlerTests
         game.AddPlayer(player1Id, "Player1", null);
         game.AddPlayer(player2Id, "Player2", null);
         var round = game.NextRound();
-        
+
         // Player 1 submits a meme
         var memeSubmission = new MemeSubmission(player1Id, Guid.NewGuid(), Array.Empty<MemeTextEntry>());
         game.AddMemeSubmission(round.RoundNumber, memeSubmission);
         game.MarkCreativePhaseEnded(round.RoundNumber);
-        
+
         var memeId = game.GetRound(round.RoundNumber)!.Submissions.First().SubmissionId;
-        
+
         var repositoryMock = new Mock<IGamesRepository>();
         repositoryMock
             .Setup(r => r.GetByGameCodeAsync(gameCode, It.IsAny<CancellationToken>()))
@@ -41,7 +41,7 @@ public sealed class RateMemeCommandHandlerTests
 
         var endScorePhaseHandlerMock = new Mock<ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult>>();
         var loggerMock = new Mock<ILogger<RateMemeCommandHandler>>();
-        
+
         var handler = new RateMemeCommandHandler(
             repositoryMock.Object,
             endScorePhaseHandlerMock.Object,
@@ -56,7 +56,7 @@ public sealed class RateMemeCommandHandlerTests
         Assert.Equal(gameCode, result.GameCode);
         Assert.Equal(round.RoundNumber, result.RoundNumber);
         Assert.True(result.Success);
-        
+
         repositoryMock.Verify(r => r.UpdateAsync(game, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -73,7 +73,7 @@ public sealed class RateMemeCommandHandlerTests
             repositoryMock.Object,
             new Mock<ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult>>().Object,
             new Mock<ILogger<RateMemeCommandHandler>>().Object);
-        
+
         var command = new RateMemeCommand("INVALID", 1, Guid.NewGuid(), Guid.NewGuid(), 5);
 
         // Act & Assert
@@ -88,7 +88,7 @@ public sealed class RateMemeCommandHandlerTests
         // Arrange
         var adminId = Guid.NewGuid();
         var game = new Game("TEST1234", adminId, password: null);
-        
+
         var repositoryMock = new Mock<IGamesRepository>();
         repositoryMock
             .Setup(r => r.GetByGameCodeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -98,7 +98,7 @@ public sealed class RateMemeCommandHandlerTests
             repositoryMock.Object,
             new Mock<ICommandHandler<EndScorePhaseCommand, EndScorePhaseResult>>().Object,
             new Mock<ILogger<RateMemeCommandHandler>>().Object);
-        
+
         var command = new RateMemeCommand("TEST1234", 999, Guid.NewGuid(), Guid.NewGuid(), 5);
 
         // Act & Assert

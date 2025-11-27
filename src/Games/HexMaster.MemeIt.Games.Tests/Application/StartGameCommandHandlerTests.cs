@@ -18,7 +18,7 @@ public sealed class StartGameCommandHandlerTests
         var adminId = Guid.NewGuid();
         var gameCode = "TEST1234";
         var game = new Game(gameCode, adminId, password: null);
-        
+
         var repositoryMock = new Mock<IGamesRepository>();
         repositoryMock
             .Setup(r => r.GetByGameCodeAsync(gameCode, It.IsAny<CancellationToken>()))
@@ -29,12 +29,12 @@ public sealed class StartGameCommandHandlerTests
 
         var daprClientMock = new Mock<DaprClient>();
         var scheduledTaskServiceMock = new Mock<IScheduledTaskService>();
-        
+
         var handler = new StartGameCommandHandler(
             repositoryMock.Object,
             daprClientMock.Object,
             scheduledTaskServiceMock.Object);
-        
+
         var command = new StartGameCommand(gameCode, adminId);
 
         // Act
@@ -43,7 +43,7 @@ public sealed class StartGameCommandHandlerTests
         // Assert
         Assert.Equal(gameCode, result.GameCode);
         Assert.Equal(1, result.RoundNumber);
-        
+
         repositoryMock.Verify(r => r.UpdateAsync(game, It.IsAny<CancellationToken>()), Times.Once);
         scheduledTaskServiceMock.Verify(
             s => s.ScheduleCreativePhaseEnded(gameCode, 1, 30),
@@ -70,7 +70,7 @@ public sealed class StartGameCommandHandlerTests
             repositoryMock.Object,
             new Mock<DaprClient>().Object,
             new Mock<IScheduledTaskService>().Object);
-        
+
         var command = new StartGameCommand("INVALID", Guid.NewGuid());
 
         // Act & Assert
@@ -86,7 +86,7 @@ public sealed class StartGameCommandHandlerTests
         var adminId = Guid.NewGuid();
         var nonAdminId = Guid.NewGuid();
         var game = new Game("TEST1234", adminId, password: null);
-        
+
         var repositoryMock = new Mock<IGamesRepository>();
         repositoryMock
             .Setup(r => r.GetByGameCodeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -96,7 +96,7 @@ public sealed class StartGameCommandHandlerTests
             repositoryMock.Object,
             new Mock<DaprClient>().Object,
             new Mock<IScheduledTaskService>().Object);
-        
+
         var command = new StartGameCommand("TEST1234", nonAdminId);
 
         // Act & Assert

@@ -87,7 +87,7 @@ public class EndRoundCommandHandlerTests
         var submission = new MemeSubmission(playerId, Guid.NewGuid(), Array.Empty<IMemeTextEntry>());
         game.AddMemeSubmission(round.RoundNumber, submission);
         round.MarkMemeScorePhaseEnded(submission.SubmissionId);
-        
+
         _mockRepository.Setup(r => r.GetByGameCodeAsync(command.GameCode, It.IsAny<CancellationToken>()))
             .ReturnsAsync(game);
         _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<IGame>(), It.IsAny<CancellationToken>()))

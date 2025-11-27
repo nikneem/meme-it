@@ -93,7 +93,7 @@ public class EndScorePhaseCommandHandlerTests
         var submission = new MemeSubmission(playerId, Guid.NewGuid(), Array.Empty<IMemeTextEntry>());
         game.AddMemeSubmission(round.RoundNumber, submission);
         round.MarkMemeScorePhaseEnded(submission.SubmissionId);
-        
+
         var command2 = new EndScorePhaseCommand(command.GameCode, round.RoundNumber, submission.SubmissionId);
         _mockRepository.Setup(r => r.GetByGameCodeAsync(command2.GameCode, It.IsAny<CancellationToken>()))
             .ReturnsAsync(game);

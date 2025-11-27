@@ -107,7 +107,7 @@ public class EndCreativePhaseCommandHandlerTests
         var playerId = Guid.NewGuid();
         game.AddPlayer(playerId, "Player");
         var round = game.NextRound();
-        
+
         _mockRepository.Setup(r => r.GetByGameCodeAsync(command.GameCode, It.IsAny<CancellationToken>()))
             .ReturnsAsync(game);
         _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<IGame>(), It.IsAny<CancellationToken>()))

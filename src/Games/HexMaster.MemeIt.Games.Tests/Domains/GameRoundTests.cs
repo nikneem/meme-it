@@ -129,10 +129,10 @@ public sealed class GameRoundTests
         var playerId = Guid.NewGuid();
         var template1 = Guid.NewGuid();
         var template2 = Guid.NewGuid();
-        
+
         var submission1 = new MemeSubmission(playerId, template1, Array.Empty<MemeTextEntry>());
         round.UpsertSubmission(submission1);
-        
+
         // Act
         var submission2 = new MemeSubmission(playerId, template2, Array.Empty<MemeTextEntry>());
         round.UpsertSubmission(submission2);
@@ -184,7 +184,7 @@ public sealed class GameRoundTests
         var submission2 = new MemeSubmission(Guid.NewGuid(), Guid.NewGuid(), Array.Empty<MemeTextEntry>());
         round.UpsertSubmission(submission1);
         round.UpsertSubmission(submission2);
-        
+
         var sub1Id = round.Submissions.ElementAt(0).SubmissionId;
         var sub2Id = round.Submissions.ElementAt(1).SubmissionId;
 
