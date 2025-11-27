@@ -44,7 +44,15 @@ jobs:
       
       - name: Run tests with coverage
         if: steps.check_tests.outputs.tests_exist == 'true'
-        run: dotnet test src/Realtime/HexMaster.MemeIt.Realtime.Tests/HexMaster.MemeIt.Realtime.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+        run: |
+          dotnet test src/Realtime/HexMaster.MemeIt.Realtime.Tests/HexMaster.MemeIt.Realtime.Tests.csproj \
+            --no-restore \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage \
+            --logger "console;verbosity=normal"
+          echo "Test execution completed. Checking for coverage files..."
+          find ./coverage -name "*.xml" -type f || echo "No XML files found in coverage directory"
         
       - name: Install ReportGenerator
         if: steps.check_tests.outputs.tests_exist == 'true'

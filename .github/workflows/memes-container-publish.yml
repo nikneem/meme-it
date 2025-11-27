@@ -33,7 +33,15 @@ jobs:
         run: dotnet build src/Memes/HexMaster.MemeIt.Memes.Api/HexMaster.MemeIt.Memes.Api.csproj --no-restore --configuration Release
         
       - name: Run tests with coverage
-        run: dotnet test src/Memes/HexMaster.MemeIt.Memes.Tests/HexMaster.MemeIt.Memes.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+        run: |
+          dotnet test src/Memes/HexMaster.MemeIt.Memes.Tests/HexMaster.MemeIt.Memes.Tests.csproj \
+            --no-restore \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage \
+            --logger "console;verbosity=normal"
+          echo "Test execution completed. Checking for coverage files..."
+          find ./coverage -name "*.xml" -type f || echo "No XML files found in coverage directory"
         
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
