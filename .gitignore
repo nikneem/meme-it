@@ -33,6 +33,7 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+[Cc]overage[Rr]eport/
 
 # Build results on 'Bin' directories
 **/[Bb]in/*
