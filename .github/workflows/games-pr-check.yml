@@ -11,6 +11,13 @@ on:
       - 'src/HexMaster.MemeIt.IntegrationEvents/**'
       - '.github/workflows/games-pr-check.yml'
 
+env:
+  AZURE_LOCATION: "North Europe"
+  DOTNET_VERSION: "10.0.x"
+  API_PROJECT_PATH: "src/Games/HexMaster.MemeIt.Games.Api"
+  TESTS_PROJECT_PATH: "src/Games/HexMaster.MemeIt.Games.Tests"
+  INFRASTRUCTURE_PATH: "src/Games/infrastructure"
+
 jobs:
   build-and-test:
     name: Build, Test & Coverage
@@ -30,7 +37,25 @@ jobs:
         
       - name: Build
         run: dotnet build src/Games/HexMaster.MemeIt.Games.Api/HexMaster.MemeIt.Games.Api.csproj --no-restore --configuration Release
-        
+
+      - name: Run Members API Tests
+        run: |
+          dotnet test ${{ env.TESTS_PROJECT_PATH }} \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --logger trx \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: members-test-results
+          path: TestResults/
+          retention-days: 30
+
       - name: Run tests with coverage
         run: |
           dotnet test src/Games/HexMaster.MemeIt.Games.Tests/HexMaster.MemeIt.Games.Tests.csproj \
@@ -55,6 +80,14 @@ jobs:
             mkdir -p ./coveragereport
             echo '<?xml version="1.0" encoding="utf-8"?><coverage line-rate="0" branch-rate="0" version="1.9"></coverage>' > ./coveragereport/Cobertura.xml
           fi
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: games-coverage-report
+          path: coveragereport/
+          retention-days: 30
         
       - name: Validate coverage threshold
         run: |

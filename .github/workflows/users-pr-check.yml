@@ -55,6 +55,14 @@ jobs:
             mkdir -p ./coveragereport
             echo '<?xml version="1.0" encoding="utf-8"?><coverage line-rate="0" branch-rate="0" version="1.9"></coverage>' > ./coveragereport/Cobertura.xml
           fi
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: users-coverage-report
+          path: coveragereport/
+          retention-days: 30
         
       - name: Validate coverage threshold
         run: |
