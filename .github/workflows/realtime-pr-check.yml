@@ -1,0 +1,97 @@
+name: Realtime Service - PR Quality Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/Realtime/**'
+      - 'src/HexMaster.MemeIt.Core/**'
+      - 'src/HexMaster.MemeIt.IntegrationEvents/**'
+      - '.github/workflows/realtime-pr-check.yml'
+
+jobs:
+  build-and-test:
+    name: Build, Test & Coverage
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          
+      - name: Restore dependencies
+        run: dotnet restore src/Realtime/HexMaster.MemeIt.Realtime.Api/HexMaster.MemeIt.Realtime.Api.csproj
+        
+      - name: Build
+        run: dotnet build src/Realtime/HexMaster.MemeIt.Realtime.Api/HexMaster.MemeIt.Realtime.Api.csproj --no-restore --configuration Release
+        
+      - name: Check if tests exist
+        id: check_tests
+        run: |
+          if [ -f "src/Realtime/HexMaster.MemeIt.Realtime.Tests/HexMaster.MemeIt.Realtime.Tests.csproj" ]; then
+            echo "tests_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests_exist=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No test project found - skipping coverage validation"
+          fi
+      
+      - name: Run tests with coverage
+        if: steps.check_tests.outputs.tests_exist == 'true'
+        run: |
+          dotnet test src/Realtime/HexMaster.MemeIt.Realtime.Tests/HexMaster.MemeIt.Realtime.Tests.csproj \
+            --no-restore \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            --logger "console;verbosity=normal"
+        
+      - name: Install ReportGenerator
+        if: steps.check_tests.outputs.tests_exist == 'true'
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+        
+      - name: Generate coverage report
+        if: steps.check_tests.outputs.tests_exist == 'true'
+        run: |
+          COVERAGE_FILE=$(find ./TestResults -name "coverage.cobertura.xml" -type f | head -1)
+          if [ -n "$COVERAGE_FILE" ] && [ -f "$COVERAGE_FILE" ]; then
+            echo "Found coverage file: $COVERAGE_FILE"
+            reportgenerator -reports:"$COVERAGE_FILE" -targetdir:./coveragereport -reporttypes:"Html;Cobertura" -filefilters:-**/Migrations/**
+          else
+            echo "No coverage file found, creating empty report"
+            mkdir -p ./coveragereport
+            echo '<?xml version="1.0" encoding="utf-8"?><coverage line-rate="0" branch-rate="0" version="1.9"></coverage>' > ./coveragereport/Cobertura.xml
+          fi
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: realtime-coverage-report
+          path: coveragereport/
+          retention-days: 30
+        
+      - name: Validate coverage threshold
+        if: steps.check_tests.outputs.tests_exist == 'true'
+        run: |
+          COVERAGE=$(grep -oP 'line-rate="\K[0-9.]+' ./coveragereport/Cobertura.xml | head -1)
+          COVERAGE_PERCENT=$(echo "$COVERAGE * 100" | bc)
+          echo "Coverage: $COVERAGE_PERCENT%"
+          if (( $(echo "$COVERAGE_PERCENT < 80" | bc -l) )); then
+            echo "❌ Coverage is below 80% threshold ($COVERAGE_PERCENT%)"
+            exit 1
+          fi
+          echo "✅ Coverage meets 80% threshold ($COVERAGE_PERCENT%)"
+        
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: realtime-coverage-report
+          path: ./coveragereport
+          retention-days: 30
