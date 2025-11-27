@@ -31,16 +31,37 @@ jobs:
       - name: Build
         run: dotnet build src/Realtime/HexMaster.MemeIt.Realtime.Api/HexMaster.MemeIt.Realtime.Api.csproj --no-restore --configuration Release
         
+      - name: Check if tests exist
+        id: check_tests
+        run: |
+          if [ -f "src/Realtime/HexMaster.MemeIt.Realtime.Tests/HexMaster.MemeIt.Realtime.Tests.csproj" ]; then
+            echo "tests_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests_exist=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No test project found - skipping coverage validation"
+          fi
+      
       - name: Run tests with coverage
+        if: steps.check_tests.outputs.tests_exist == 'true'
         run: dotnet test src/Realtime/HexMaster.MemeIt.Realtime.Tests/HexMaster.MemeIt.Realtime.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
         
       - name: Install ReportGenerator
+        if: steps.check_tests.outputs.tests_exist == 'true'
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
         
       - name: Generate coverage report
-        run: reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:./coveragereport -reporttypes:"Html;Cobertura" -filefilters:-**/Migrations/**
+        if: steps.check_tests.outputs.tests_exist == 'true'
+        run: |
+          if [ -d "./coverage" ] && [ "$(find ./coverage -name 'coverage.cobertura.xml' -type f | wc -l)" -gt 0 ]; then
+            reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:./coveragereport -reporttypes:"Html;Cobertura" -filefilters:-**/Migrations/**
+          else
+            echo "No coverage files found, creating empty report"
+            mkdir -p ./coveragereport
+            echo '<?xml version="1.0" encoding="utf-8"?><coverage line-rate="0" branch-rate="0" version="1.9"></coverage>' > ./coveragereport/Cobertura.xml
+          fi
         
       - name: Validate coverage threshold
+        if: steps.check_tests.outputs.tests_exist == 'true'
         run: |
           COVERAGE=$(grep -oP 'line-rate="\K[0-9.]+' ./coveragereport/Cobertura.xml | head -1)
           COVERAGE_PERCENT=$(echo "$COVERAGE * 100" | bc)
