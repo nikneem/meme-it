@@ -91,9 +91,11 @@ if (Directory.Exists(frontEndSourceFolder))
 {
     var frontend = builder.AddJavaScriptApp("frontend", frontEndSourceFolder)
         .WaitFor(gateway)
+        .WithNpm(false)
         .WithRunScript("start")
         .WithHttpEndpoint(port: 4200, isProxied: false)
         .WithEnvironment("ASPIRE_GATEWAY_URL", gateway.GetEndpoint("http"));
+
 }
 
 builder.Build().Run();

@@ -1,31 +1,31 @@
 <div class="sunray-container"></div>
 <div class="game-play-container">
     <!-- Game Timer -->
-    <memeit-game-timer [duration]="timerDuration" [endTime]="creativePhaseEndTime" (timeExpired)="onTimeExpired()">
+    <memeit-game-timer [duration]="timer().duration" [endTime]="getTimerEndDate()" (timeExpired)="onTimeExpired()">
     </memeit-game-timer>
 
     <div class="game-header">
         <div class="header-badge">
-            <span *ngIf="isCreativePhase">🎨 Creative Phase</span>
-            <span *ngIf="isScorePhase">⭐ Rating Phase</span>
+            <span *ngIf="isCreativePhase()">🎨 Creative Phase</span>
+            <span *ngIf="isScoringPhase()">⭐ Rating Phase</span>
             <span *ngIf="isScoreboardPhase">🏆 Scoreboard</span>
         </div>
-        <h1>Round {{ roundNumber }} of {{ totalRounds }}</h1>
-        <p class="game-code">Game Code: <strong>{{ gameCode }}</strong></p>
+        <h1>Round {{ currentRound() }} of {{ totalRounds() }}</h1>
+        <p class="game-code">Game Code: <strong>{{ gameCode() }}</strong></p>
     </div>
 
     <!-- Meme Creative Phase Component -->
-    <memeit-meme-creative *ngIf="isCreativePhase" [gameCode]="gameCode" [roundNumber]="roundNumber"
+    <memeit-meme-creative *ngIf="isCreativePhase()" [gameCode]="gameCode()" [roundNumber]="currentRound()"
         (memeSubmitted)="onMemeSubmitted()">
     </memeit-meme-creative>
 
     <!-- Meme Rating Phase Component -->
-    <memeit-meme-rating *ngIf="isScorePhase" [gameCode]="gameCode" [roundNumber]="roundNumber"
+    <memeit-meme-rating *ngIf="isScoringPhase()" [gameCode]="gameCode()" [roundNumber]="currentRound()"
         [memeSubmission]="currentMemeToRate" (ratingSubmitted)="onRatingSubmitted()">
     </memeit-meme-rating>
 
     <!-- Scoreboard Component -->
-    <memeit-game-scoreboard *ngIf="isScoreboardPhase" [roundNumber]="roundNumber" [totalRounds]="totalRounds"
-        [scoreboard]="currentScoreboard">
+    <memeit-game-scoreboard *ngIf="isScoreboardPhase" [roundNumber]="currentRound()" [totalRounds]="totalRounds()"
+        [scoreboard]="finalScores()">
     </memeit-game-scoreboard>
 </div>

@@ -1,7 +1,7 @@
 using HexMaster.MemeIt.Memes.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Repositories;
-using HexMaster.MemeIt.Memes.Application.MemeTemplates;
+using HexMaster.MemeIt.Memes.Application.MemeTemplates.DeleteMemeTemplate;
 using Moq;
 
 namespace HexMaster.MemeIt.Memes.Tests.Application;

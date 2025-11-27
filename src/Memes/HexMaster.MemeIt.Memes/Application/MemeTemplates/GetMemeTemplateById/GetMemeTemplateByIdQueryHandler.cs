@@ -1,0 +1,67 @@
+using Azure.Storage.Blobs;
+using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
+using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
+using HexMaster.MemeIt.Memes.Abstractions.Domains;
+using HexMaster.MemeIt.Memes.Repositories;
+using HexMaster.MemeIt.Memes.Abstractions.ValueObjects;
+
+namespace HexMaster.MemeIt.Memes.Application.MemeTemplates.GetMemeTemplateById;
+
+/// <summary>
+/// Handler for getting a meme template by ID.
+/// </summary>
+public class GetMemeTemplateByIdQueryHandler : IQueryHandler<GetMemeTemplateByIdQuery, GetMemeTemplateByIdResult>
+{
+    private readonly IMemeTemplateRepository _repository;
+    private readonly BlobServiceClient _blobServiceClient;
+
+    public GetMemeTemplateByIdQueryHandler(
+        IMemeTemplateRepository repository,
+        BlobServiceClient blobServiceClient)
+    {
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _blobServiceClient = blobServiceClient ?? throw new ArgumentNullException(nameof(blobServiceClient));
+    }
+
+    public async Task<GetMemeTemplateByIdResult> HandleAsync(
+        GetMemeTemplateByIdQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var template = await _repository.GetByIdAsync(query.Id, cancellationToken);
+
+        if (template is null)
+        {
+            return new GetMemeTemplateByIdResult(null);
+        }
+
+        var dto = MapToDto(template);
+        return new GetMemeTemplateByIdResult(dto);
+    }
+
+    private MemeTemplateDto MapToDto(Domains.MemeTemplate template)
+    {
+        var baseUrl = _blobServiceClient.Uri.GetLeftPart(UriPartial.Authority);
+        var fullImageUrl = $"{baseUrl}{template.ImageUrl}";
+
+        return new MemeTemplateDto(
+            template.Id,
+            template.Title,
+            fullImageUrl,
+            template.Width,
+            template.Height,
+            template.TextAreas.Select(ta => new TextAreaDefinitionDto(
+                ta.X,
+                ta.Y,
+                ta.Width,
+                ta.Height,
+                ta.FontSize,
+                ta.FontColor,
+                ta.BorderSize,
+                ta.BorderColor,
+                ta.IsBold
+            )).ToList(),
+            template.CreatedAt,
+            template.UpdatedAt
+        );
+    }
+}

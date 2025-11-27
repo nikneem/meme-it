@@ -1,7 +1,8 @@
 using HexMaster.MemeIt.Games.Abstractions.Domains;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
-using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Games.CreateGame;
+using HexMaster.MemeIt.Games.Application.Observability;
 using Moq;
 
 namespace HexMaster.MemeIt.Games.Tests.Application;
@@ -21,8 +22,13 @@ public sealed class CreateGameCommandHandlerTests
         var codeGeneratorMock = new Mock<IGameCodeGenerator>();
         codeGeneratorMock.Setup(gen => gen.Generate()).Returns("ABCDEFGH");
 
+        var meterFactory = new Mock<System.Diagnostics.Metrics.IMeterFactory>();
+        meterFactory.Setup(m => m.Create(It.IsAny<System.Diagnostics.Metrics.MeterOptions>()))
+            .Returns(new System.Diagnostics.Metrics.Meter("Test"));
+        var metrics = new GamesMetrics(meterFactory.Object);
+
         var now = DateTimeOffset.UtcNow;
-        var handler = new CreateGameCommandHandler(repositoryMock.Object, codeGeneratorMock.Object, new FixedTimeProvider(now));
+        var handler = new CreateGameCommandHandler(repositoryMock.Object, codeGeneratorMock.Object, new FixedTimeProvider(now), metrics);
 
         var command = new CreateGameCommand(Guid.NewGuid(), "Admin", null);
 
@@ -40,7 +46,11 @@ public sealed class CreateGameCommandHandlerTests
     {
         var repositoryMock = new Mock<IGamesRepository>();
         var codeGeneratorMock = new Mock<IGameCodeGenerator>();
-        var handler = new CreateGameCommandHandler(repositoryMock.Object, codeGeneratorMock.Object, TimeProvider.System);
+        var meterFactory = new Mock<System.Diagnostics.Metrics.IMeterFactory>();
+        meterFactory.Setup(m => m.Create(It.IsAny<System.Diagnostics.Metrics.MeterOptions>()))
+            .Returns(new System.Diagnostics.Metrics.Meter("Test"));
+        var metrics = new GamesMetrics(meterFactory.Object);
+        var handler = new CreateGameCommandHandler(repositoryMock.Object, codeGeneratorMock.Object, TimeProvider.System, metrics);
 
         var command = new CreateGameCommand(Guid.NewGuid(), "", null);
 

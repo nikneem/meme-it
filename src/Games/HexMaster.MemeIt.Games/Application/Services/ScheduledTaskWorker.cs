@@ -1,6 +1,8 @@
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Services;
-using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Games.EndCreativePhase;
+using HexMaster.MemeIt.Games.Application.Games.EndScorePhase;
+using HexMaster.MemeIt.Games.Application.Games.StartNewRound;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

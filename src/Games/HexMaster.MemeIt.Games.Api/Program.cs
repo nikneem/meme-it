@@ -5,7 +5,21 @@ using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Api.Endpoints;
 using HexMaster.MemeIt.Games.Api.Infrastructure;
 using HexMaster.MemeIt.Games.Api.Infrastructure.Identity;
-using HexMaster.MemeIt.Games.Application.Games;
+using HexMaster.MemeIt.Games.Application.Games.CreateGame;
+using HexMaster.MemeIt.Games.Application.Games.EndCreativePhase;
+using HexMaster.MemeIt.Games.Application.Games.EndRound;
+using HexMaster.MemeIt.Games.Application.Games.EndScorePhase;
+using HexMaster.MemeIt.Games.Application.Games.GetGameDetails;
+using HexMaster.MemeIt.Games.Application.Games.GetPlayerRoundState;
+using HexMaster.MemeIt.Games.Application.Games.JoinGame;
+using HexMaster.MemeIt.Games.Application.Games.RateMeme;
+using HexMaster.MemeIt.Games.Application.Games.RemovePlayer;
+using HexMaster.MemeIt.Games.Application.Games.SelectMemeTemplate;
+using HexMaster.MemeIt.Games.Application.Games.SetPlayerReady;
+using HexMaster.MemeIt.Games.Application.Games.StartGame;
+using HexMaster.MemeIt.Games.Application.Games.StartNewRound;
+using HexMaster.MemeIt.Games.Application.Games.SubmitMeme;
+using HexMaster.MemeIt.Games.Application.Observability;
 using HexMaster.MemeIt.Games.Application.Services;
 using HexMaster.MemeIt.Games.Data.MongoDb;
 using HexMaster.MemeIt.IntegrationEvents.Publishers;
@@ -14,6 +28,13 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// Configure OpenTelemetry with custom activity sources and meters
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddSource(GamesActivitySource.SourceName))
+    .WithMetrics(metrics => metrics
+        .AddMeter("HexMaster.MemeIt.Games"));
 builder.AddMongoDBClient("games-db");
 builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
@@ -31,6 +52,7 @@ builder.Services.AddGamesMongoData(builder.Configuration);
 builder.Services.AddScheduledTaskService();
 builder.Services.AddSingleton<IGameCodeGenerator, RandomGameCodeGenerator>();
 builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
+builder.Services.AddSingleton<GamesMetrics>();
 builder.Services.Configure<UsersJwtOptions>(builder.Configuration.GetSection(UsersJwtOptions.SectionName));
 builder.Services.AddSingleton<IPlayerIdentityProvider, JwtPlayerIdentityProvider>();
 builder.Services.AddScoped<ICommandHandler<CreateGameCommand, CreateGameResult>, CreateGameCommandHandler>();

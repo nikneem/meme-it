@@ -1,13 +1,13 @@
 <div class="sunray-container"></div>
 <div class="lobby-container">
-  <div class="lobby-content" *ngIf="!isLoading && game">
+  <div class="lobby-content" *ngIf="!isLoading() && gameCode()">
     <header class="lobby-header">
       <div class="header-top">
         <h1 class="lobby-title">Game Lobby</h1>
-        <div class="game-status-badge" [class.lobby]="game.state === 'Lobby'"
-          [class.in-progress]="game.state === 'InProgress'">
-          <mat-icon>{{ game.state === 'Lobby' ? 'groups' : 'sports_esports' }}</mat-icon>
-          <span>{{ game.state === 'Lobby' ? 'Waiting for Players' : game.state }}</span>
+        <div class="game-status-badge" [class.lobby]="gameStore.phase() === 'lobby'"
+          [class.in-progress]="gameStore.phase() === 'in-progress'">
+          <mat-icon>{{ gameStore.phase() === 'lobby' ? 'groups' : 'sports_esports' }}</mat-icon>
+          <span>{{ gameStore.phase() === 'lobby' ? 'Waiting for Players' : gameStore.phase() }}</span>
         </div>
       </div>
 
@@ -15,7 +15,7 @@
         <div class="code-container">
           <span class="code-label">Game Code</span>
           <div class="code-display">
-            <span class="code-value">{{ gameCode }}</span>
+            <span class="code-value">{{ gameCode() }}</span>
             <button mat-icon-button (click)="copyGameCode()" class="copy-button" title="Copy game code">
               <mat-icon>content_copy</mat-icon>
             </button>
@@ -26,13 +26,13 @@
             <mat-icon>people</mat-icon>
             <span>{{ playerCount }} Player{{ playerCount !== 1 ? 's' : '' }}</span>
           </div>
-          <div class="stat-item" *ngIf="game.state === 'Lobby'">
+          <div class="stat-item" *ngIf="gameStore.phase() === 'lobby'">
             <mat-icon>check_circle</mat-icon>
             <span>{{ readyPlayerCount }}/{{ playerCount }} Ready</span>
           </div>
-          <div class="stat-item" *ngIf="game.rounds.length > 0">
+          <div class="stat-item" *ngIf="gameStore.rounds().length > 0">
             <mat-icon>emoji_events</mat-icon>
-            <span>Round {{ game.rounds.length }}</span>
+            <span>Round {{ gameStore.rounds().length }}</span>
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@
       </div>
 
       <div class="players-grid">
-        <mat-card *ngFor="let player of game.players" class="player-card" [class.ready]="player.isReady">
+        <mat-card *ngFor="let player of players()" class="player-card" [class.ready]="player.isReady">
           <mat-card-header>
             <mat-card-title>{{ player.displayName }}</mat-card-title>
           </mat-card-header>
@@ -66,7 +66,7 @@
 
                 <!-- Delete Badge (only for admin, not for current user or admin player) -->
                 <div class="badge-item delete-badge"
-                  *ngIf="isAdmin && !isCurrentUser(player.playerId) && !isPlayerAdmin(player.playerId)"
+                  *ngIf="isAdmin() && !isCurrentUser(player.playerId) && !isPlayerAdmin(player.playerId)"
                   (click)="removePlayer(player.playerId)">
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
@@ -98,20 +98,20 @@
         Leave Game
       </button>
 
-      <button mat-raised-button color="primary" *ngIf="isAdmin" (click)="startGame()"
-        [disabled]="playerCount < 2 || !allPlayersReady" class="action-btn primary-btn">
+      <button mat-raised-button color="primary" *ngIf="isAdmin()" (click)="startGame()"
+        [disabled]="playerCount < 2 || !allPlayersReady()" class="action-btn primary-btn">
         <mat-icon>play_arrow</mat-icon>
         Start Game
       </button>
     </footer>
   </div>
 
-  <div class="loading-state" *ngIf="isLoading">
+  <div class="loading-state" *ngIf="isLoading()">
     <mat-spinner diameter="60"></mat-spinner>
     <p>Loading game...</p>
   </div>
 
-  <div class="error-state" *ngIf="!isLoading && !game && errorMessage">
+  <div class="error-state" *ngIf="!isLoading() && !gameCode() && errorMessage">
     <mat-icon class="error-icon">error_outline</mat-icon>
     <p>{{ errorMessage }}</p>
     <button mat-raised-button color="primary" routerLink="/">

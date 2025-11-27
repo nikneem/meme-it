@@ -3,7 +3,7 @@ using HexMaster.MemeIt.Memes.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Repositories;
 using HexMaster.MemeIt.Memes.Abstractions.ValueObjects;
-using HexMaster.MemeIt.Memes.Application.MemeTemplates;
+using HexMaster.MemeIt.Memes.Application.MemeTemplates.CreateMemeTemplate;
 using HexMaster.MemeIt.Memes.Domains;
 using Moq;
 

@@ -1,6 +1,6 @@
 using HexMaster.MemeIt.Users.Abstractions.Application.Users;
 using HexMaster.MemeIt.Users.Abstractions.Services;
-using HexMaster.MemeIt.Users.Application.Users;
+using HexMaster.MemeIt.Users.Application.Users.JoinUser;
 using Moq;
 
 namespace HexMaster.MemeIt.Users.Tests.Application;
