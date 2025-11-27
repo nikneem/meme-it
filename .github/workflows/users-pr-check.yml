@@ -34,7 +34,6 @@ jobs:
       - name: Run tests with coverage
         run: |
           dotnet test src/Users/HexMaster.MemeIt.Users.Tests/HexMaster.MemeIt.Users.Tests.csproj \
-            --no-restore \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
             --results-directory ./TestResults \
@@ -74,11 +73,3 @@ jobs:
             exit 1
           fi
           echo "✅ Coverage meets 80% threshold ($COVERAGE_PERCENT%)"
-        
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: users-coverage-report
-          path: ./coveragereport
-          retention-days: 30
