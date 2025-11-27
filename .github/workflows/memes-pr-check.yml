@@ -49,7 +49,7 @@ jobs:
         
       - name: Generate coverage report
         run: |
-          COVERAGE_FILE=$(find ./TestResults -name "*.cobertura.xml" -o -name "coverage.cobertura.xml" | head -1)
+          COVERAGE_FILE=$(find . -name "coverage.cobertura.xml" -type f | head -1)
           if [ -n "$COVERAGE_FILE" ] && [ -f "$COVERAGE_FILE" ]; then
             echo "Found coverage file: $COVERAGE_FILE"
             reportgenerator -reports:"$COVERAGE_FILE" -targetdir:./coveragereport -reporttypes:"Html;Cobertura" -filefilters:-**/Migrations/**
