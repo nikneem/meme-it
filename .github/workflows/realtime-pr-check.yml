@@ -47,9 +47,8 @@ jobs:
           dotnet test src/Realtime/HexMaster.MemeIt.Realtime.Tests/HexMaster.MemeIt.Realtime.Tests.csproj \
             --no-restore \
             --configuration Release \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=cobertura \
-            /p:CoverletOutput=coverage.cobertura.xml \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
             --logger "console;verbosity=normal"
         
       - name: Install ReportGenerator
@@ -59,12 +58,12 @@ jobs:
       - name: Generate coverage report
         if: steps.check_tests.outputs.tests_exist == 'true'
         run: |
-          COVERAGE_FILE="src/Realtime/HexMaster.MemeIt.Realtime.Tests/coverage.cobertura.xml"
-          if [ -f "$COVERAGE_FILE" ]; then
+          COVERAGE_FILE=$(find ./TestResults -name "coverage.cobertura.xml" -type f | head -1)
+          if [ -n "$COVERAGE_FILE" ] && [ -f "$COVERAGE_FILE" ]; then
             echo "Found coverage file: $COVERAGE_FILE"
             reportgenerator -reports:"$COVERAGE_FILE" -targetdir:./coveragereport -reporttypes:"Html;Cobertura" -filefilters:-**/Migrations/**
           else
-            echo "No coverage file found at $COVERAGE_FILE, creating empty report"
+            echo "No coverage file found, creating empty report"
             mkdir -p ./coveragereport
             echo '<?xml version="1.0" encoding="utf-8"?><coverage line-rate="0" branch-rate="0" version="1.9"></coverage>' > ./coveragereport/Cobertura.xml
           fi
