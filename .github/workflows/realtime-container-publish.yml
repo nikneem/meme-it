@@ -49,10 +49,11 @@ jobs:
             --no-restore \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage \
-            --logger "console;verbosity=normal"
+            --results-directory:./TestResults \
+            --logger "console;verbosity=normal" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
           echo "Test execution completed. Checking for coverage files..."
-          find ./coverage -name "*.xml" -type f || echo "No XML files found in coverage directory"
+          find ./TestResults -type f -name "*.xml" || echo "No coverage files found"
         
       - name: Install ReportGenerator
         if: steps.check_tests.outputs.tests_exist == 'true'
@@ -61,8 +62,8 @@ jobs:
       - name: Generate coverage report
         if: steps.check_tests.outputs.tests_exist == 'true'
         run: |
-          if [ -d "./coverage" ] && [ "$(find ./coverage -name 'coverage.cobertura.xml' -type f | wc -l)" -gt 0 ]; then
-            reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:./coveragereport -reporttypes:"Html;Cobertura" -filefilters:-**/Migrations/**
+          if [ -d "./TestResults" ] && [ "$(find ./TestResults -name 'coverage.cobertura.xml' -type f | wc -l)" -gt 0 ]; then
+            reportgenerator -reports:./TestResults/**/coverage.cobertura.xml -targetdir:./coveragereport -reporttypes:"Html;Cobertura" -filefilters:-**/Migrations/**
           else
             echo "No coverage files found, creating empty report"
             mkdir -p ./coveragereport
