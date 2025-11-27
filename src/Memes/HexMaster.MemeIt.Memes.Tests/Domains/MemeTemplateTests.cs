@@ -149,6 +149,122 @@ public class MemeTemplateTests
         Assert.Contains("Invalid text area index", exception.Message);
     }
 
+    [Fact]
+    public void Create_WithZeroWidth_ShouldThrowDomainException()
+    {
+        // Arrange
+        var title = _faker.Lorem.Sentence();
+        var imageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
+        var textAreas = new List<TextAreaDefinition>
+        {
+            TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<DomainException>(() =>
+            MemeTemplate.Create(title, imageUrl, 0, 600, textAreas));
+        Assert.Contains("Width must be greater than 0", exception.Message);
+    }
+
+    [Fact]
+    public void Create_WithNegativeWidth_ShouldThrowDomainException()
+    {
+        // Arrange
+        var title = _faker.Lorem.Sentence();
+        var imageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
+        var textAreas = new List<TextAreaDefinition>
+        {
+            TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<DomainException>(() =>
+            MemeTemplate.Create(title, imageUrl, -100, 600, textAreas));
+        Assert.Contains("Width must be greater than 0", exception.Message);
+    }
+
+    [Fact]
+    public void Create_WithZeroHeight_ShouldThrowDomainException()
+    {
+        // Arrange
+        var title = _faker.Lorem.Sentence();
+        var imageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
+        var textAreas = new List<TextAreaDefinition>
+        {
+            TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<DomainException>(() =>
+            MemeTemplate.Create(title, imageUrl, 800, 0, textAreas));
+        Assert.Contains("Height must be greater than 0", exception.Message);
+    }
+
+    [Fact]
+    public void Create_WithNullTextAreas_ShouldThrowArgumentNullException()
+    {
+        // Arrange
+        var title = _faker.Lorem.Sentence();
+        var imageUrl = "/meme-templates/" + _faker.Random.AlphaNumeric(10) + ".jpg";
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            MemeTemplate.Create(title, imageUrl, 800, 600, null!));
+    }
+
+    [Fact]
+    public void AddTextArea_WithNullTextArea_ShouldThrowArgumentNullException()
+    {
+        // Arrange
+        var template = CreateValidTemplate();
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => template.AddTextArea(null!));
+    }
+
+    [Fact]
+    public void Update_WithNullTitle_ShouldThrowArgumentNullException()
+    {
+        // Arrange
+        var template = CreateValidTemplate();
+        var textAreas = new List<TextAreaDefinition>
+        {
+            TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
+        };
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            template.Update(null!, "/test.jpg", 800, 600, textAreas));
+    }
+
+    [Fact]
+    public void Update_WithZeroWidth_ShouldThrowDomainException()
+    {
+        // Arrange
+        var template = CreateValidTemplate();
+        var textAreas = new List<TextAreaDefinition>
+        {
+            TextAreaDefinition.Create(10, 10, 200, 50, 24, "#FFFFFF", 2, "#000000", true)
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<DomainException>(() =>
+            template.Update("New Title", "/test.jpg", 0, 600, textAreas));
+        Assert.Contains("Width must be greater than 0", exception.Message);
+    }
+
+    [Fact]
+    public void RemoveTextArea_WithNegativeIndex_ShouldThrowDomainException()
+    {
+        // Arrange
+        var template = CreateValidTemplate();
+        template.AddTextArea(TextAreaDefinition.Create(50, 50, 150, 40, 18, "#00FF00", 1, "#000000", true));
+
+        // Act & Assert
+        var exception = Assert.Throws<DomainException>(() => template.RemoveTextArea(-1));
+        Assert.Contains("Invalid text area index", exception.Message);
+    }
+
     private MemeTemplate CreateValidTemplate()
     {
         var title = _faker.Lorem.Sentence();
