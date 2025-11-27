@@ -68,4 +68,63 @@ public sealed class JoinUserCommandHandlerTests
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() => handler.HandleAsync(command));
     }
+
+    [Fact]
+    public async Task HandleAsync_Throws_When_Command_Is_Null()
+    {
+        // Arrange
+        var handler = new JoinUserCommandHandler(Mock.Of<IUserTokenService>());
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentNullException>(() => handler.HandleAsync(null!));
+    }
+
+    [Fact]
+    public async Task HandleAsync_Throws_When_DisplayName_Too_Short()
+    {
+        // Arrange
+        var handler = new JoinUserCommandHandler(Mock.Of<IUserTokenService>());
+        var command = new JoinUserCommand("A", null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => handler.HandleAsync(command));
+    }
+
+    [Fact]
+    public async Task HandleAsync_Throws_When_DisplayName_Too_Long()
+    {
+        // Arrange
+        var handler = new JoinUserCommandHandler(Mock.Of<IUserTokenService>());
+        var command = new JoinUserCommand(new string('A', 33), null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => handler.HandleAsync(command));
+    }
+
+    [Fact]
+    public async Task HandleAsync_Trims_DisplayName()
+    {
+        // Arrange
+        var tokenServiceMock = new Mock<IUserTokenService>();
+        tokenServiceMock
+            .Setup(service => service.CreateToken(It.IsAny<Guid>(), "Player"))
+            .Returns<Guid, string>((userId, _) => new JwtToken($"token-{userId}", DateTimeOffset.UtcNow.AddDays(1)));
+
+        var handler = new JoinUserCommandHandler(tokenServiceMock.Object);
+        var command = new JoinUserCommand("  Player  ", null);
+
+        // Act
+        var result = await handler.HandleAsync(command);
+
+        // Assert
+        Assert.Equal("Player", result.DisplayName);
+        tokenServiceMock.Verify(service => service.CreateToken(It.IsAny<Guid>(), "Player"), Times.Once);
+    }
+
+    [Fact]
+    public void Constructor_Throws_When_TokenService_Is_Null()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new JoinUserCommandHandler(null!));
+    }
 }
