@@ -166,6 +166,200 @@ public class GameTests
         Assert.Equal(GameState.Completed, game.State);
     }
 
+    [Fact]
+    public void SetPlayerReady_ShouldUpdatePlayerReadyStatus()
+    {
+        var playerId = Guid.NewGuid();
+        var game = CreateGame();
+        game.AddPlayer(playerId, "Player");
+
+        game.SetPlayerReady(playerId, true);
+
+        var player = game.Players.First(p => p.PlayerId == playerId);
+        Assert.True(player.IsReady);
+    }
+
+    [Fact]
+    public void SetPlayerReady_ShouldRejectIfNotInLobby()
+    {
+        var playerId = Guid.NewGuid();
+        var game = CreateGame();
+        game.AddPlayer(playerId, "Player");
+        game.NextRound();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => game.SetPlayerReady(playerId, true));
+        Assert.Contains("lobby", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void SetPlayerReady_ShouldRejectNonExistentPlayer()
+    {
+        var game = CreateGame();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => game.SetPlayerReady(Guid.NewGuid(), true));
+        Assert.Contains("not part of this game", ex.Message);
+    }
+
+    [Fact]
+    public void AreAllPlayersReady_ShouldReturnFalseWhenNoPlayers()
+    {
+        var game = CreateGame();
+
+        Assert.False(game.AreAllPlayersReady());
+    }
+
+    [Fact]
+    public void AreAllPlayersReady_ShouldReturnFalseWhenSomeNotReady()
+    {
+        var game = CreateGame();
+        var player1 = Guid.NewGuid();
+        var player2 = Guid.NewGuid();
+        game.AddPlayer(player1, "Player1");
+        game.AddPlayer(player2, "Player2");
+        game.SetPlayerReady(player1, true);
+
+        Assert.False(game.AreAllPlayersReady());
+    }
+
+    [Fact]
+    public void AreAllPlayersReady_ShouldReturnTrueWhenAllReady()
+    {
+        var game = CreateGame();
+        var player1 = Guid.NewGuid();
+        var player2 = Guid.NewGuid();
+        game.AddPlayer(player1, "Player1");
+        game.AddPlayer(player2, "Player2");
+        game.SetPlayerReady(player1, true);
+        game.SetPlayerReady(player2, true);
+
+        Assert.True(game.AreAllPlayersReady());
+    }
+
+    [Fact]
+    public void GetRound_ShouldReturnRoundWhenExists()
+    {
+        var game = CreateGame();
+        var round = game.NextRound();
+
+        var result = game.GetRound(round.RoundNumber);
+
+        Assert.NotNull(result);
+        Assert.Equal(round.RoundNumber, result.RoundNumber);
+    }
+
+    [Fact]
+    public void GetRound_ShouldReturnNullWhenNotExists()
+    {
+        var game = CreateGame();
+
+        var result = game.GetRound(99);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetRandomUnratedSubmissionForRound_ShouldThrowWhenRoundNotFound()
+    {
+        var game = CreateGame();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => game.GetRandomUnratedSubmissionForRound(99));
+        Assert.Contains("not found", ex.Message);
+    }
+
+    [Fact]
+    public void AddScore_ShouldThrowWhenRoundNotFound()
+    {
+        var game = CreateGame();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => game.AddScore(99, Guid.NewGuid(), Guid.NewGuid(), 5));
+        Assert.Contains("not found", ex.Message);
+    }
+
+    [Fact]
+    public void AddScore_ShouldDelegateToGameRound()
+    {
+        var playerId = Guid.NewGuid();
+        var game = CreateGame();
+        game.AddPlayer(playerId, "Player");
+        var round = game.NextRound();
+        var submission = new MemeSubmission(playerId, Guid.NewGuid(), Array.Empty<IMemeTextEntry>());
+        game.AddMemeSubmission(round.RoundNumber, submission);
+
+        game.AddScore(round.RoundNumber, submission.SubmissionId, Guid.NewGuid(), 4);
+
+        var updatedRound = game.GetRound(round.RoundNumber);
+        var updatedSubmission = updatedRound!.Submissions.First();
+        Assert.Single(updatedSubmission.Scores);
+    }
+
+    [Fact]
+    public void MarkCreativePhaseEnded_ShouldMarkRoundPhaseEnded()
+    {
+        var game = CreateGame();
+        var round = game.NextRound();
+
+        game.MarkCreativePhaseEnded(round.RoundNumber);
+
+        var updatedRound = game.GetRound(round.RoundNumber);
+        Assert.True(updatedRound!.HasCreativePhaseEnded);
+    }
+
+    [Fact]
+    public void MarkCreativePhaseEnded_ShouldThrowWhenRoundNotFound()
+    {
+        var game = CreateGame();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => game.MarkCreativePhaseEnded(99));
+        Assert.Contains("not found", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_ShouldRejectEmptyGameCode()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => CreateGame(gameCode: ""));
+        Assert.Contains("Game code must be provided", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_ShouldRejectInvalidGameCodeLength()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => CreateGame(gameCode: "SHORT"));
+        Assert.Contains("must be 8 characters long", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_ShouldRejectEmptyAdminId()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => CreateGame(adminId: Guid.Empty));
+        Assert.Contains("non-empty guid", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_ShouldNormalizeGameCodeToUpperCase()
+    {
+        var game = CreateGame(gameCode: "abc12345");
+
+        Assert.Equal("ABC12345", game.GameCode);
+    }
+
+    [Fact]
+    public void Constructor_ShouldInitializeWithInitialPlayers()
+    {
+        var player1 = new GamePlayer(Guid.NewGuid(), "Player1", isReady: true);
+        var player2 = new GamePlayer(Guid.NewGuid(), "Player2", isReady: false);
+        var initialPlayers = new[] { player1, player2 };
+
+        var game = new Game(
+            "ABCD1234",
+            Guid.NewGuid(),
+            initialPlayers: initialPlayers,
+            createdAt: DateTimeOffset.UtcNow);
+
+        Assert.Equal(2, game.Players.Count);
+        Assert.Contains(game.Players, p => p.PlayerId == player1.PlayerId);
+        Assert.Contains(game.Players, p => p.PlayerId == player2.PlayerId);
+    }
+
     private Game CreateGame(
         string? gameCode = null,
         Guid? adminId = null,
