@@ -38,6 +38,7 @@ jobs:
             --configuration Release \
             --collect:"XPlat Code Coverage" \
             --results-directory ./TestResults \
+            --settings src/Users/HexMaster.MemeIt.Users.Tests/coverlet.runsettings \
             --logger "console;verbosity=normal"
         
       - name: Install ReportGenerator
