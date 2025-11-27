@@ -35,7 +35,6 @@ jobs:
       - name: Run tests with coverage
         run: |
           dotnet test src/Games/HexMaster.MemeIt.Games.Tests/HexMaster.MemeIt.Games.Tests.csproj \
-            --no-restore \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
             --results-directory ./TestResults \
