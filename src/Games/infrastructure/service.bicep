@@ -52,22 +52,6 @@ resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/mongodbDatabases@
   }
 }
 
-// Grant managed identity access to Cosmos DB
-resource cosmosDbDataContributorRole 'Microsoft.DocumentDB/databaseAccounts/mongodbRoleDefinitions@2024-05-15' existing = {
-  parent: cosmosDbAccount
-  name: '00000000-0000-0000-0000-000000000001' // Built-in MongoDB data contributor role
-}
-
-resource cosmosDbRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/mongodbRoleAssignments@2024-05-15' = {
-  parent: cosmosDbAccount
-  name: guid(cosmosDbAccount.id, managedIdentityId, 'MongoDBDataContributor')
-  properties: {
-    roleDefinitionId: cosmosDbDataContributorRole.id
-    principalId: reference(managedIdentityId, '2023-01-31').principalId
-    scope: cosmosDbAccount.id
-  }
-}
-
 resource gamesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-ca'
   location: location
@@ -157,9 +141,6 @@ resource gamesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
     }
   }
-  dependsOn: [
-    cosmosDbRoleAssignment
-  ]
 }
 
 output containerAppName string = gamesContainerApp.name

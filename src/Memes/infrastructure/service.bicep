@@ -69,27 +69,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     allowBlobPublicAccess: true
     minimumTlsVersion: 'TLS1_2'
     supportsHttpsTrafficOnly: true
-    cors: {
-      corsRules: [
-        {
-          allowedOrigins: [
-            allowedCorsOrigin
-          ]
-          allowedMethods: [
-            'GET'
-            'PUT'
-            'POST'
-          ]
-          allowedHeaders: [
-            '*'
-          ]
-          exposedHeaders: [
-            '*'
-          ]
-          maxAgeInSeconds: 3600
-        }
-      ]
-    }
   }
 }
 
