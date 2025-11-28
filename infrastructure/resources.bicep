@@ -76,6 +76,12 @@ resource containerAppsManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIde
   location: location
 }
 
+// Managed Identity for Container Apps to pull images from external registry
+resource containerRegistryPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${defaultResourceName}-acr-pull-id'
+  location: location
+}
+
 // Grant Container Apps identity permissions to Service Bus
 resource serviceBusDataSenderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(serviceBusNamespace.id, containerAppsManagedIdentity.id, 'ServiceBusDataSender')
@@ -119,7 +125,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 
 // Container Apps Environment with OpenTelemetry configured
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' = {
-  name: '${defaultResourceName}-cae'
+  name: '${defaultResourceName}-env'
   location: location
   properties: {
     appLogsConfiguration: {
@@ -145,6 +151,12 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-
         destinations: ['appInsightsOtlp']
       }
     }
+    workloadProfiles: [
+      {
+        name: 'Consumption'
+        workloadProfileType: 'Consumption'
+      }
+    ]
   }
 }
 
@@ -178,3 +190,6 @@ output containerAppsEnvironmentName string = containerAppsEnvironment.name
 output serviceBusNamespace string = serviceBusNamespace.name
 output managedIdentityClientId string = containerAppsManagedIdentity.properties.clientId
 output managedIdentityId string = containerAppsManagedIdentity.id
+output containerRegistryPullIdentityId string = containerRegistryPullIdentity.id
+output containerRegistryPullIdentityClientId string = containerRegistryPullIdentity.properties.clientId
+output containerRegistryPullIdentityPrincipalId string = containerRegistryPullIdentity.properties.principalId
