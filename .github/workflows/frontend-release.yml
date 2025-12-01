@@ -83,7 +83,7 @@ jobs:
         with:
           azcliversion: 2.72.0
           inlineScript: |
-            SWA_SECRETS=$(az staticwebapp secrets list -n spreavw-frontend-prd-westeurope-swa -g rg-spreavw-frontend-prd-westeurope --query 'properties.apiKey' -o tsv )
+            SWA_SECRETS=$(az staticwebapp secrets list -n memeit-frontend-prd-westeurope-swa -g rg-memeit-frontend-prd-westeurope --query 'properties.apiKey' -o tsv )
             echo "::add-mask::$SWA_SECRETS"
             echo SWA_SECRETS=$SWA_SECRETS >> $GITHUB_OUTPUT
 
