@@ -1,0 +1,78 @@
+name: Landing Zone - Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/**'
+      - '.github/workflows/landingzone-deploy.yml'
+
+jobs:
+  deploy-landingzone:
+    name: Deploy Landing Zone
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Deploy Landing Zone
+        run: |
+          az deployment sub create \
+            --name "landingzone-deploy-${{ github.run_number }}" \
+            --location northeurope \
+            --template-file infrastructure/main.bicep \
+            --parameters infrastructure/main.bicepparam
+      
+      - name: Get Deployment Outputs
+        id: outputs
+        run: |
+          OUTPUTS=$(az deployment sub show \
+            --name "landingzone-deploy-${{ github.run_number }}" \
+            --query 'properties.outputs' \
+            -o json)
+          echo "outputs=$OUTPUTS" >> $GITHUB_OUTPUT
+      
+      - name: Display Deployment Summary
+        run: |
+          echo "### Landing Zone Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment:** landingzone-deploy-${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Location:** northeurope" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          OUTPUTS='${{ steps.outputs.outputs }}'
+          
+          if [ -n "$OUTPUTS" ]; then
+            echo "**Application Insights:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Connection String: $(echo $OUTPUTS | jq -r '.appInsightsConnectionString.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            echo "**Service Bus:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Namespace: $(echo $OUTPUTS | jq -r '.serviceBusNamespace.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            echo "**Container Apps Environment:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Name: $(echo $OUTPUTS | jq -r '.containerAppsEnvironmentName.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            echo "**API Gateway:**" >> $GITHUB_STEP_SUMMARY
+            echo "- FQDN: $(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "- Users: https://$(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')/users" >> $GITHUB_STEP_SUMMARY
+            echo "- Realtime: https://$(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')/realtime" >> $GITHUB_STEP_SUMMARY
+            echo "- Games: https://$(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')/games" >> $GITHUB_STEP_SUMMARY
+            echo "- Memes: https://$(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')/memes" >> $GITHUB_STEP_SUMMARY
+          fi
