@@ -14,3 +14,5 @@ param landingzoneServiceName = 'landingzone'
 //   containerRegistryPullIdentityName: 'memeit-landingzone-dev-nor-acr-pull-id'
 //   appInsightsName: 'memeit-landingzone-dev-nor-ai'
 // }
+
+param jwtSigningKey = ''
