@@ -132,4 +132,5 @@ jobs:
             --location northeurope \
             --template-file src/Users/infrastructure/main.bicep \
             --parameters src/Users/infrastructure/main.bicepparam \
-            --parameters containerImage="${{ secrets.CONTAINER_REGISTRY_SERVER }}/memeit/users-api:${{ steps.gitversion.outputs.semVer }}"
+            --parameters containerImage="${{ secrets.CONTAINER_REGISTRY_SERVER }}/memeit/users-api:${{ steps.gitversion.outputs.semVer }}" \
+            --parameters jwtSigningKey="${{ secrets.MEMEIT_USERS_JWT_TOKEN_SIGNATURE }}"

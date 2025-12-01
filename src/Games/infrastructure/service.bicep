@@ -6,6 +6,8 @@ param containerRegistryPullIdentityId string
 param appInsightsConnectionString string
 param containerImage string
 param containerPort int
+@secure()
+param jwtSigningKey string
 
 // Cosmos DB for MongoDB
 resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
@@ -121,6 +123,22 @@ resource gamesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'MongoDB__DatabaseName'
               value: cosmosDatabase.name
+            }
+            {
+              name: 'UsersJwt__SigningKey'
+              value: jwtSigningKey
+            }
+            {
+              name: 'UsersJwt__Issuer'
+              value: 'HexMaster.MemeIt.Users'
+            }
+            {
+              name: 'UsersJwt__Audience'
+              value: 'HexMaster.MemeIt.Clients'
+            }
+            {
+              name: 'UsersJwt__ExpiryMinutes'
+              value: '1440'
             }
           ]
         }

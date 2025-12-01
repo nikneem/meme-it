@@ -6,6 +6,8 @@ param containerRegistryPullIdentityId string
 param appInsightsConnectionString string
 param containerImage string
 param containerPort int
+@secure()
+param jwtSigningKey string
 
 resource usersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-ca'
@@ -68,6 +70,22 @@ resource usersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
               value: appInsightsConnectionString
+            }
+            {
+              name: 'UsersJwt__SigningKey'
+              value: jwtSigningKey
+            }
+            {
+              name: 'UsersJwt__Issuer'
+              value: 'HexMaster.MemeIt.Users'
+            }
+            {
+              name: 'UsersJwt__Audience'
+              value: 'HexMaster.MemeIt.Clients'
+            }
+            {
+              name: 'UsersJwt__ExpiryMinutes'
+              value: '1440'
             }
           ]
         }

@@ -6,6 +6,8 @@ param serviceName string = 'games'
 param environmentName string
 param containerImage string
 param containerPort int = 8080
+@secure()
+param jwtSigningKey string
 
 // Landingzone configuration
 param landingzoneServiceName string = 'landingzone'
@@ -58,6 +60,7 @@ module gamesService 'service.bicep' = {
     appInsightsConnectionString: landingzoneResources.outputs.appInsightsConnectionString
     containerImage: containerImage
     containerPort: containerPort
+    jwtSigningKey: jwtSigningKey
   }
 }
 
