@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { Subject, Observable } from 'rxjs';
+import { API_BASE_URL } from '../constants/api.constants';
 
 export interface PlayerJoinedEvent {
     playerId: string;
@@ -69,7 +70,7 @@ export interface RoundEndedEvent {
 })
 export class RealtimeService {
     private hubConnection?: HubConnection;
-    private readonly hubUrl = 'http://localhost:5000/hubs/games';
+    private readonly hubUrl = `${API_BASE_URL}/hubs/games`;
     private currentGameCode?: string;
 
     private playerJoinedSubject = new Subject<PlayerJoinedEvent>();

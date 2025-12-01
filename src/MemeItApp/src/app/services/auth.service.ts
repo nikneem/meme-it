@@ -4,12 +4,13 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuthTokenRequest, AuthTokenResponse } from '../models/auth.model';
 import { AUTH_TOKEN_KEY } from '../constants/auth.constants';
+import { API_BASE_URL } from '../constants/api.constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:5000/users';
+  private readonly apiUrl = `${API_BASE_URL}/users`;
 
   constructor(private http: HttpClient) { }
 
