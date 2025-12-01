@@ -35,7 +35,13 @@ public class BlobStorageService : IBlobStorageService
         // Set expiration time
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(expirationMinutes);
 
-        // Generate SAS token for upload (write permissions)
+        // Get a user delegation key for the Blob service (required for managed identity)
+        var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(
+            DateTimeOffset.UtcNow.AddMinutes(-5),
+            expiresAt,
+            cancellationToken);
+
+        // Generate SAS token for upload (write permissions) using user delegation
         var sasBuilder = new BlobSasBuilder
         {
             BlobContainerName = ContainerName,
@@ -48,8 +54,9 @@ public class BlobStorageService : IBlobStorageService
         // Grant write permissions
         sasBuilder.SetPermissions(BlobSasPermissions.Create | BlobSasPermissions.Write);
 
-        // Generate the SAS token
-        var sasToken = blobClient.GenerateSasUri(sasBuilder).Query.TrimStart('?');
+        // Generate the SAS token using user delegation key
+        var sasQueryParameters = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName);
+        var sasToken = sasQueryParameters.ToString();
         var blobUrl = blobClient.Uri.ToString();
 
         return (blobUrl, sasToken, expiresAt);
