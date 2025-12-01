@@ -186,6 +186,31 @@ resource memesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
     }
     template: {
+      initContainers: [
+        {
+          name: 'db-migration'
+          image: containerImage
+          command: [
+            'dotnet'
+            'HexMaster.MemeIt.Memes.Api.dll'
+            '--migrate'
+          ]
+          env: [
+            {
+              name: 'ASPNETCORE_ENVIRONMENT'
+              value: 'Production'
+            }
+            {
+              name: 'ConnectionStrings__memes-db'
+              value: 'Host=${postgresServer.properties.fullyQualifiedDomainName};Database=memesdb;Username=${postgresAdminUsername};Password=${postgresAdminPassword};SSL Mode=Require'
+            }
+          ]
+          resources: {
+            cpu: json('0.25')
+            memory: '0.5Gi'
+          }
+        }
+      ]
       containers: [
         {
           name: 'memes-api'

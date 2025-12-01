@@ -63,11 +63,26 @@ builder.Services.AddScoped<IQueryHandler<GenerateUploadSasTokenQuery, GenerateUp
 
 var app = builder.Build();
 
-// Apply database migrations automatically on startup
-using (var scope = app.Services.CreateScope())
+// Check if running in migration mode
+var runMigrations = args.Contains("--migrate") ||
+                    builder.Configuration.GetValue<bool>("RunDatabaseMigrations");
+
+if (runMigrations)
 {
+    using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<MemesDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    logger.LogInformation("Running database migrations...");
     dbContext.Database.EnsureCreated();
+    logger.LogInformation("Database migrations completed successfully");
+
+    // Exit after migrations if --migrate flag was used
+    if (args.Contains("--migrate"))
+    {
+        logger.LogInformation("Migration-only mode: exiting after database update");
+        return;
+    }
 }
 
 app.MapDefaultEndpoints();
