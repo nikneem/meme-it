@@ -63,14 +63,11 @@ builder.Services.AddScoped<IQueryHandler<GenerateUploadSasTokenQuery, GenerateUp
 
 var app = builder.Build();
 
-// Apply migrations automatically in development
-if (app.Environment.IsDevelopment())
+// Apply database migrations automatically on startup
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<MemesDbContext>();
-        dbContext.Database.EnsureCreated();
-    }
+    var dbContext = scope.ServiceProvider.GetRequiredService<MemesDbContext>();
+    dbContext.Database.EnsureCreated();
 }
 
 app.MapDefaultEndpoints();
