@@ -208,11 +208,11 @@ resource memesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: appInsightsConnectionString
             }
             {
-              name: 'ConnectionStrings__PostgresConnection'
+              name: 'ConnectionStrings__memes-db'
               value: 'Host=${postgresServer.properties.fullyQualifiedDomainName};Database=memesdb;Username=${postgresAdminUsername};Password=${postgresAdminPassword};SSL Mode=Require'
             }
             {
-              name: 'ConnectionStrings__BlobStorage'
+              name: 'ConnectionStrings__memes-blobs'
               value: 'https://${storageAccount.name}.blob.${environment().suffixes.storage}'
             }
             {
