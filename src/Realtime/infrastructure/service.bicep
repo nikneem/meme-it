@@ -6,6 +6,7 @@ param containerRegistryPullIdentityId string
 param appInsightsConnectionString string
 param containerImage string
 param containerPort int
+param allowedCorsOrigin string
 
 resource realtimeContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-ca'
@@ -38,6 +39,26 @@ resource realtimeContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             weight: 100
           }
         ]
+        corsPolicy: {
+          allowedOrigins: [
+            allowedCorsOrigin
+          ]
+          allowedMethods: [
+            'GET'
+            'POST'
+            'PUT'
+            'DELETE'
+            'OPTIONS'
+          ]
+          allowedHeaders: [
+            '*'
+          ]
+          exposeHeaders: [
+            '*'
+          ]
+          maxAge: 3600
+          allowCredentials: true
+        }
       }
       dapr: {
         enabled: true
