@@ -88,4 +88,4 @@ jobs:
             echo SWA_SECRETS=$SWA_SECRETS >> $GITHUB_OUTPUT
 
       - name: Deploy Artifacts to SWA
-        run: swa deploy ./dist/browser --deployment-token ${{ steps.get-secret-from-cli.outputs.SWA_SECRETS }} --env production -V silly
+        run: swa deploy ./dist --deployment-token ${{ steps.get-secret-from-cli.outputs.SWA_SECRETS }} --env production -V silly
