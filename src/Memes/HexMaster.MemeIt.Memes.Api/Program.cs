@@ -64,7 +64,8 @@ builder.Services.AddScoped<IQueryHandler<GenerateUploadSasTokenQuery, GenerateUp
 var app = builder.Build();
 
 // Check if running in migration mode
-var runMigrations = args.Contains("--migrate") ||
+var runMigrations = app.Environment.IsDevelopment() ||
+                    args.Contains("--migrate") ||
                     builder.Configuration.GetValue<bool>("RunDatabaseMigrations");
 
 if (runMigrations)
