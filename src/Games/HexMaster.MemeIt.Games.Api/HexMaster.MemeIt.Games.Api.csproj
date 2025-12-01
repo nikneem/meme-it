@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ContainerImageName>memeit/games-api</ContainerImageName>
     <ContainerUser>app</ContainerUser>
+    <UserSecretsId>17c17640-6cb9-4eb6-87ef-3e0f90ce5fbc</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
