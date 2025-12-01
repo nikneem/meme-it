@@ -39,6 +39,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [compile]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     name: Deploy Production
     steps:
       - name: Download SWA Content
