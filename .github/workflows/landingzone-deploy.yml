@@ -35,7 +35,8 @@ jobs:
             --name "landingzone-deploy-${{ github.run_number }}" \
             --location northeurope \
             --template-file infrastructure/main.bicep \
-            --parameters infrastructure/main.bicepparam
+            --parameters infrastructure/main.bicepparam \
+            --parameters skipAcrRoleAssignment=true
       
       - name: Get Deployment Outputs
         id: outputs
