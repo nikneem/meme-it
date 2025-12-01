@@ -262,6 +262,10 @@ resource memesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
               name: 'Azure__Storage__BlobContainerName'
               value: blobContainer.name
             }
+            {
+              name: 'AZURE_CLIENT_ID'
+              value: reference(managedIdentityId, '2023-01-31').clientId
+            }
           ]
         }
       ]
