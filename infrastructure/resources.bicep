@@ -206,14 +206,26 @@ resource httpRouteConfig 'Microsoft.App/managedEnvironments/httpRouteConfigs@202
         ]
       }
       {
+        description: 'Route /hubs to SignalR'
+        routes: [
+          {
+            match: {
+              pathSeparatedPrefix: '/hubs'
+            }
+          }
+        ]
+        targets: [
+          {
+            containerApp: 'memeit-realtime-dev-nor-ca'
+          }
+        ]
+      }
+      {
         description: 'Route /realtime to Realtime API'
         routes: [
           {
             match: {
-              pathSeparatedPrefix: '/realtime'
-            }
-            action: {
-              prefixRewrite: '/api/realtime'
+              pathSeparatedPrefix: '/realtime/eventhandlers'
             }
           }
         ]

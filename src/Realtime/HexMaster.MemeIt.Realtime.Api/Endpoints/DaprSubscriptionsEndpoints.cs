@@ -16,7 +16,7 @@ public static class DaprSubscriptionsEndpoints
 
     public static IEndpointRouteBuilder MapDaprSubscriptionsEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/dapr/subscriptions")
+        var group = endpoints.MapGroup("/realtime/eventhandlers")
             .WithTags("Dapr Subscriptions");
 
         // Subscribe to player state changed events
