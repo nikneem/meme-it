@@ -2,6 +2,7 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { retry, timer } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { API_BASE_URL } from '../constants/api.constants';
 
 /**
  * HTTP status codes that should trigger a retry
@@ -17,15 +18,16 @@ const RETRYABLE_STATUS_CODES = new Set([
 
 /**
  * HTTP Interceptor that:
- * 1. Adds Bearer token to Authorization header if available
+ * 1. Adds Bearer token to Authorization header if available and request is to API_BASE_URL
  * 2. Retries failed requests with exponential backoff for retryable errors
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
     const token = authService.getToken();
 
-    // Clone request and add Authorization header if token exists
-    const authReq = token
+    // Clone request and add Authorization header if token exists and request is to our API
+    const isApiRequest = req.url.startsWith(API_BASE_URL);
+    const authReq = token && isApiRequest
         ? req.clone({
             setHeaders: {
                 Authorization: `Bearer ${token}`
