@@ -109,6 +109,19 @@ resource serviceBusDataReceiverRole 'Microsoft.Authorization/roleAssignments@202
   }
 }
 
+resource serviceBusDataOwnerRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(serviceBusNamespace.id, containerAppsManagedIdentity.id, 'ServiceBusDataOwner')
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '090c5cfd-751d-490a-894a-3ce6f1109419'
+    ) // Azure Service Bus Data Owner
+    principalId: containerAppsManagedIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // Application Insights for OpenTelemetry data collection
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${defaultResourceName}-ai'
