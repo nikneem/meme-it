@@ -44,7 +44,7 @@ jobs:
           OUTPUTS=$(az deployment sub show \
             --name "landingzone-deploy-${{ github.run_number }}" \
             --query 'properties.outputs' \
-            -o json)
+            -o json | jq -c .)
           echo "outputs=$OUTPUTS" >> $GITHUB_OUTPUT
       
       - name: Display Deployment Summary
@@ -57,23 +57,24 @@ jobs:
           
           OUTPUTS='${{ steps.outputs.outputs }}'
           
-          if [ -n "$OUTPUTS" ]; then
+          if [ -n "$OUTPUTS" ] && [ "$OUTPUTS" != "null" ]; then
             echo "**Application Insights:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Connection String: $(echo $OUTPUTS | jq -r '.appInsightsConnectionString.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "- Connection String: \`$(echo "$OUTPUTS" | jq -r '.appInsightsConnectionString.value // "N/A"')\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
             echo "**Service Bus:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Namespace: $(echo $OUTPUTS | jq -r '.serviceBusNamespace.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "- Namespace: $(echo "$OUTPUTS" | jq -r '.serviceBusNamespace.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
             echo "**Container Apps Environment:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Name: $(echo $OUTPUTS | jq -r '.containerAppsEnvironmentName.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "- Name: $(echo "$OUTPUTS" | jq -r '.containerAppsEnvironmentName.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
+            FQDN=$(echo "$OUTPUTS" | jq -r '.httpRouteConfigFqdn.value // "N/A"')
             echo "**API Gateway:**" >> $GITHUB_STEP_SUMMARY
-            echo "- FQDN: $(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
-            echo "- Users: https://$(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')/users" >> $GITHUB_STEP_SUMMARY
-            echo "- Realtime: https://$(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')/realtime" >> $GITHUB_STEP_SUMMARY
-            echo "- Games: https://$(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')/games" >> $GITHUB_STEP_SUMMARY
-            echo "- Memes: https://$(echo $OUTPUTS | jq -r '.httpRouteConfigFqdn.value // "N/A"')/memes" >> $GITHUB_STEP_SUMMARY
+            echo "- FQDN: $FQDN" >> $GITHUB_STEP_SUMMARY
+            echo "- Users: https://$FQDN/users" >> $GITHUB_STEP_SUMMARY
+            echo "- Realtime: https://$FQDN/realtime" >> $GITHUB_STEP_SUMMARY
+            echo "- Games: https://$FQDN/games" >> $GITHUB_STEP_SUMMARY
+            echo "- Memes: https://$FQDN/memes" >> $GITHUB_STEP_SUMMARY
           fi
