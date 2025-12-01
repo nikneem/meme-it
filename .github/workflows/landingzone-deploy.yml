@@ -48,6 +48,8 @@ jobs:
           echo "outputs=$OUTPUTS" >> $GITHUB_OUTPUT
       
       - name: Display Deployment Summary
+        if: always()
+        continue-on-error: true
         run: |
           echo "### Landing Zone Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -57,24 +59,26 @@ jobs:
           
           OUTPUTS='${{ steps.outputs.outputs }}'
           
-          if [ -n "$OUTPUTS" ] && [ "$OUTPUTS" != "null" ]; then
-            echo "**Application Insights:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Connection String: \`$(echo "$OUTPUTS" | jq -r '.appInsightsConnectionString.value // "N/A"')\`" >> $GITHUB_STEP_SUMMARY
+          if [ -n "$OUTPUTS" ] && [ "$OUTPUTS" != "null" ] && [ "$OUTPUTS" != "Object" ]; then
+            echo "**Application Insights:**" >> $GITHUB_STEP_SUMMARY || true
+            echo "- Connection String: \`$(echo "$OUTPUTS" | jq -r '.appInsightsConnectionString.value // "N/A"' 2>/dev/null || echo "N/A")\`" >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            echo "**Service Bus:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Namespace: $(echo "$OUTPUTS" | jq -r '.serviceBusNamespace.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "**Service Bus:**" >> $GITHUB_STEP_SUMMARY || true
+            echo "- Namespace: $(echo "$OUTPUTS" | jq -r '.serviceBusNamespace.value // "N/A"' 2>/dev/null || echo "N/A")" >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            echo "**Container Apps Environment:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Name: $(echo "$OUTPUTS" | jq -r '.containerAppsEnvironmentName.value // "N/A"')" >> $GITHUB_STEP_SUMMARY
+            echo "**Container Apps Environment:**" >> $GITHUB_STEP_SUMMARY || true
+            echo "- Name: $(echo "$OUTPUTS" | jq -r '.containerAppsEnvironmentName.value // "N/A"' 2>/dev/null || echo "N/A")" >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            FQDN=$(echo "$OUTPUTS" | jq -r '.httpRouteConfigFqdn.value // "N/A"')
-            echo "**API Gateway:**" >> $GITHUB_STEP_SUMMARY
-            echo "- FQDN: $FQDN" >> $GITHUB_STEP_SUMMARY
-            echo "- Users: https://$FQDN/users" >> $GITHUB_STEP_SUMMARY
-            echo "- Realtime: https://$FQDN/realtime" >> $GITHUB_STEP_SUMMARY
-            echo "- Games: https://$FQDN/games" >> $GITHUB_STEP_SUMMARY
-            echo "- Memes: https://$FQDN/memes" >> $GITHUB_STEP_SUMMARY
+            FQDN=$(echo "$OUTPUTS" | jq -r '.httpRouteConfigFqdn.value // "N/A"' 2>/dev/null || echo "N/A")
+            echo "**API Gateway:**" >> $GITHUB_STEP_SUMMARY || true
+            echo "- FQDN: $FQDN" >> $GITHUB_STEP_SUMMARY || true
+            echo "- Users: https://$FQDN/users" >> $GITHUB_STEP_SUMMARY || true
+            echo "- Realtime: https://$FQDN/realtime" >> $GITHUB_STEP_SUMMARY || true
+            echo "- Games: https://$FQDN/games" >> $GITHUB_STEP_SUMMARY || true
+            echo "- Memes: https://$FQDN/memes" >> $GITHUB_STEP_SUMMARY || true
+          else
+            echo "⚠️ Deployment outputs not available for summary" >> $GITHUB_STEP_SUMMARY
           fi
