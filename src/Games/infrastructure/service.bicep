@@ -115,7 +115,7 @@ resource gamesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: appInsightsConnectionString
             }
             {
-              name: 'ConnectionStrings__MongoDb'
+              name: 'ConnectionStrings__games-db'
               value: cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
             }
             {
