@@ -92,7 +92,7 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference(options => options.Title = "Meme-It Memes API");
+    app.MapScalarApiReference(options => options.Title = "Meme-It Memes Management API");
 }
 
 app.UseCors("AllowAngularApp");
