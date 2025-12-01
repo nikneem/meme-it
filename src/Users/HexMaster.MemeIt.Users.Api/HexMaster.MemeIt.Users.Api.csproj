@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ContainerImageName>memeit/users-api</ContainerImageName>
     <ContainerUser>app</ContainerUser>
+    <UserSecretsId>b3123dd2-fa07-4216-bd76-2313cbe1af9e</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
