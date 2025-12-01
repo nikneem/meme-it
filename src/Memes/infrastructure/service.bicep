@@ -124,6 +124,20 @@ resource storageBlobDataContributorRole 'Microsoft.Authorization/roleAssignments
   }
 }
 
+// Grant managed identity Storage Blob Delegator role for SAS token generation
+resource storageBlobDelegatorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageAccount.id, managedIdentityId, 'StorageBlobDelegator')
+  scope: storageAccount
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'db58b8e5-c6ad-4a2a-8342-4190687cbf4a'
+    ) // Storage Blob Delegator
+    principalId: reference(managedIdentityId, '2023-01-31').principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // Container App
 resource memesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-ca'
