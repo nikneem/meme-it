@@ -59,6 +59,16 @@ else {
         Write-Host "Managed Identity:" -ForegroundColor Cyan
         Write-Host "   Client ID: $($output.properties.outputs.managedIdentityClientId.value)" -ForegroundColor White
         Write-Host ""
+        Write-Host "API Gateway (HTTP Route Config):" -ForegroundColor Cyan
+        Write-Host "   Name: $($output.properties.outputs.httpRouteConfigName.value)" -ForegroundColor White
+        Write-Host "   FQDN: $($output.properties.outputs.httpRouteConfigFqdn.value)" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Route Endpoints:" -ForegroundColor Cyan
+        Write-Host "   Users API: https://$($output.properties.outputs.httpRouteConfigFqdn.value)/users" -ForegroundColor White
+        Write-Host "   Realtime API: https://$($output.properties.outputs.httpRouteConfigFqdn.value)/realtime" -ForegroundColor White
+        Write-Host "   Games API: https://$($output.properties.outputs.httpRouteConfigFqdn.value)/games" -ForegroundColor White
+        Write-Host "   Memes API: https://$($output.properties.outputs.httpRouteConfigFqdn.value)/memes" -ForegroundColor White
+        Write-Host ""
         Write-Host "Next Steps:" -ForegroundColor Yellow
         Write-Host "   1. Container apps will automatically use Service Bus via Dapr"
         Write-Host "   2. Add managed identity to container app deployments"

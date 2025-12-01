@@ -50,3 +50,5 @@ output appInsightsInstrumentationKey string = resources.outputs.appInsightsInstr
 output containerAppsEnvironmentName string = resources.outputs.containerAppsEnvironmentName
 output serviceBusNamespace string = resources.outputs.serviceBusNamespace
 output managedIdentityClientId string = resources.outputs.managedIdentityClientId
+output httpRouteConfigFqdn string = resources.outputs.httpRouteConfigFqdn
+output httpRouteConfigName string = resources.outputs.httpRouteConfigName

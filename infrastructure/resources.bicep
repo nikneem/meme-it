@@ -181,6 +181,88 @@ resource daprPubSubComponent 'Microsoft.App/managedEnvironments/daprComponents@2
   }
 }
 
+// HTTP Route Configuration for API Gateway
+resource httpRouteConfig 'Microsoft.App/managedEnvironments/httpRouteConfigs@2024-10-02-preview' = {
+  parent: containerAppsEnvironment
+  name: 'api-gateway'
+  properties: {
+    rules: [
+      {
+        description: 'Route /users to Users API'
+        routes: [
+          {
+            match: {
+              pathSeparatedPrefix: '/users'
+            }
+            action: {
+              prefixRewrite: '/api/users'
+            }
+          }
+        ]
+        targets: [
+          {
+            containerApp: 'memeit-users-dev-nor-ca'
+          }
+        ]
+      }
+      {
+        description: 'Route /realtime to Realtime API'
+        routes: [
+          {
+            match: {
+              pathSeparatedPrefix: '/realtime'
+            }
+            action: {
+              prefixRewrite: '/api/realtime'
+            }
+          }
+        ]
+        targets: [
+          {
+            containerApp: 'memeit-realtime-dev-nor-ca'
+          }
+        ]
+      }
+      {
+        description: 'Route /games to Games API'
+        routes: [
+          {
+            match: {
+              pathSeparatedPrefix: '/games'
+            }
+            action: {
+              prefixRewrite: '/api/games'
+            }
+          }
+        ]
+        targets: [
+          {
+            containerApp: 'memeit-games-dev-nor-ca'
+          }
+        ]
+      }
+      {
+        description: 'Route /memes to Memes API'
+        routes: [
+          {
+            match: {
+              pathSeparatedPrefix: '/memes'
+            }
+            action: {
+              prefixRewrite: '/api/memes'
+            }
+          }
+        ]
+        targets: [
+          {
+            containerApp: 'memeit-memes-dev-nor-ca'
+          }
+        ]
+      }
+    ]
+  }
+}
+
 // Outputs for use in container app deployments
 output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.id
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
@@ -193,3 +275,5 @@ output managedIdentityId string = containerAppsManagedIdentity.id
 output containerRegistryPullIdentityId string = containerRegistryPullIdentity.id
 output containerRegistryPullIdentityClientId string = containerRegistryPullIdentity.properties.clientId
 output containerRegistryPullIdentityPrincipalId string = containerRegistryPullIdentity.properties.principalId
+output httpRouteConfigFqdn string = httpRouteConfig.properties.fqdn
+output httpRouteConfigName string = httpRouteConfig.name
