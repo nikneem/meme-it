@@ -44,3 +44,17 @@ h4 {
 * {
     box-sizing: border-box;
 }
+
+// Leave Game Dialog Styles
+.leave-game-dialog {
+    .mat-mdc-dialog-container {
+        padding: 0;
+        background: transparent;
+        box-shadow: 0 8px 32px rgba(200, 7, 175, 0.4);
+    }
+}
+
+.leave-game-backdrop {
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.7);
+}

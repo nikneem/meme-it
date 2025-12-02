@@ -1,0 +1,183 @@
+@use 'variables/colors' as colors;
+
+.dialog-container {
+    background: radial-gradient(circle at top right, #1a0a47 0%, #000384 35%, #000225 100%);
+    border: 2px solid rgba(200, 7, 175, 0.3);
+    border-radius: 16px;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(200, 7, 175, 0.1) 0%, transparent 70%);
+        animation: pulse 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.dialog-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 2rem 1rem;
+    position: relative;
+    z-index: 1;
+
+    .warning-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: #ff6b6b;
+        margin-bottom: 1rem;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        text-shadow: 0 2px 8px rgba(200, 7, 175, 0.5);
+    }
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-10px);
+    }
+
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+mat-dialog-content {
+    padding: 1rem 2rem 2rem;
+    position: relative;
+    z-index: 1;
+
+    .dialog-message {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        text-align: center;
+        margin: 0;
+    }
+}
+
+mat-dialog-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 0 2rem 2rem;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+
+    button {
+        flex: 1;
+        min-width: 140px;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+
+        mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+
+    .cancel-button {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        color: #fff;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+
+        &:hover {
+            background: linear-gradient(135deg, #5a6578 0%, #3d4758 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+    }
+
+    .confirm-button {
+        background: linear-gradient(135deg, #ff6b6b 0%, #c83349 100%);
+        color: #fff;
+        border: 2px solid rgba(255, 107, 107, 0.3);
+
+        &:hover {
+            background: linear-gradient(135deg, #ff7b7b 0%, #d84359 100%);
+            box-shadow: 0 4px 16px rgba(200, 51, 73, 0.5);
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .dialog-header {
+        padding: 1.5rem 1.5rem 0.75rem;
+
+        .warning-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+    }
+
+    mat-dialog-content {
+        padding: 0.75rem 1.5rem 1.5rem;
+
+        .dialog-message {
+            font-size: 1rem;
+        }
+    }
+
+    mat-dialog-actions {
+        padding: 0 1.5rem 1.5rem;
+        flex-direction: column;
+
+        button {
+            width: 100%;
+        }
+    }
+}

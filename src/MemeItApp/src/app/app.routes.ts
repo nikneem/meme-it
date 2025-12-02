@@ -7,6 +7,7 @@ import { GameLobbyPage } from '@pages/private/game-lobby/game-lobby';
 import { MemesManagementPage } from '@pages/private/management/memes/memes-management';
 import { CreateMemePage } from '@pages/private/management/memes/create/create-meme';
 import { GamePlayPage } from '@pages/private/game-play/game-play';
+import { canDeactivateGameGuard } from './guards/can-deactivate-game.guard';
 
 export const routes: Routes = [
     {
@@ -37,7 +38,8 @@ export const routes: Routes = [
     {
         path: 'app/games/:code/play',
         component: GamePlayPage,
-        title: 'Play Game — Meme-It'
+        title: 'Play Game — Meme-It',
+        canDeactivate: [canDeactivateGameGuard]
     },
     {
         path: 'management',

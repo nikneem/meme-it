@@ -1,0 +1,23 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <mat-icon class="warning-icon">warning</mat-icon>
+        <h2 mat-dialog-title>Leave Game?</h2>
+    </div>
+
+    <mat-dialog-content>
+        <p class="dialog-message">
+            Are you sure you want to leave this game? Your progress will be lost and other players will be notified.
+        </p>
+    </mat-dialog-content>
+
+    <mat-dialog-actions>
+        <button mat-raised-button class="cancel-button" (click)="onCancel()">
+            <mat-icon>close</mat-icon>
+            Stay in Game
+        </button>
+        <button mat-raised-button class="confirm-button" (click)="onConfirm()">
+            <mat-icon>exit_to_app</mat-icon>
+            Leave Game
+        </button>
+    </mat-dialog-actions>
+</div>

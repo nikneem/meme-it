@@ -2,6 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { CanComponentDeactivate } from '../../../guards/can-deactivate-game.guard';
 import { MemeService } from '@services/meme.service';
 import { NotificationService } from '@services/notification.service';
 import { RealtimeService } from '@services/realtime.service';
@@ -23,7 +24,7 @@ import { GameStore } from '../../../store/game.store';
     templateUrl: './game-play.html',
     styleUrl: './game-play.scss',
 })
-export class GamePlayPage implements OnInit, OnDestroy {
+export class GamePlayPage implements OnInit, OnDestroy, CanComponentDeactivate {
     @ViewChild(GameTimerComponent) gameTimer?: GameTimerComponent;
 
     // Inject the game store
@@ -236,5 +237,11 @@ export class GamePlayPage implements OnInit, OnDestroy {
     getTimerEndDate(): Date | null {
         const endTime = this.timer().endTime;
         return endTime ? new Date(endTime) : null;
+    }
+
+    canDeactivate(): boolean {
+        // Prevent navigation if game is in progress (not ended)
+        const phase = this.currentPhase();
+        return phase === 'ended' || phase === 'waiting';
     }
 }

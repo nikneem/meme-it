@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { CanComponentDeactivate } from '../../../guards/can-deactivate-game.guard';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,7 +30,7 @@ import { GameStore } from '../../../store/game.store';
   templateUrl: './game-lobby.html',
   styleUrl: './game-lobby.scss',
 })
-export class GameLobbyPage implements OnInit, OnDestroy {
+export class GameLobbyPage implements OnInit, OnDestroy, CanComponentDeactivate {
   // Inject the game store
   readonly gameStore = inject(GameStore);
 
@@ -333,5 +334,11 @@ export class GameLobbyPage implements OnInit, OnDestroy {
     // Clear the game state from store and session storage
     this.gameStore.clearGame(this.gameCodeValue);
     this.router.navigate(['/']);
+  }
+
+  canDeactivate(): boolean {
+    // Always show confirmation when leaving lobby
+    // Return false to trigger the guard dialog
+    return false;
   }
 }
