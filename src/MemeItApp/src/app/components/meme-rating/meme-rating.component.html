@@ -18,7 +18,10 @@
                             [attr.stroke]="textEntry.borderColor" [attr.stroke-width]="textEntry.borderSize"
                             [attr.paint-order]="'stroke'" text-anchor="middle" dominant-baseline="middle"
                             class="meme-text">
-                            {{ textEntry.text }}
+                            <tspan
+                                *ngFor="let line of wrapText(textEntry.text, textEntry.width, textEntry.fontSize); let lineIndex = index"
+                                [attr.x]="textEntry.x + textEntry.width / 2"
+                                [attr.dy]="lineIndex === 0 ? 0 : textEntry.fontSize * 1.2">{{ line }}</tspan>
                         </text>
                     </svg>
                 </div>

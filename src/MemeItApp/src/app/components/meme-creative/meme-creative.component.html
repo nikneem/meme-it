@@ -17,7 +17,10 @@
                     [attr.font-weight]="textArea.isBold ? 'bold' : 'normal'" [attr.stroke]="textArea.borderColor"
                     [attr.stroke-width]="textArea.borderSize" [attr.paint-order]="'stroke'" text-anchor="middle"
                     dominant-baseline="middle" class="meme-text">
-                    {{ textInputs[i] || 'Text ' + (i + 1) }}
+                    <tspan
+                        *ngFor="let line of wrapText(textInputs[i] || 'Text ' + (i + 1), textArea.width, textArea.fontSize); let lineIndex = index"
+                        [attr.x]="textArea.x + textArea.width / 2"
+                        [attr.dy]="lineIndex === 0 ? 0 : textArea.fontSize * 1.2">{{ line }}</tspan>
                 </text>
             </svg>
         </div>

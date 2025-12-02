@@ -188,4 +188,47 @@ export class MemeCreativeComponent implements OnInit, OnDestroy {
         // Create a GUID-like string
         return `${hex.slice(0, 8)}-${hex.slice(0, 4)}-${hex.slice(0, 4)}-${hex.slice(0, 4)}-${hex.padEnd(12, '0')}`;
     }
+
+    wrapText(text: string, maxWidth: number, fontSize: number): string[] {
+        if (!text) return [''];
+
+        // Approximate character width based on font size (roughly 0.6 of fontSize for average characters)
+        const avgCharWidth = fontSize * 0.6;
+        const maxCharsPerLine = Math.floor(maxWidth / avgCharWidth);
+
+        if (maxCharsPerLine <= 0) return [text];
+
+        const words = text.split(' ');
+        const lines: string[] = [];
+        let currentLine = '';
+
+        for (const word of words) {
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+            if (testLine.length <= maxCharsPerLine) {
+                currentLine = testLine;
+            } else {
+                if (currentLine) {
+                    lines.push(currentLine);
+                }
+                // If single word is too long, break it
+                if (word.length > maxCharsPerLine) {
+                    let remainingWord = word;
+                    while (remainingWord.length > maxCharsPerLine) {
+                        lines.push(remainingWord.substring(0, maxCharsPerLine));
+                        remainingWord = remainingWord.substring(maxCharsPerLine);
+                    }
+                    currentLine = remainingWord;
+                } else {
+                    currentLine = word;
+                }
+            }
+        }
+
+        if (currentLine) {
+            lines.push(currentLine);
+        }
+
+        return lines.length > 0 ? lines : [''];
+    }
 }
