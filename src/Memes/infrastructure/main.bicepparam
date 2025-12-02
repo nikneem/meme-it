@@ -7,4 +7,7 @@ param containerPort = 8080
 param landingzoneServiceName = 'landingzone'
 param postgresAdminUsername = 'memeadmin'
 param postgresAdminPassword = readEnvironmentVariable('POSTGRES_ADMIN_PASSWORD', 'DefaultP@ssw0rd!')
-param allowedCorsOrigin = 'https://memeit.hexmaster.nl'
+param allowedCorsOrigins = [
+  'https://localhost:4200'
+  'https://memeit.hexmaster.nl'
+]

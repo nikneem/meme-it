@@ -23,7 +23,10 @@ param postgresAdminUsername string = 'memeadmin'
 param postgresAdminPassword string
 
 // Storage configuration
-param allowedCorsOrigin string = 'https://localhost:4200'
+param allowedCorsOrigins array = [
+  'https://localhost:4200'
+  'https://memeit.hexmaster.nl'
+]
 
 var defaultResourceName = '${projectName}-${serviceName}-${environmentName}-${substring(location, 0, 3)}'
 var resourceGroupName = toLower('${defaultResourceName}-rg')
@@ -68,7 +71,7 @@ module memesService 'service.bicep' = {
     containerPort: containerPort
     postgresAdminUsername: postgresAdminUsername
     postgresAdminPassword: postgresAdminPassword
-    allowedCorsOrigin: allowedCorsOrigin
+    allowedCorsOrigins: allowedCorsOrigins
   }
 }
 

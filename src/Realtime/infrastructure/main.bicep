@@ -6,7 +6,10 @@ param serviceName string = 'realtime'
 param environmentName string
 param containerImage string
 param containerPort int = 8080
-param allowedCorsOrigin string = 'https://localhost:4200'
+param allowedCorsOrigins array = [
+  'https://localhost:4200'
+  'https://memeit.hexmaster.nl'
+]
 
 // Landingzone configuration
 param landingzoneServiceName string = 'landingzone'
@@ -59,7 +62,7 @@ module realtimeService 'service.bicep' = {
     appInsightsConnectionString: landingzoneResources.outputs.appInsightsConnectionString
     containerImage: containerImage
     containerPort: containerPort
-    allowedCorsOrigin: allowedCorsOrigin
+    allowedCorsOrigins: allowedCorsOrigins
   }
 }
 

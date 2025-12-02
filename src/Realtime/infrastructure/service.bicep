@@ -6,7 +6,7 @@ param containerRegistryPullIdentityId string
 param appInsightsConnectionString string
 param containerImage string
 param containerPort int
-param allowedCorsOrigin string
+param allowedCorsOrigins array
 
 resource realtimeContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-ca'
@@ -40,9 +40,7 @@ resource realtimeContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           }
         ]
         corsPolicy: {
-          allowedOrigins: [
-            allowedCorsOrigin
-          ]
+          allowedOrigins: allowedCorsOrigins
           allowedMethods: [
             'GET'
             'POST'

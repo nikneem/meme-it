@@ -9,7 +9,7 @@ param containerPort int
 param postgresAdminUsername string
 @secure()
 param postgresAdminPassword string
-param allowedCorsOrigin string
+param allowedCorsOrigins array
 
 // PostgreSQL Flexible Server
 resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
@@ -80,9 +80,7 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01'
     cors: {
       corsRules: [
         {
-          allowedOrigins: [
-            allowedCorsOrigin
-          ]
+          allowedOrigins: allowedCorsOrigins
           allowedMethods: [
             'GET'
             'PUT'
@@ -171,9 +169,7 @@ resource memesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           }
         ]
         corsPolicy: {
-          allowedOrigins: [
-            allowedCorsOrigin
-          ]
+          allowedOrigins: allowedCorsOrigins
           allowedMethods: [
             'GET'
             'POST'
