@@ -36,7 +36,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:4200",  // Angular dev server
-                "http://localhost:5000")  // Aspire gateway
+                "http://localhost:5000",  // Aspire gateway
+                "https://memeit.hexmaster.nl")  // Production frontend
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
