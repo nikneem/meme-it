@@ -33,7 +33,7 @@ export const routes: Routes = [
     {
         path: 'app/games/:code',
         component: GameLobbyPage,
-        title: 'Game Lobby — Meme-It'
+        title: 'Game Lobby — Meme-It',
     },
     {
         path: 'app/games/:code/play',

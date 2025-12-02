@@ -240,8 +240,8 @@ export class GamePlayPage implements OnInit, OnDestroy, CanComponentDeactivate {
     }
 
     canDeactivate(): boolean {
-        // Prevent navigation if game is in progress (not ended)
+        // Allow navigation only when round has ended (not during active creative/scoring phases)
         const phase = this.currentPhase();
-        return phase === 'ended' || phase === 'waiting';
+        return phase === 'ended';
     }
 }
