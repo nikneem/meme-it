@@ -44,16 +44,16 @@ jobs:
       contents: read
     name: Deploy Production
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          lfs: false
+
       - name: Download SWA Content
         uses: actions/download-artifact@v4
         with:
           name: production
           path: dist
-
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-          lfs: false
 
       - name: Az CLI login
         uses: azure/login@v1
