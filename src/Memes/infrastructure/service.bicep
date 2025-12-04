@@ -9,6 +9,8 @@ param containerPort int
 param postgresAdminUsername string
 @secure()
 param postgresAdminPassword string
+@secure()
+param managementApiKey string
 param allowedCorsOrigins array
 
 // PostgreSQL Flexible Server
@@ -257,6 +259,10 @@ resource memesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'Azure__Storage__BlobContainerName'
               value: blobContainer.name
+            }
+            {
+              name: 'Management__ApiKey'
+              value: managementApiKey
             }
             {
               name: 'AZURE_CLIENT_ID'

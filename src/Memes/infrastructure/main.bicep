@@ -22,6 +22,10 @@ param postgresAdminUsername string = 'memeadmin'
 @secure()
 param postgresAdminPassword string
 
+// Management API Key
+@secure()
+param managementApiKey string
+
 // Storage configuration
 param allowedCorsOrigins array = [
   'https://localhost:4200'
@@ -71,6 +75,7 @@ module memesService 'service.bicep' = {
     containerPort: containerPort
     postgresAdminUsername: postgresAdminUsername
     postgresAdminPassword: postgresAdminPassword
+    managementApiKey: managementApiKey
     allowedCorsOrigins: allowedCorsOrigins
   }
 }
