@@ -163,7 +163,7 @@ export class ManagementLoginPage {
     constructor(
         private passcodeAuthService: PasscodeAuthService,
         private router: Router
-    ) {}
+    ) { }
 
     onSubmit(): void {
         if (!this.passcode) {
@@ -175,7 +175,7 @@ export class ManagementLoginPage {
 
         // Store the passcode - server will validate via interceptor
         this.passcodeAuthService.setPasscode(this.passcode);
-        
+
         // Navigate to management page
         // If the API key is invalid, the server will reject requests
         this.router.navigate(['/management/memes']);

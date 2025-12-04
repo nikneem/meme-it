@@ -3,7 +3,6 @@ using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Memes.Abstractions.Services;
 using HexMaster.MemeIt.Memes.Api.Endpoints;
-using HexMaster.MemeIt.Memes.Api.Middleware;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.CreateMemeTemplate;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.DeleteMemeTemplate;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.GenerateUploadSasToken;
@@ -90,7 +89,6 @@ if (runMigrations)
 }
 
 app.MapDefaultEndpoints();
-
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -98,9 +96,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options => options.Title = "Meme-It Memes Management API");
 }
 
-app.UseCors("AllowAngularApp");
-app.UseApiKeyValidation();
 app.UseHttpsRedirection();
+app.UseCors("AllowAngularApp");
+
+
 
 // Map meme template endpoints
 app.MapMemeTemplateEndpoints();
@@ -108,5 +107,19 @@ app.MapMemeTemplateEndpoints();
 app.MapGet("/", () => Results.Ok("Meme-It Memes API"))
    .WithTags("Diagnostics")
    .WithName("GetRoot");
+
+app.MapGet("/test-filter", () =>
+{
+    Console.WriteLine("===== TEST ENDPOINT HANDLER =====");
+    return Results.Ok("Filter test endpoint");
+})
+.AddEndpointFilter(async (context, next) =>
+{
+    Console.WriteLine("===== TEST FILTER BEFORE =====");
+    var result = await next(context);
+    Console.WriteLine("===== TEST FILTER AFTER =====");
+    return result;
+})
+.WithName("TestFilter");
 
 app.Run();

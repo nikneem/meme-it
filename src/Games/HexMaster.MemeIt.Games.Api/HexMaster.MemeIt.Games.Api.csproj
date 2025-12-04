@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.MongoDB.Driver" Version="13.0.0" />
+    <PackageReference Include="Aspire.MongoDB.Driver" Version="13.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.11.0" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.16.1" />
