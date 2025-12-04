@@ -1,6 +1,7 @@
 using HexMaster.MemeIt.Games.Abstractions.Application.Games;
 using HexMaster.MemeIt.Games.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
+using HexMaster.MemeIt.Games.Constants;
 
 namespace HexMaster.MemeIt.Games.Application.Games.GetGameDetails;
 
@@ -63,18 +64,17 @@ public sealed class GetGameDetailsQueryHandler : IQueryHandler<GetGameDetailsQue
                 if (!currentRound.HasCreativePhaseEnded)
                 {
                     phase = "Creative";
-                    // Creative phase typically lasts 60 seconds from round start
-                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(60);
+                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(GameTimingConstants.CreativePhaseDurationSeconds);
                 }
                 else if (!currentRound.HasScorePhaseEnded)
                 {
                     phase = "Scoring";
-                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(60);
+                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(GameTimingConstants.CreativePhaseDurationSeconds);
                 }
                 else
                 {
                     phase = "Ended";
-                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(60);
+                    creativePhaseEndTime = currentRound.StartedAt.AddSeconds(GameTimingConstants.CreativePhaseDurationSeconds);
                 }
 
                 currentRoundInfo = new CurrentRoundInfoDto(

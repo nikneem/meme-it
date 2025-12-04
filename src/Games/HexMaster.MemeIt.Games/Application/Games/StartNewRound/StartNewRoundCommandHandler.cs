@@ -2,6 +2,7 @@ using Dapr.Client;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.Games.Constants;
 using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 using Microsoft.Extensions.Logging;
@@ -59,12 +60,17 @@ public sealed class StartNewRoundCommandHandler : ICommandHandler<StartNewRoundC
         // Persist the updated game
         await _repository.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
 
-        // Schedule the creative phase end task (30 seconds from now)
-        const int creativePhaseDuration = 30;
-        _scheduledTaskService.ScheduleCreativePhaseEnded(game.GameCode, round.RoundNumber, delaySeconds: creativePhaseDuration);
+        // Schedule the creative phase end task
+        _scheduledTaskService.ScheduleCreativePhaseEnded(
+            game.GameCode, 
+            round.RoundNumber, 
+            delaySeconds: GameTimingConstants.CreativePhaseDurationSeconds);
 
         // Publish RoundStartedEvent
-        var roundStartedEvent = new RoundStartedEvent(game.GameCode, round.RoundNumber, creativePhaseDuration);
+        var roundStartedEvent = new RoundStartedEvent(
+            game.GameCode, 
+            round.RoundNumber, 
+            GameTimingConstants.CreativePhaseDurationSeconds);
         await _daprClient.PublishEventAsync(
             DaprConstants.PubSubName,
             DaprConstants.Topics.RoundStarted,

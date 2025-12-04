@@ -2,6 +2,7 @@ using Dapr.Client;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.Games.Constants;
 using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
 using Microsoft.Extensions.Logging;
@@ -77,7 +78,7 @@ public sealed class EndCreativePhaseCommandHandler(
                 randomSubmission.PlayerId,
                 randomSubmission.MemeTemplateId,
                 textEntries,
-                RatingDurationSeconds: 30);
+                RatingDurationSeconds: GameTimingConstants.ScoringPhaseDurationSeconds);
 
             await _daprClient.PublishEventAsync(
                 DaprConstants.PubSubName,
@@ -90,7 +91,7 @@ public sealed class EndCreativePhaseCommandHandler(
                 game.GameCode,
                 command.RoundNumber,
                 randomSubmission.SubmissionId,
-                delaySeconds: 30);
+                delaySeconds: GameTimingConstants.ScoringPhaseDurationSeconds);
         }
 
         return new EndCreativePhaseResult(game.GameCode, command.RoundNumber, true);

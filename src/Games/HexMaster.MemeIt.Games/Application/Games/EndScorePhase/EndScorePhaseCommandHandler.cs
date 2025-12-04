@@ -3,6 +3,7 @@ using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Application.Games.EndRound;
+using HexMaster.MemeIt.Games.Constants;
 using HexMaster.MemeIt.Games.Domains;
 using HexMaster.MemeIt.IntegrationEvents;
 using HexMaster.MemeIt.IntegrationEvents.Events;
@@ -79,7 +80,7 @@ public sealed class EndScorePhaseCommandHandler(
                 nextSubmission.PlayerId,
                 nextSubmission.MemeTemplateId,
                 textEntries,
-                RatingDurationSeconds: 30);
+                RatingDurationSeconds: GameTimingConstants.ScoringPhaseDurationSeconds);
 
             await _daprClient.PublishEventAsync(
                 DaprConstants.PubSubName,
@@ -92,7 +93,7 @@ public sealed class EndScorePhaseCommandHandler(
                 game.GameCode,
                 command.RoundNumber,
                 nextSubmission.SubmissionId,
-                delaySeconds: 30);
+                delaySeconds: GameTimingConstants.ScoringPhaseDurationSeconds);
 
 
             return new EndScorePhaseResult(game.GameCode, command.RoundNumber, true, false);
