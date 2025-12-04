@@ -6,8 +6,10 @@ import { JoinGamePage } from '@pages/public/games/join-game/join-game';
 import { GameLobbyPage } from '@pages/private/game-lobby/game-lobby';
 import { MemesManagementPage } from '@pages/private/management/memes/memes-management';
 import { CreateMemePage } from '@pages/private/management/memes/create/create-meme';
+import { ManagementLoginPage } from '@pages/private/management/login/management-login';
 import { GamePlayPage } from '@pages/private/game-play/game-play';
 import { canDeactivateGameGuard } from './guards/can-deactivate-game.guard';
+import { passcodeGuard } from './guards/passcode.guard';
 
 export const routes: Routes = [
     {
@@ -45,14 +47,21 @@ export const routes: Routes = [
         path: 'management',
         children: [
             {
+                path: 'login',
+                component: ManagementLoginPage,
+                title: 'Management Login — Meme-It'
+            },
+            {
                 path: 'memes',
                 component: MemesManagementPage,
-                title: 'Manage Meme Templates — Meme-It'
+                title: 'Manage Meme Templates — Meme-It',
+                canActivate: [passcodeGuard]
             },
             {
                 path: 'memes/create',
                 component: CreateMemePage,
-                title: 'Create Meme Template — Meme-It'
+                title: 'Create Meme Template — Meme-It',
+                canActivate: [passcodeGuard]
             }
         ]
     }

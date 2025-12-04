@@ -3,6 +3,7 @@ using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Memes.Abstractions.Services;
 using HexMaster.MemeIt.Memes.Api.Endpoints;
+using HexMaster.MemeIt.Memes.Api.Middleware;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.CreateMemeTemplate;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.DeleteMemeTemplate;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.GenerateUploadSasToken;
@@ -98,6 +99,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAngularApp");
+app.UseApiKeyValidation();
 app.UseHttpsRedirection();
 
 // Map meme template endpoints
