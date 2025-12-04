@@ -17,6 +17,13 @@ public class ApiKeyEndpointFilter : IEndpointFilter
         _logger.LogInformation("ApiKeyEndpointFilter invoked for {Method} {Path}",
             context.HttpContext.Request.Method, context.HttpContext.Request.Path);
 
+        // Skip API key validation for OPTIONS requests (CORS preflight)
+        if (context.HttpContext.Request.Method == "OPTIONS")
+        {
+            _logger.LogInformation("Skipping API key validation for OPTIONS preflight request");
+            return await next(context);
+        }
+
         // Check for API key in header
         if (!context.HttpContext.Request.Headers.TryGetValue(ApiKeyHeaderName, out var extractedApiKey))
         {

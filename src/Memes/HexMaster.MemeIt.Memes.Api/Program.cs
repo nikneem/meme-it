@@ -40,7 +40,7 @@ builder.Services.AddCors(options =>
                 "https://memeit.hexmaster.nl")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .WithExposedHeaders("Authorization")
+              .WithExposedHeaders("Authorization", "X-ApiKey")
               .AllowCredentials();
     });
 });
