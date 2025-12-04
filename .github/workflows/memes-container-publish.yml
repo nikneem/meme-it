@@ -128,6 +128,7 @@ jobs:
       - name: Deploy to Azure Container Apps
         env:
           POSTGRES_ADMIN_PASSWORD: ${{ secrets.MEMEIT_POSTGRESS_DB_PASSWORD }}
+          MANAGEMENT_API_KEY: ${{ secrets.MEMEIT_MEMES_API_KEY }}
         run: |
           az deployment sub create \
             --name "memes-deploy-${{ github.run_number }}" \

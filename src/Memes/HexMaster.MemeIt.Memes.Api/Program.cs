@@ -40,7 +40,7 @@ builder.Services.AddCors(options =>
                 "https://memeit.hexmaster.nl")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .WithExposedHeaders("Authorization")
+              .WithExposedHeaders("Authorization", "X-ApiKey")
               .AllowCredentials();
     });
 });
@@ -89,7 +89,6 @@ if (runMigrations)
 }
 
 app.MapDefaultEndpoints();
-
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -97,8 +96,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options => options.Title = "Meme-It Memes Management API");
 }
 
-app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
+app.UseCors("AllowAngularApp");
+
+
 
 // Map meme template endpoints
 app.MapMemeTemplateEndpoints();

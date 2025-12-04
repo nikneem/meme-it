@@ -1,4 +1,5 @@
 using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.Games.Constants;
 
 namespace HexMaster.MemeIt.Games.Api.Endpoints;
 
@@ -18,7 +19,7 @@ public static class SchedulingEndpoints
             var taskId = schedulingService.ScheduleCreativePhaseEnded(
                 gameCode,
                 roundNumber,
-                delaySeconds ?? 30);
+                delaySeconds ?? GameTimingConstants.CreativePhaseDurationSeconds);
 
             return Results.Ok(new { taskId, message = "Creative phase task scheduled" });
         })
@@ -36,7 +37,7 @@ public static class SchedulingEndpoints
                 gameCode,
                 roundNumber,
                 memeId,
-                delaySeconds ?? 30);
+                delaySeconds ?? GameTimingConstants.ScoringPhaseDurationSeconds);
 
             return Results.Ok(new { taskId, message = "Score phase task scheduled" });
         })

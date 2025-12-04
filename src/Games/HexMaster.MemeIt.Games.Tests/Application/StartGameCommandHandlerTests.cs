@@ -46,7 +46,7 @@ public sealed class StartGameCommandHandlerTests
 
         repositoryMock.Verify(r => r.UpdateAsync(game, It.IsAny<CancellationToken>()), Times.Once);
         scheduledTaskServiceMock.Verify(
-            s => s.ScheduleCreativePhaseEnded(gameCode, 1, 30),
+            s => s.ScheduleCreativePhaseEnded(gameCode, 1, 60),
             Times.Once);
         daprClientMock.Verify(
             d => d.PublishEventAsync(

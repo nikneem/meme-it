@@ -2,6 +2,7 @@ using HexMaster.MemeIt.Memes.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
 using HexMaster.MemeIt.Memes.Api.Requests;
+using HexMaster.MemeIt.Memes.Api.Filters;
 
 namespace HexMaster.MemeIt.Memes.Api.Endpoints;
 
@@ -41,6 +42,7 @@ public static class MemeTemplateEndpoints
         })
         .WithName("CreateMemeTemplate")
         .WithSummary("Create a new meme template (Admin)")
+        .AddEndpointFilter<ApiKeyEndpointFilter>()
         .Produces(201)
         .Produces(400);
 
@@ -73,6 +75,7 @@ public static class MemeTemplateEndpoints
         })
         .WithName("UpdateMemeTemplate")
         .WithSummary("Update an existing meme template (Admin)")
+        .AddEndpointFilter<ApiKeyEndpointFilter>()
         .Produces(204)
         .Produces(400)
         .Produces(404);
@@ -91,6 +94,7 @@ public static class MemeTemplateEndpoints
         })
         .WithName("DeleteMemeTemplate")
         .WithSummary("Delete a meme template (Admin)")
+        .AddEndpointFilter<ApiKeyEndpointFilter>()
         .Produces(204)
         .Produces(404);
 
@@ -102,8 +106,17 @@ public static class MemeTemplateEndpoints
             var result = await handler.HandleAsync(query, ct);
             return Results.Ok(result.Templates);
         })
+        .AddEndpointFilter(async (context, next) =>
+        {
+            Console.WriteLine("===== SIMPLE TEST FILTER EXECUTING =====");
+            var result = await next(context);
+            Console.WriteLine("===== SIMPLE TEST FILTER COMPLETED =====");
+            return result;
+        })
         .WithName("ListMemeTemplates")
         .WithSummary("List all meme templates (Admin)")
+
+        .AddEndpointFilter<ApiKeyEndpointFilter>()
         .Produces(200);
 
         group.MapGet("/templates/{id:guid}", async (
@@ -150,6 +163,7 @@ public static class MemeTemplateEndpoints
         })
         .WithName("GenerateUploadSasToken")
         .WithSummary("Generate a SAS token for uploading meme template images")
+        .AddEndpointFilter<ApiKeyEndpointFilter>()
         .Produces(200);
 
         return app;

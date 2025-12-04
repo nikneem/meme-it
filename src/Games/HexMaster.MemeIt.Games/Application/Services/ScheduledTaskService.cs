@@ -1,4 +1,5 @@
 using HexMaster.MemeIt.Games.Abstractions.Services;
+using HexMaster.MemeIt.Games.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace HexMaster.MemeIt.Games.Application.Services;
@@ -16,7 +17,7 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
 
     private const int MinDelaySeconds = 1;
     private const int MaxDelaySeconds = 120;
-    private const int DefaultDelaySeconds = 30;
+    private const int DefaultDelaySeconds = 60;
 
     public ScheduledTaskService(ILogger<ScheduledTaskService> logger)
     {
@@ -29,7 +30,7 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
         _taskLookup = new Dictionary<Guid, ScheduledGameTask>();
     }
 
-    public Guid ScheduleCreativePhaseEnded(string gameCode, int roundNumber, int delaySeconds = DefaultDelaySeconds)
+    public Guid ScheduleCreativePhaseEnded(string gameCode, int roundNumber, int delaySeconds = GameTimingConstants.CreativePhaseDurationSeconds)
     {
         ValidateDelay(ref delaySeconds);
         var task = new ScheduledGameTask(
@@ -46,7 +47,7 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
         return task.Id;
     }
 
-    public Guid ScheduleScorePhaseEnded(string gameCode, int roundNumber, Guid submissionId, int delaySeconds = DefaultDelaySeconds)
+    public Guid ScheduleScorePhaseEnded(string gameCode, int roundNumber, Guid submissionId, int delaySeconds = GameTimingConstants.ScoringPhaseDurationSeconds)
     {
         ValidateDelay(ref delaySeconds);
         var task = new ScheduledGameTask(
@@ -64,7 +65,7 @@ public sealed class ScheduledTaskService : IScheduledTaskService, IDisposable
         return task.Id;
     }
 
-    public Guid ScheduleStartNewRound(string gameCode, int roundNumber, int delaySeconds = DefaultDelaySeconds)
+    public Guid ScheduleStartNewRound(string gameCode, int roundNumber, int delaySeconds = GameTimingConstants.ScoreboardDurationSeconds)
     {
         ValidateDelay(ref delaySeconds);
         var task = new ScheduledGameTask(
