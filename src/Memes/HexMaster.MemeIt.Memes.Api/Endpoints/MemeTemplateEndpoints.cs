@@ -40,13 +40,6 @@ public static class MemeTemplateEndpoints
                 return Results.BadRequest(new { error = ex.Message });
             }
         })
-        .AddEndpointFilter(async (context, next) =>
-        {
-            Console.WriteLine("===== SIMPLE TEST FILTER EXECUTING =====");
-            var result = await next(context);
-            Console.WriteLine("===== SIMPLE TEST FILTER COMPLETED =====");
-            return result;
-        })
         .WithName("CreateMemeTemplate")
         .WithSummary("Create a new meme template (Admin)")
         .AddEndpointFilter<ApiKeyEndpointFilter>()

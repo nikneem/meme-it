@@ -14,20 +14,17 @@ public class ApiKeyEndpointFilter : IEndpointFilter
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        _logger.LogInformation("ApiKeyEndpointFilter invoked for {Method} {Path}",
-            context.HttpContext.Request.Method, context.HttpContext.Request.Path);
-
         // Skip API key validation for OPTIONS requests (CORS preflight)
         if (context.HttpContext.Request.Method == "OPTIONS")
         {
-            _logger.LogInformation("Skipping API key validation for OPTIONS preflight request");
             return await next(context);
         }
 
         // Check for API key in header
         if (!context.HttpContext.Request.Headers.TryGetValue(ApiKeyHeaderName, out var extractedApiKey))
         {
-            _logger.LogWarning("API key missing for management operation");
+            _logger.LogWarning("API key missing for management operation: {Method} {Path}",
+                context.HttpContext.Request.Method, context.HttpContext.Request.Path);
             return Results.Unauthorized();
         }
 
@@ -41,7 +38,8 @@ public class ApiKeyEndpointFilter : IEndpointFilter
 
         if (!string.Equals(extractedApiKey, configuredApiKey, StringComparison.Ordinal))
         {
-            _logger.LogWarning("Invalid API key provided for management operation");
+            _logger.LogWarning("Invalid API key provided for management operation: {Method} {Path}",
+                context.HttpContext.Request.Method, context.HttpContext.Request.Path);
             return Results.StatusCode(StatusCodes.Status403Forbidden);
         }
 

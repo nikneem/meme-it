@@ -108,18 +108,4 @@ app.MapGet("/", () => Results.Ok("Meme-It Memes API"))
    .WithTags("Diagnostics")
    .WithName("GetRoot");
 
-app.MapGet("/test-filter", () =>
-{
-    Console.WriteLine("===== TEST ENDPOINT HANDLER =====");
-    return Results.Ok("Filter test endpoint");
-})
-.AddEndpointFilter(async (context, next) =>
-{
-    Console.WriteLine("===== TEST FILTER BEFORE =====");
-    var result = await next(context);
-    Console.WriteLine("===== TEST FILTER AFTER =====");
-    return result;
-})
-.WithName("TestFilter");
-
 app.Run();
