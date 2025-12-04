@@ -80,6 +80,17 @@
             }
         }
     }
+
+    &.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+        user-select: none;
+
+        mat-card-subtitle {
+            color: #4caf50;
+            font-weight: 500;
+        }
+    }
 }
 
 .error-message {

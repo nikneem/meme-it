@@ -35,6 +35,7 @@ export class MemeCreativeComponent implements OnInit, OnDestroy {
     isLoading = true;
     errorMessage = '';
     memeChangesRemaining = 2;
+    hasSubmittedMeme = false;
 
     constructor(
         private gameService: GameService,
@@ -105,6 +106,7 @@ export class MemeCreativeComponent implements OnInit, OnDestroy {
                 this.memeTemplate = this.ensureTemplateDimensions(template);
                 this.textInputs = new Array(template.textAreas.length).fill('');
                 this.isLoading = false;
+                this.hasSubmittedMeme = false;
 
                 // Select this meme template for the round
                 if (template.id) {
@@ -158,6 +160,7 @@ export class MemeCreativeComponent implements OnInit, OnDestroy {
 
         this.gameService.submitMeme(this.gameCode, this.roundNumber, this.memeTemplate.id, textEntries).subscribe({
             next: () => {
+                this.hasSubmittedMeme = true;
                 this.notificationService.success('Success', 'Meme submitted successfully!');
                 this.memeSubmitted.emit();
             },

@@ -26,24 +26,28 @@
         </div>
     </div>
 
-    <mat-card class="input-panel">
+    <mat-card class="input-panel" [class.disabled]="hasSubmittedMeme">
         <mat-card-header>
             <mat-card-title>Enter Your Text</mat-card-title>
+            <mat-card-subtitle *ngIf="hasSubmittedMeme">Meme submitted! Waiting for other players...</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
             <div *ngFor="let textArea of memeTemplate.textAreas; let i = index" class="text-input-group">
                 <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Text {{ i + 1 }}</mat-label>
-                    <input matInput [(ngModel)]="textInputs[i]" placeholder="Enter your text here..." />
+                    <input matInput [(ngModel)]="textInputs[i]" placeholder="Enter your text here..."
+                        [disabled]="hasSubmittedMeme" />
                 </mat-form-field>
             </div>
         </mat-card-content>
         <mat-card-actions>
-            <button mat-raised-button color="warn" (click)="selectNewMeme()" [disabled]="!canSelectNewMeme">
+            <button mat-raised-button color="warn" (click)="selectNewMeme()"
+                [disabled]="!canSelectNewMeme || hasSubmittedMeme">
                 Select Different Meme ({{ memeChangesRemaining }} left)
             </button>
-            <button mat-raised-button color="primary" (click)="submitMeme()" [disabled]="!memeTemplate">
-                Submit Meme
+            <button mat-raised-button color="primary" (click)="submitMeme()"
+                [disabled]="!memeTemplate || hasSubmittedMeme">
+                {{ hasSubmittedMeme ? 'Submitted' : 'Submit Meme' }}
             </button>
         </mat-card-actions>
     </mat-card>

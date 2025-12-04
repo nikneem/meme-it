@@ -62,14 +62,14 @@ public sealed class StartNewRoundCommandHandler : ICommandHandler<StartNewRoundC
 
         // Schedule the creative phase end task
         _scheduledTaskService.ScheduleCreativePhaseEnded(
-            game.GameCode, 
-            round.RoundNumber, 
+            game.GameCode,
+            round.RoundNumber,
             delaySeconds: GameTimingConstants.CreativePhaseDurationSeconds);
 
         // Publish RoundStartedEvent
         var roundStartedEvent = new RoundStartedEvent(
-            game.GameCode, 
-            round.RoundNumber, 
+            game.GameCode,
+            round.RoundNumber,
             GameTimingConstants.CreativePhaseDurationSeconds);
         await _daprClient.PublishEventAsync(
             DaprConstants.PubSubName,
