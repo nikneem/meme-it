@@ -9,7 +9,7 @@ public interface IScheduledTaskService
     /// <param name="roundNumber">The round number.</param>
     /// <param name="delaySeconds">Delay in seconds (1-120, default 30).</param>
     /// <returns>Scheduled task ID.</returns>
-    Guid ScheduleCreativePhaseEnded(string gameCode, int roundNumber, int delaySeconds = 30);
+    Guid ScheduleCreativePhaseEnded(string gameCode, int roundNumber, int delaySeconds = 60);
 
     /// <summary>
     /// Schedules a score phase ended task.

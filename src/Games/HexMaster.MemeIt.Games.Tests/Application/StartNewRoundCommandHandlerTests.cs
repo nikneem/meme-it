@@ -20,7 +20,7 @@ public sealed class StartNewRoundCommandHandlerTests
         var gameCode = "TEST1234";
         var game = new Game(gameCode, adminId, password: null);
         game.NextRound(); // Start round 1
-        
+
         var repositoryMock = new Mock<IGamesRepository>();
         repositoryMock
             .Setup(r => r.GetByGameCodeAsync(gameCode, It.IsAny<CancellationToken>()))
@@ -32,13 +32,13 @@ public sealed class StartNewRoundCommandHandlerTests
         var daprClientMock = new Mock<DaprClient>();
         var scheduledTaskServiceMock = new Mock<IScheduledTaskService>();
         var loggerMock = new Mock<ILogger<StartNewRoundCommandHandler>>();
-        
+
         var handler = new StartNewRoundCommandHandler(
             repositoryMock.Object,
             daprClientMock.Object,
             scheduledTaskServiceMock.Object,
             loggerMock.Object);
-        
+
         var command = new StartNewRoundCommand(gameCode, 2);
 
         // Act
@@ -47,10 +47,10 @@ public sealed class StartNewRoundCommandHandlerTests
         // Assert
         Assert.Equal(gameCode, result.GameCode);
         Assert.Equal(2, result.RoundNumber);
-        
+
         repositoryMock.Verify(r => r.UpdateAsync(game, It.IsAny<CancellationToken>()), Times.Once);
         scheduledTaskServiceMock.Verify(
-            s => s.ScheduleCreativePhaseEnded(gameCode, 2, 30),
+            s => s.ScheduleCreativePhaseEnded(gameCode, 2, 60),
             Times.Once);
         daprClientMock.Verify(
             d => d.PublishEventAsync(
@@ -75,7 +75,7 @@ public sealed class StartNewRoundCommandHandlerTests
             new Mock<DaprClient>().Object,
             new Mock<IScheduledTaskService>().Object,
             new Mock<ILogger<StartNewRoundCommandHandler>>().Object);
-        
+
         var command = new StartNewRoundCommand("INVALID", 2);
 
         // Act & Assert
@@ -91,7 +91,7 @@ public sealed class StartNewRoundCommandHandlerTests
         var adminId = Guid.NewGuid();
         var game = new Game("TEST1234", adminId, password: null);
         game.NextRound(); // Current round is 1
-        
+
         var repositoryMock = new Mock<IGamesRepository>();
         repositoryMock
             .Setup(r => r.GetByGameCodeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -102,7 +102,7 @@ public sealed class StartNewRoundCommandHandlerTests
             new Mock<DaprClient>().Object,
             new Mock<IScheduledTaskService>().Object,
             new Mock<ILogger<StartNewRoundCommandHandler>>().Object);
-        
+
         var command = new StartNewRoundCommand("TEST1234", 5); // Skipping rounds
 
         // Act & Assert

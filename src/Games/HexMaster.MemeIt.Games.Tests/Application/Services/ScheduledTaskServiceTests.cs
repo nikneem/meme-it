@@ -83,7 +83,7 @@ public class ScheduledTaskServiceTests : IDisposable
         // Arrange
         var gameCode = "ABC123";
         var roundNumber = 1;
-        var taskId = _sut.ScheduleCreativePhaseEnded(gameCode, roundNumber, 30);
+        var taskId = _sut.ScheduleCreativePhaseEnded(gameCode, roundNumber, 60);
 
         // Act
         var result = _sut.CancelTask(taskId);
@@ -110,7 +110,7 @@ public class ScheduledTaskServiceTests : IDisposable
     {
         // Arrange
         var gameCode = "ABC123";
-        _sut.ScheduleCreativePhaseEnded(gameCode, 1, 30);
+        _sut.ScheduleCreativePhaseEnded(gameCode, 1, 60);
         _sut.ScheduleScorePhaseEnded(gameCode, 1, Guid.NewGuid(), 30);
 
         // Act
@@ -127,7 +127,7 @@ public class ScheduledTaskServiceTests : IDisposable
         // Arrange
         var gameCode1 = "ABC123";
         var gameCode2 = "XYZ789";
-        _sut.ScheduleCreativePhaseEnded(gameCode1, 1, 30);
+        _sut.ScheduleCreativePhaseEnded(gameCode1, 1, 60);
 
         // Act
         var cancelledCount = _sut.CancelAllTasksForGame(gameCode2);
@@ -174,7 +174,7 @@ public class ScheduledTaskServiceTests : IDisposable
         var eventFired = false;
 
         _sut.TaskDue += (sender, task) => eventFired = true;
-        _sut.ScheduleCreativePhaseEnded(gameCode, roundNumber, 30);
+        _sut.ScheduleCreativePhaseEnded(gameCode, roundNumber, 60);
 
         // Act
         _sut.ProcessDueTasks();
