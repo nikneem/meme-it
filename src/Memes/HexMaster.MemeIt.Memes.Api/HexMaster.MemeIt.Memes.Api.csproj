@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ContainerImageName>memeit/memes-api</ContainerImageName>
     <ContainerUser>app</ContainerUser>
+    <UserSecretsId>40c530b9-cb26-4945-b6b1-a0f82bff0bb6</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
