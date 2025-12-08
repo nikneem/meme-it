@@ -49,6 +49,10 @@
                                 [style.-webkit-text-stroke-width.px]="textArea.borderSize"
                                 [style.-webkit-text-stroke-color]="textArea.borderColor">Text Area</span>
                             @if (textArea.isSelected) {
+                            <button type="button" class="delete-handle" (mousedown)="deleteTextArea($event, textArea)"
+                                mat-icon-button>
+                                <mat-icon>close</mat-icon>
+                            </button>
                             <div class="resize-handle" (mousedown)="onResizeHandleMouseDown($event, textArea)">
                             </div>
                             }

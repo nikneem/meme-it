@@ -153,6 +153,37 @@
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
+    .delete-handle {
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        width: 24px;
+        height: 24px;
+        background: var(--mat-sys-error);
+        color: white;
+        border: 2px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+        z-index: 10;
+
+        &:hover {
+            transform: scale(1.1);
+            background: var(--mat-sys-error-container);
+        }
+
+        mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+        }
+    }
+
     .resize-handle {
         position: absolute;
         right: -6px;

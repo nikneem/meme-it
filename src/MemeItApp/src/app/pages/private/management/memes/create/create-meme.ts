@@ -310,6 +310,16 @@ export class CreateMemePage implements OnInit, OnDestroy {
         this.selectedTextArea = null;
     }
 
+    deleteTextArea(event: MouseEvent, textArea: TextAreaEditable): void {
+        event.stopPropagation();
+        event.preventDefault();
+
+        this.textAreas = this.textAreas.filter(ta => ta.id !== textArea.id);
+        if (this.selectedTextArea?.id === textArea.id) {
+            this.selectedTextArea = null;
+        }
+    }
+
     formatLabel(value: number): string {
         return `${value}`;
     }
