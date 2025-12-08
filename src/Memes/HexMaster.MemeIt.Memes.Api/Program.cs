@@ -1,6 +1,7 @@
 using HexMaster.MemeIt.Memes.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
 using HexMaster.MemeIt.Memes.Abstractions.Application.Queries;
+using HexMaster.MemeIt.Memes.Abstractions.Configuration;
 using HexMaster.MemeIt.Memes.Abstractions.Services;
 using HexMaster.MemeIt.Memes.Api.Endpoints;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.CreateMemeTemplate;
@@ -44,6 +45,10 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
+// Register configuration
+builder.Services.Configure<BlobStorageOptions>(
+    builder.Configuration.GetSection(BlobStorageOptions.SectionName));
 
 // Register repositories (DbContext is already registered by Aspire)
 builder.Services.AddScoped<HexMaster.MemeIt.Memes.Repositories.IMemeTemplateRepository, PostgresMemeTemplateRepository>();

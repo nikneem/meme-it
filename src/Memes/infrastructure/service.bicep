@@ -101,10 +101,19 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01'
   }
 }
 
-// Blob Container with public access
-resource blobContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+// Upload Container - Private access (files are temporary and not meant to be publicly accessible)
+resource uploadContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
   parent: blobService
-  name: 'memes-blobs'
+  name: 'upload'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+// Memes Container - Public blob access (finalized meme templates need to be publicly readable)
+resource memesContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: 'memes'
   properties: {
     publicAccess: 'Blob'
   }
@@ -257,8 +266,12 @@ resource memesContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: storageAccount.name
             }
             {
-              name: 'Azure__Storage__BlobContainerName'
-              value: blobContainer.name
+              name: 'BlobStorage__UploadContainerName'
+              value: uploadContainer.name
+            }
+            {
+              name: 'BlobStorage__MemesContainerName'
+              value: memesContainer.name
             }
             {
               name: 'Management__ApiKey'
@@ -298,4 +311,5 @@ output containerAppId string = memesContainerApp.id
 output postgresServerName string = postgresServer.name
 output postgresServerFqdn string = postgresServer.properties.fullyQualifiedDomainName
 output storageAccountName string = storageAccount.name
-output blobContainerName string = blobContainer.name
+output uploadContainerName string = uploadContainer.name
+output memesContainerName string = memesContainer.name

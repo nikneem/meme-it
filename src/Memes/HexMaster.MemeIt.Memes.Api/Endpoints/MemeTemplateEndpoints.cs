@@ -106,16 +106,8 @@ public static class MemeTemplateEndpoints
             var result = await handler.HandleAsync(query, ct);
             return Results.Ok(result.Templates);
         })
-        .AddEndpointFilter(async (context, next) =>
-        {
-            Console.WriteLine("===== SIMPLE TEST FILTER EXECUTING =====");
-            var result = await next(context);
-            Console.WriteLine("===== SIMPLE TEST FILTER COMPLETED =====");
-            return result;
-        })
         .WithName("ListMemeTemplates")
         .WithSummary("List all meme templates (Admin)")
-
         .AddEndpointFilter<ApiKeyEndpointFilter>()
         .Produces(200);
 

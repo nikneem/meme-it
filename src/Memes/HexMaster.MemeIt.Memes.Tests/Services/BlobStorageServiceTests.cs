@@ -14,6 +14,18 @@ public sealed class BlobStorageServiceTests
     }
 
     [Fact]
+    public async Task GenerateUploadSasTokenAsync_ShouldThrowWhenContainerNameIsNull()
+    {
+        // Arrange
+        var mockBlobServiceClient = new Mock<BlobServiceClient>();
+        var service = new BlobStorageService(mockBlobServiceClient.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            service.GenerateUploadSasTokenAsync(null!, "test.png"));
+    }
+
+    [Fact]
     public async Task GenerateUploadSasTokenAsync_ShouldThrowWhenBlobNameIsNull()
     {
         // Arrange
@@ -22,7 +34,7 @@ public sealed class BlobStorageServiceTests
 
         // Act & Assert
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
-            service.GenerateUploadSasTokenAsync(null!));
+            service.GenerateUploadSasTokenAsync("upload", null!));
     }
 
     [Fact]
@@ -34,7 +46,7 @@ public sealed class BlobStorageServiceTests
 
         // Act & Assert
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
-            service.GenerateUploadSasTokenAsync(""));
+            service.GenerateUploadSasTokenAsync("upload", ""));
     }
 
     [Fact]
@@ -46,6 +58,42 @@ public sealed class BlobStorageServiceTests
 
         // Act & Assert
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
-            service.GenerateUploadSasTokenAsync("   "));
+            service.GenerateUploadSasTokenAsync("upload", "   "));
+    }
+
+    [Fact]
+    public async Task MoveBlobAsync_ShouldThrowWhenSourceBlobNameIsNull()
+    {
+        // Arrange
+        var mockBlobServiceClient = new Mock<BlobServiceClient>();
+        var service = new BlobStorageService(mockBlobServiceClient.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            service.MoveBlobAsync(null!, "upload", "memes"));
+    }
+
+    [Fact]
+    public async Task MoveBlobAsync_ShouldThrowWhenSourceContainerNameIsNull()
+    {
+        // Arrange
+        var mockBlobServiceClient = new Mock<BlobServiceClient>();
+        var service = new BlobStorageService(mockBlobServiceClient.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            service.MoveBlobAsync("test.png", null!, "memes"));
+    }
+
+    [Fact]
+    public async Task MoveBlobAsync_ShouldThrowWhenDestinationContainerNameIsNull()
+    {
+        // Arrange
+        var mockBlobServiceClient = new Mock<BlobServiceClient>();
+        var service = new BlobStorageService(mockBlobServiceClient.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            service.MoveBlobAsync("test.png", "upload", null!));
     }
 }
