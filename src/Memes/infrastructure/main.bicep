@@ -85,4 +85,5 @@ output containerAppFqdn string = memesService.outputs.containerAppFqdn
 output resourceGroupName string = resourceGroupName
 output postgresServerName string = memesService.outputs.postgresServerName
 output storageAccountName string = memesService.outputs.storageAccountName
-output blobContainerName string = memesService.outputs.blobContainerName
+output uploadContainerName string = memesService.outputs.uploadContainerName
+output memesContainerName string = memesService.outputs.memesContainerName
