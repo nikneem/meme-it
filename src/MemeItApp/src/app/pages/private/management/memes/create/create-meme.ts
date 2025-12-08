@@ -114,6 +114,24 @@ export class CreateMemePage implements OnInit, OnDestroy {
 
         this.isUploading = true;
 
+        // Create a local data URL from the file for preview
+        const reader = new FileReader();
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+            if (e.target?.result) {
+                this.uploadedImageFullUrl = e.target.result as string;
+
+                // Load image to get dimensions
+                const img = new Image();
+                img.onload = () => {
+                    this.imageNaturalWidth = img.naturalWidth;
+                    this.imageNaturalHeight = img.naturalHeight;
+                    this.cdr.detectChanges();
+                };
+                img.src = this.uploadedImageFullUrl;
+            }
+        };
+        reader.readAsDataURL(file);
+
         // First, get the SAS token
         this.memeService.generateUploadToken()
             .pipe(takeUntil(this.destroy$))
@@ -124,24 +142,13 @@ export class CreateMemePage implements OnInit, OnDestroy {
                         .pipe(takeUntil(this.destroy$))
                         .subscribe({
                             next: () => {
-                                // Store full URL for display
-                                this.uploadedImageFullUrl = tokenResponse.blobUrl;
-
                                 // Extract relative path for API request
-                                // e.g., "https://storage.blob.core.windows.net/meme-templates/image.jpg" -> "/meme-templates/image.jpg"
+                                // e.g., "https://storage.blob.core.windows.net/upload/image.jpg" -> "/upload/image.jpg"
                                 const url = new URL(tokenResponse.blobUrl);
                                 this.uploadedImageUrl = url.pathname;
 
                                 this.isUploading = false;
                                 this.notificationService.success('Uploaded', 'Image uploaded successfully', undefined, 2000);
-
-                                // Load image to get dimensions (use full URL for image src)
-                                const img = new Image();
-                                img.onload = () => {
-                                    this.imageNaturalWidth = img.naturalWidth;
-                                    this.imageNaturalHeight = img.naturalHeight;
-                                };
-                                img.src = this.uploadedImageFullUrl;
                             },
                             error: (error) => {
                                 console.error('Upload failed:', error);

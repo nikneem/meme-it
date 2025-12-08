@@ -1,6 +1,8 @@
 using HexMaster.MemeIt.Memes.Abstractions.Application.MemeTemplates;
+using HexMaster.MemeIt.Memes.Abstractions.Configuration;
 using HexMaster.MemeIt.Memes.Abstractions.Services;
 using HexMaster.MemeIt.Memes.Application.MemeTemplates.GenerateUploadSasToken;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace HexMaster.MemeIt.Memes.Tests.Application;
@@ -11,7 +13,7 @@ public sealed class GenerateUploadSasTokenQueryHandlerTests
     public async Task HandleAsync_ShouldGenerateTokenWithBlobName()
     {
         // Arrange
-        var blobUrl = "https://storage.blob.core.windows.net/meme-templates/20251127150000-12345678.png";
+        var blobUrl = "https://storage.blob.core.windows.net/upload/20251127150000-12345678.png";
         var sasToken = "sv=2021-06-08&st=2025-11-27T15:00:00Z";
         var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
 
@@ -19,11 +21,18 @@ public sealed class GenerateUploadSasTokenQueryHandlerTests
         mockBlobService
             .Setup(s => s.GenerateUploadSasTokenAsync(
                 It.IsAny<string>(),
+                It.IsAny<string>(),
                 60,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((blobUrl, sasToken, expiresAt));
 
-        var handler = new GenerateUploadSasTokenQueryHandler(mockBlobService.Object);
+        var options = Options.Create(new BlobStorageOptions
+        {
+            UploadContainerName = "upload",
+            MemesContainerName = "memes"
+        });
+
+        var handler = new GenerateUploadSasTokenQueryHandler(mockBlobService.Object, options);
         var query = new GenerateUploadSasTokenQuery();
 
         // Act
@@ -34,9 +43,10 @@ public sealed class GenerateUploadSasTokenQueryHandlerTests
         Assert.Equal(blobUrl, result.BlobUrl);
         Assert.Equal(sasToken, result.SasToken);
         Assert.Equal(expiresAt, result.ExpiresAt);
-        Assert.Equal("https://storage.blob.core.windows.net/meme-templates", result.ContainerUrl);
+        Assert.Equal("https://storage.blob.core.windows.net/upload", result.ContainerUrl);
 
         mockBlobService.Verify(s => s.GenerateUploadSasTokenAsync(
+            "upload",
             It.Is<string>(name => name.EndsWith(".png") && name.Contains("-")),
             60,
             It.IsAny<CancellationToken>()), Times.Once);
@@ -51,12 +61,19 @@ public sealed class GenerateUploadSasTokenQueryHandlerTests
         mockBlobService
             .Setup(s => s.GenerateUploadSasTokenAsync(
                 It.IsAny<string>(),
+                It.IsAny<string>(),
                 60,
                 It.IsAny<CancellationToken>()))
-            .Callback<string, int, CancellationToken>((name, _, _) => capturedBlobNames.Add(name))
-            .ReturnsAsync(("https://storage.blob.core.windows.net/meme-templates/test.png", "token", DateTimeOffset.UtcNow.AddHours(1)));
+            .Callback<string, string, int, CancellationToken>((_, name, _, _) => capturedBlobNames.Add(name))
+            .ReturnsAsync(("https://storage.blob.core.windows.net/upload/test.png", "token", DateTimeOffset.UtcNow.AddHours(1)));
 
-        var handler = new GenerateUploadSasTokenQueryHandler(mockBlobService.Object);
+        var options = Options.Create(new BlobStorageOptions
+        {
+            UploadContainerName = "upload",
+            MemesContainerName = "memes"
+        });
+
+        var handler = new GenerateUploadSasTokenQueryHandler(mockBlobService.Object, options);
 
         // Act
         await handler.HandleAsync(new GenerateUploadSasTokenQuery());
