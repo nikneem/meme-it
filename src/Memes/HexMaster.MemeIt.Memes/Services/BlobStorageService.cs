@@ -29,6 +29,7 @@ public class BlobStorageService(BlobServiceClient blobServiceClient) : IBlobStor
         var blobClient = containerClient.GetBlobClient(blobName);
 
         // Set expiration time
+        var startsOn = DateTimeOffset.UtcNow.AddMinutes(-5); // Start 5 minutes ago to account for clock skew
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(expirationMinutes);
 
         var sasBuilder = new BlobSasBuilder
@@ -36,46 +37,36 @@ public class BlobStorageService(BlobServiceClient blobServiceClient) : IBlobStor
             BlobContainerName = containerName,
             BlobName = blobName,
             Resource = "b", // 'b' for blob
-            StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5), // Start 5 minutes ago to account for clock skew
+            StartsOn = startsOn,
             ExpiresOn = expiresAt
         };
 
         // Grant write permissions
         sasBuilder.SetPermissions(BlobSasPermissions.Create | BlobSasPermissions.Write);
 
-        // Generate the SAS token
-        var sasToken = blobClient.GenerateSasUri(sasBuilder).Query.TrimStart('?');
-
-        //// Get a user delegation key for the Blob service (required for managed identity)
-        //var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(
-        //    DateTimeOffset.UtcNow.AddMinutes(-5),
-        //    expiresAt,
-        //    cancellationToken);
-
-        //// Generate SAS token for upload (write permissions) using user delegation
-        //var sasBuilder = new BlobSasBuilder
-        //{
-        //    BlobContainerName = containerName,
-        //    BlobName = blobName,
-        //    Resource = "b", // 'b' for blob
-        //    StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5), // Start 5 minutes ago to account for clock skew
-        //    ExpiresOn = expiresAt
-        //};
-
-        // Grant write permissions
-        //sasBuilder.SetPermissions(BlobSasPermissions.Create | BlobSasPermissions.Write);
-
-        //// Generate the SAS token using user delegation key
-        //var sasQueryParameters = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName);
-        //var sasToken = sasQueryParameters.ToString();
-        //var blobUrl = blobClient.Uri.ToString();
-
-        //return (blobUrl, sasToken, expiresAt);
-        // Generate the SAS token
+        string sasToken;
         var blobUrl = blobClient.Uri.ToString();
 
-        return (blobUrl, sasToken, expiresAt);
+        // Check if we can generate SAS with shared key (local development with Azurite)
+        if (blobClient.CanGenerateSasUri)
+        {
+            // Use shared key credential (Azurite/local development)
+            sasToken = blobClient.GenerateSasUri(sasBuilder).Query.TrimStart('?');
+        }
+        else
+        {
+            // Use user delegation key (Managed Identity in Azure)
+            var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(
+                startsOn,
+                expiresAt,
+                cancellationToken);
 
+            // Generate the SAS token using user delegation key
+            var sasQueryParameters = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName);
+            sasToken = sasQueryParameters.ToString();
+        }
+
+        return (blobUrl, sasToken, expiresAt);
     }
 
     /// <inheritdoc />
