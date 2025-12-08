@@ -32,4 +32,16 @@ public interface IBlobStorageService
         string sourceContainerName,
         string destinationContainerName,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a blob from a container.
+    /// </summary>
+    /// <param name="blobName">The name of the blob to delete.</param>
+    /// <param name="containerName">The container name.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if the blob was deleted, false if it didn't exist.</returns>
+    Task<bool> DeleteBlobAsync(
+        string blobName,
+        string containerName,
+        CancellationToken cancellationToken = default);
 }
