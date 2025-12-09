@@ -52,7 +52,7 @@
 
     h2 {
         margin: 0;
-        color: colors.$text-primary;
+        color: #fff;
         font-size: 1.75rem;
         font-weight: 700;
         text-align: center;
@@ -78,7 +78,7 @@ mat-dialog-content {
     z-index: 1;
 
     .dialog-message {
-        color: colors.$text-primary;
+        color: rgba(255, 255, 255, 0.9);
         font-size: 1.125rem;
         line-height: 1.6;
         margin: 0 0 1rem 0;
