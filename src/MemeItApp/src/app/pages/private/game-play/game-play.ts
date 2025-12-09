@@ -249,16 +249,19 @@ export class GamePlayPage implements OnInit, OnDestroy, CanComponentDeactivate {
             return;
         }
 
+        this.realtimeService.leaveGameGroup(currentGameCode);
+
         this.gameService.createGame({ previousGameCode: currentGameCode }).subscribe({
-            next: (response) => {
+            next: async (response) => {
                 this.notificationService.success(
                     'New Game Created!',
                     `Game ${response.gameCode} created. All players have been invited!`,
                     undefined,
                     5000
                 );
+
                 // Navigate to the new game lobby
-                this.router.navigate(['/games/lobby', response.gameCode]);
+                this.router.navigate(['/app/games/', response.gameCode]);
             },
             error: (error) => {
                 console.error('Failed to create new game:', error);
