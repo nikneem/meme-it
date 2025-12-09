@@ -218,6 +218,37 @@
     }
 }
 
+.new-game-action {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 0.5rem;
+    margin-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+
+    .new-game-btn {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+        transition: all 0.3s ease;
+
+        mat-icon {
+            margin-right: 0.5rem;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(63, 81, 181, 0.4);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+}
+
 @keyframes spin {
     from {
         transform: rotate(0deg);

@@ -26,6 +26,6 @@
 
     <!-- Scoreboard Component -->
     <memeit-game-scoreboard *ngIf="isScoreboardPhase" [roundNumber]="currentRound()" [totalRounds]="totalRounds()"
-        [scoreboard]="finalScores()">
+        [scoreboard]="finalScores()" [isAdmin]="isAdmin()" [gameCode]="gameCode()" (startNewGame)="onStartNewGame()">
     </memeit-game-scoreboard>
 </div>
