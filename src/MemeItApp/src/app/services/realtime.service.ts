@@ -65,6 +65,12 @@ export interface RoundEndedEvent {
     scoreboard: ScoreboardEntryDto[];
 }
 
+export interface NewGameStartedEvent {
+    previousGameCode: string;
+    newGameCode: string;
+    initiatedByPlayerName: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -81,6 +87,7 @@ export class RealtimeService {
     private creativePhaseEndedSubject = new Subject<CreativePhaseEndedEvent>();
     private scorePhaseStartedSubject = new Subject<ScorePhaseStartedEvent>();
     private roundEndedSubject = new Subject<RoundEndedEvent>();
+    private newGameStartedSubject = new Subject<NewGameStartedEvent>();
 
     public playerJoined$: Observable<PlayerJoinedEvent> = this.playerJoinedSubject.asObservable();
     public playerStateChanged$: Observable<PlayerStateChangedEvent> = this.playerStateChangedSubject.asObservable();
@@ -90,6 +97,7 @@ export class RealtimeService {
     public creativePhaseEnded$: Observable<CreativePhaseEndedEvent> = this.creativePhaseEndedSubject.asObservable();
     public scorePhaseStarted$: Observable<ScorePhaseStartedEvent> = this.scorePhaseStartedSubject.asObservable();
     public roundEnded$: Observable<RoundEndedEvent> = this.roundEndedSubject.asObservable();
+    public newGameStarted$: Observable<NewGameStartedEvent> = this.newGameStartedSubject.asObservable();
 
     constructor() { }
 
@@ -212,6 +220,11 @@ export class RealtimeService {
         this.hubConnection.on('RoundEnded', (event: RoundEndedEvent) => {
             console.log('RoundEnded event received:', event);
             this.roundEndedSubject.next(event);
+        });
+
+        this.hubConnection.on('NewGameStarted', (event: NewGameStartedEvent) => {
+            console.log('NewGameStarted event received:', event);
+            this.newGameStartedSubject.next(event);
         });
 
         this.hubConnection.onreconnecting((error) => {
