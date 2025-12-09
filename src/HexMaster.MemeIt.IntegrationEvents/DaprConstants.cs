@@ -23,5 +23,6 @@ public static class DaprConstants
         public const string CreativePhaseEnded = "creativephaseended";
         public const string ScorePhaseStarted = "scorephasestarted";
         public const string RoundEnded = "roundended";
+        public const string NewGameStarted = "newgamestarted";
     }
 }

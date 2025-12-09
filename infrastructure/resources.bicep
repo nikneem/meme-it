@@ -41,6 +41,7 @@ var topics = [
   'creativephaseended'
   'scorephasestarted'
   'roundended'
+  'newgamestarted'
 ]
 
 resource serviceBusTopics 'Microsoft.ServiceBus/namespaces/topics@2022-10-01-preview' = [
