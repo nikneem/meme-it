@@ -1,9 +1,13 @@
 using System.Diagnostics;
+using Dapr.Client;
 using HexMaster.MemeIt.Games.Abstractions.Application.Commands;
 using HexMaster.MemeIt.Games.Abstractions.Repositories;
 using HexMaster.MemeIt.Games.Abstractions.Services;
 using HexMaster.MemeIt.Games.Application.Observability;
+using HexMaster.MemeIt.Games.Constants;
 using HexMaster.MemeIt.Games.Domains;
+using HexMaster.MemeIt.IntegrationEvents;
+using HexMaster.MemeIt.IntegrationEvents.Events;
 
 namespace HexMaster.MemeIt.Games.Application.Games.CreateGame;
 
@@ -16,17 +20,20 @@ public sealed class CreateGameCommandHandler : ICommandHandler<CreateGameCommand
     private readonly IGameCodeGenerator _codeGenerator;
     private readonly TimeProvider _timeProvider;
     private readonly GamesMetrics _metrics;
+    private readonly DaprClient _daprClient;
 
     public CreateGameCommandHandler(
         IGamesRepository repository,
         IGameCodeGenerator codeGenerator,
         TimeProvider timeProvider,
-        GamesMetrics metrics)
+        GamesMetrics metrics,
+        DaprClient daprClient)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
         _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
         _metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
+        _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
     }
 
     public async Task<CreateGameResult> HandleAsync(CreateGameCommand command, CancellationToken cancellationToken = default)
@@ -58,6 +65,25 @@ public sealed class CreateGameCommandHandler : ICommandHandler<CreateGameCommand
             activity?.SetTag("game.code", game.GameCode);
 
             await _repository.CreateAsync(game, cancellationToken).ConfigureAwait(false);
+
+            // Publish NewGameStartedEvent if a previous game code was provided
+            if (!string.IsNullOrWhiteSpace(command.PreviousGameCode))
+            {
+                var previousGame = await _repository.GetByGameCodeAsync(command.PreviousGameCode, cancellationToken).ConfigureAwait(false);
+                if (previousGame is not null)
+                {
+                    var newGameStartedEvent = new NewGameStartedEvent(
+                        command.PreviousGameCode,
+                        game.GameCode,
+                        command.PlayerDisplayName);
+
+                    await _daprClient.PublishEventAsync(
+                        DaprConstants.PubSubName,
+                        DaprConstants.Topics.NewGameStarted,
+                        newGameStartedEvent,
+                        cancellationToken).ConfigureAwait(false);
+                }
+            }
 
             activity?.SetStatus(ActivityStatusCode.Ok);
             _metrics.RecordGameCreated();

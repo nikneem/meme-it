@@ -50,6 +50,16 @@
                 <span>Next round starting soon...</span>
             </div>
             }
+
+            <!-- Start New Game Button (Final Round, Admin Only) -->
+            @if (isFinalRound && isAdmin) {
+            <div class="new-game-action">
+                <button mat-raised-button color="primary" class="new-game-btn" (click)="onStartNewGame()">
+                    <mat-icon>refresh</mat-icon>
+                    Start New Game & Invite Players
+                </button>
+            </div>
+            }
         </mat-card-content>
     </mat-card>
 </div>

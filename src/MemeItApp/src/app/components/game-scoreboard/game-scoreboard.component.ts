@@ -1,7 +1,8 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 
 export interface ScoreboardEntry {
@@ -13,7 +14,7 @@ export interface ScoreboardEntry {
 @Component({
     selector: 'memeit-game-scoreboard',
     standalone: true,
-    imports: [CommonModule, MatCardModule, MatIconModule],
+    imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule],
     templateUrl: './game-scoreboard.component.html',
     styleUrl: './game-scoreboard.component.scss',
     animations: [
@@ -46,6 +47,10 @@ export class GameScoreboardComponent {
     @Input() roundNumber: number = 1;
     @Input() totalRounds: number = 5;
     @Input() scoreboard: ScoreboardEntry[] = [];
+    @Input() isAdmin: boolean = false;
+    @Input() gameCode: string = '';
+
+    @Output() startNewGame = new EventEmitter<void>();
 
     protected get isFinalRound(): boolean {
         return this.roundNumber >= this.totalRounds;
@@ -87,5 +92,9 @@ export class GameScoreboardComponent {
             case 2: return 'rank-third';
             default: return 'rank-other';
         }
+    }
+
+    protected onStartNewGame(): void {
+        this.startNewGame.emit();
     }
 }

@@ -1,5 +1,6 @@
 export interface CreateGameRequest {
   password?: string;
+  previousGameCode?: string;
 }
 
 export interface JoinGameRequest {

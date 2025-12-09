@@ -75,6 +75,13 @@ public static class DaprSubscriptionsEndpoints
             .WithSummary("Handles round ended events from Dapr pubsub")
             .ExcludeFromDescription();
 
+        // Subscribe to new game started events
+        group.MapPost("/newgamestarted", OnNewGameStartedAsync)
+            .WithTopic(DaprConstants.PubSubName, DaprConstants.Topics.NewGameStarted)
+            .WithName("NewGameStartedSubscription")
+            .WithSummary("Handles new game started events from Dapr pubsub")
+            .ExcludeFromDescription();
+
         return endpoints;
     }
 
@@ -369,6 +376,42 @@ public static class DaprSubscriptionsEndpoints
         catch (Exception ex)
         {
             logger.LogError(ex, "Error processing RoundEnded event");
+            // Return 200 OK to prevent Dapr from retrying
+            return Results.Ok();
+        }
+    }
+
+    /// <summary>
+    /// Handles NewGameStartedEvent from Dapr pubsub and broadcasts to SignalR clients in the previous game's group.
+    /// </summary>
+    private static async Task<IResult> OnNewGameStartedAsync(
+        [FromBody] NewGameStartedEvent @event,
+        IHubContext<GamesHub> hubContext,
+        ILogger<GamesHub> logger,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Received NewGameStarted event: PreviousGameCode={PreviousGameCode}, NewGameCode={NewGameCode}, InitiatedBy={InitiatedBy}",
+                @event.PreviousGameCode, @event.NewGameCode, @event.InitiatedByPlayerName);
+
+            // Broadcast to all connected clients in the previous game's group
+            await hubContext.Clients.Group(@event.PreviousGameCode).SendAsync(
+                "NewGameStarted",
+                new
+                {
+                    @event.PreviousGameCode,
+                    @event.NewGameCode,
+                    @event.InitiatedByPlayerName
+                },
+                cancellationToken);
+
+            return Results.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing NewGameStarted event");
             // Return 200 OK to prevent Dapr from retrying
             return Results.Ok();
         }

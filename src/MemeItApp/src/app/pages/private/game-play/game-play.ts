@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CanComponentDeactivate } from '../../../guards/can-deactivate-game.guard';
+import { GameService } from '@services/game.service';
 import { MemeService } from '@services/meme.service';
 import { NotificationService } from '@services/notification.service';
 import { RealtimeService } from '@services/realtime.service';
@@ -41,6 +42,7 @@ export class GamePlayPage implements OnInit, OnDestroy, CanComponentDeactivate {
     readonly timeRemaining = this.gameStore.timeRemaining;
     readonly isCreativePhase = this.gameStore.isCreativePhase;
     readonly isScoringPhase = this.gameStore.isScoringPhase;
+    readonly isAdmin = this.gameStore.isAdmin;
 
     // Local state for enriched meme submission
     currentMemeToRate: ComponentMemeSubmission | null = null;
@@ -51,6 +53,7 @@ export class GamePlayPage implements OnInit, OnDestroy, CanComponentDeactivate {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
+        private gameService: GameService,
         private memeService: MemeService,
         private notificationService: NotificationService,
         private realtimeService: RealtimeService
@@ -237,6 +240,34 @@ export class GamePlayPage implements OnInit, OnDestroy, CanComponentDeactivate {
     getTimerEndDate(): Date | null {
         const endTime = this.timer().endTime;
         return endTime ? new Date(endTime) : null;
+    }
+
+    onStartNewGame(): void {
+        const currentGameCode = this.gameCode();
+        if (!currentGameCode) {
+            this.notificationService.error('Error', 'Game code not found');
+            return;
+        }
+
+        this.gameService.createGame({ previousGameCode: currentGameCode }).subscribe({
+            next: (response) => {
+                this.notificationService.success(
+                    'New Game Created!',
+                    `Game ${response.gameCode} created. All players have been invited!`,
+                    undefined,
+                    5000
+                );
+                // Navigate to the new game lobby
+                this.router.navigate(['/games/lobby', response.gameCode]);
+            },
+            error: (error) => {
+                console.error('Failed to create new game:', error);
+                this.notificationService.error(
+                    'Failed to Create Game',
+                    'Could not start a new game. Please try again.'
+                );
+            }
+        });
     }
 
     canDeactivate(): boolean {

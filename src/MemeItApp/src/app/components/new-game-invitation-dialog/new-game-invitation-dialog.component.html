@@ -1,0 +1,26 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <mat-icon class="invite-icon">celebration</mat-icon>
+        <h2 mat-dialog-title>New Game Started!</h2>
+    </div>
+
+    <mat-dialog-content>
+        <p class="dialog-message">
+            <strong>{{ data.initiatedByPlayerName }}</strong> started a new game and invites you to join!
+        </p>
+        <p class="game-code-display">
+            Game Code: <strong>{{ data.newGameCode }}</strong>
+        </p>
+    </mat-dialog-content>
+
+    <mat-dialog-actions>
+        <button mat-raised-button class="decline-button" (click)="onDecline()">
+            <mat-icon>close</mat-icon>
+            Maybe Later
+        </button>
+        <button mat-raised-button class="accept-button" (click)="onAccept()">
+            <mat-icon>check_circle</mat-icon>
+            Join Game
+        </button>
+    </mat-dialog-actions>
+</div>

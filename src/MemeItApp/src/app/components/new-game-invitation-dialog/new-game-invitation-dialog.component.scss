@@ -1,0 +1,209 @@
+@use 'variables/colors' as colors;
+
+.dialog-container {
+    background: radial-gradient(circle at top right, #0a471a 0%, #038400 35%, #022500 100%);
+    border: 2px solid rgba(7, 200, 75, 0.3);
+    border-radius: 16px;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(7, 200, 75, 0.1) 0%, transparent 70%);
+        animation: pulse 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.dialog-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 2rem 1rem;
+    position: relative;
+    z-index: 1;
+
+    .invite-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: #4caf50;
+        margin-bottom: 1rem;
+        animation: bounce 1s ease-in-out;
+    }
+
+    h2 {
+        margin: 0;
+        color: colors.$text-primary;
+        font-size: 1.75rem;
+        font-weight: 700;
+        text-align: center;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+mat-dialog-content {
+    padding: 1rem 2rem 2rem;
+    position: relative;
+    z-index: 1;
+
+    .dialog-message {
+        color: colors.$text-primary;
+        font-size: 1.125rem;
+        line-height: 1.6;
+        margin: 0 0 1rem 0;
+        text-align: center;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+        strong {
+            color: #4caf50;
+            font-weight: 700;
+        }
+    }
+
+    .game-code-display {
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(7, 200, 75, 0.5);
+        border-radius: 8px;
+        color: colors.$text-primary;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0;
+        padding: 1rem;
+        text-align: center;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+        strong {
+            color: #4caf50;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+    }
+}
+
+mat-dialog-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 0 2rem 2rem;
+    position: relative;
+    z-index: 1;
+    justify-content: center;
+
+    button {
+        flex: 1;
+        max-width: 200px;
+        height: 48px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        text-transform: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+        mat-icon {
+            margin-right: 0.5rem;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+
+    .decline-button {
+        background: linear-gradient(135deg, #616161 0%, #424242 100%);
+        color: white;
+
+        &:hover {
+            background: linear-gradient(135deg, #757575 0%, #616161 100%);
+        }
+    }
+
+    .accept-button {
+        background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+        color: white;
+
+        &:hover {
+            background: linear-gradient(135deg, #66bb6a 0%, #388e3c 100%);
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 600px) {
+    .dialog-container {
+        border-radius: 0;
+    }
+
+    .dialog-header {
+        padding: 1.5rem 1.5rem 0.75rem;
+
+        .invite-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+    }
+
+    mat-dialog-content {
+        padding: 0.75rem 1.5rem 1.5rem;
+
+        .dialog-message {
+            font-size: 1rem;
+        }
+
+        .game-code-display {
+            strong {
+                font-size: 1.25rem;
+            }
+        }
+    }
+
+    mat-dialog-actions {
+        flex-direction: column;
+        padding: 0 1.5rem 1.5rem;
+
+        button {
+            max-width: none;
+        }
+    }
+}

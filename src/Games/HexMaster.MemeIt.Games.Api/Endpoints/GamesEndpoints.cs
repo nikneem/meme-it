@@ -271,7 +271,7 @@ public static class GamesEndpoints
             });
         }
 
-        var command = new CreateGameCommand(playerIdentity.UserId, playerIdentity.DisplayName, request.Password);
+        var command = new CreateGameCommand(playerIdentity.UserId, playerIdentity.DisplayName, request.Password, request.PreviousGameCode);
         try
         {
             var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
