@@ -34,6 +34,7 @@ jobs:
         with:
           name: production
           path: ./src/MemeItApp/dist/MemeItApp/browser
+          retention-days: 7
 
   deploy_to_prod:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
